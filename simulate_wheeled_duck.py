@@ -22,7 +22,7 @@ Usage:
   pip install mujoco scipy numpy
   python3 simulate_wheeled_duck.py                    # default robot (gim6010)
   python3 simulate_wheeled_duck.py --robot gim4305    # original GIM4305-only design
-  python3 simulate_wheeled_duck.py --realism 3        # randomized robot, Feather M4 CAN timing, fast IMU
+  python3 simulate_wheeled_duck.py --realism 3        # randomized robot, Teensy 4.0 timing, fast IMU
   python3 simulate_wheeled_duck.py --realism 3 --arch pi --imu bno055  # compare architectures / IMUs
 """
 
@@ -100,11 +100,11 @@ PROFILES = {
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
         params=ScaledWheeledDuckParams(body_mass=4.806, wheel_track=0.224, com_height=0.2442, body_pitch_inertia=0.0668),
-        initial_pitch_trim=-0.0118,
-        posture_coeffs=(-0.1391, -0.0489),
+        initial_pitch_trim=-0.0639,
+        posture_coeffs=(-0.1303, -0.0323),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
-        # to x = -26 mm so standing balance trim is nearly level (-0.68 deg).
+        # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py (standing lean -3.7 deg).
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
@@ -560,7 +560,7 @@ class RealismConfig:
     all 10 motors at 500 Hz); on the Feather M4 CAN (`can_buses = 1`), all 10 share one bus (50% load at 100 Hz legs).
     """
     arch: str = "mcu"
-    imu: str = "fast"                           # "fast" (default): raw 1 kHz-class IMU on the Feather, filtered there every
+    imu: str = "fast"                           # "fast" (default): raw 1 kHz-class IMU (ICM-42688-P) on the MCU, filtered every
                                                 #   tick; "bno055": fused orientation AND gyro held at 100 Hz (fusion rate)
     gyro_noise_dps: float = 0.3                 # gyro white noise, RMS per sample (deg/s)
     gyro_bias_dps: float = 0.5                  # constant per-axis gyro bias, drawn in +/- this range (deg/s)
@@ -568,7 +568,8 @@ class RealismConfig:
     bno055_rate_hz: float = 100.0               # BNO055 fusion-mode output rate (orientation and gyro)
     encoder_counts: int = 16384                 # 14-bit encoders (counts per revolution)
     wheel_vel_noise: float = 0.05               # wheel/joint velocity estimate noise, RMS (rad/s)
-    mcu_latency_ms: Tuple[float, float] = (0.3, 0.8)    # CAN feedback frame + compute + command frame on the Feather
+    mcu_latency_ms: Tuple[float, float] = (0.25, 0.55)  # CAN feedback frame + compute + command frame on the Teensy 4.0
+    feather_latency_ms: Tuple[float, float] = (0.3, 0.8)  # ...the same on the Feather M4 CAN
     pi_latency_ms: Tuple[float, float] = (2.0, 4.0)     # Linux user-space loop + SPI CAN adapter
     pi_stall_prob: float = 0.005                # per-tick chance (pi) of a scheduling stall...
     pi_stall_ms: Tuple[float, float] = (4.0, 12.0)      # ...lasting this long (ticks missed, last command held)
@@ -615,7 +616,7 @@ class SimToReal:
         model.body_ipos[trunk, 0] += self.trunk_com_shift
         self.motor_strength = u(cfg.motor_strength)
         model.actuator_gear[WHEEL_ACTUATORS, 0] *= self.motor_strength
-        self.latency_ms = u((0.25, 0.55) if cfg.arch == "mcu" else (cfg.mcu_latency_ms if cfg.arch == "feather" else cfg.pi_latency_ms))
+        self.latency_ms = u({"mcu": cfg.mcu_latency_ms, "feather": cfg.feather_latency_ms, "pi": cfg.pi_latency_ms}[cfg.arch])
 
         # --- Sensor / actuation state ---
         self.gyro_bias = np.radians(self.rng.uniform(-cfg.gyro_bias_dps, cfg.gyro_bias_dps, 3))
@@ -831,7 +832,7 @@ if __name__ == "__main__":
     parser.add_argument("--realism", type=int, default=None, metavar="SEED",
                         help="Enable sim-to-real mode (sensor noise, CAN latency, randomized robot) with this seed.")
     parser.add_argument("--arch", choices=("mcu", "feather", "pi"), default="mcu",
-                        help="With --realism: balance loop on the Feather M4 CAN (mcu) or in Linux on the Pi (pi).")
+                        help="With --realism: balance loop on the Teensy 4.0 dual-CAN (mcu), Feather M4 CAN (feather) or in Linux on the Pi (pi).")
     parser.add_argument("--imu", choices=("bno055", "fast"), default="fast",
                         help="With --realism: fast raw IMU filtered on the MCU (default) or BNO055 (100 Hz fused).")
     parser.add_argument("--leg-rate", type=float, default=100.0, help="With --realism: leg CAN update rate (Hz).")

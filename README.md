@@ -72,7 +72,7 @@
 # 1. Install dependencies
 pip install mujoco numpy scipy
 
-# 2. Launch interactive 3D simulation (default `gim6010` 5.79 kg build configuration)
+# 2. Launch interactive 3D simulation (default `gim6010` 5.32 kg build configuration)
 python3 simulate_wheeled_duck.py
 
 # 3. Launch with SimToReal domain randomization (Teensy 4.0 dual-CAN + fast SPI IMU)

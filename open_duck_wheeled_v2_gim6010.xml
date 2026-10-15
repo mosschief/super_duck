@@ -141,7 +141,7 @@
       <body name="trunk_assembly" pos="0 0 0" quat="1 0 0 0" childclass="open_duck_mini_v2">
         <!--
           Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
-          Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + BNO055 IMU)
+          Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + ICM-42688-P IMU)
         -->
         <inertial pos="-0.0243 -0.0001 -0.0112" mass="1.519" diaginertia="0.00374 0.00462 0.00417"/>
         <!-- battery pack set by tools/battery_pack.py: 6s2p (+420 g vs. the 6S1P baseline, folded into the inertial above) -->

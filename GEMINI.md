@@ -34,7 +34,7 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
 
 ## 3. Files in This Workspace
 
-* `open_duck_wheeled_v2_gim6010.xml`: **Default model = the build configuration.** SteadyWin GIM6010-8 on hip-roll, hip-pitch and knees (GIM4305-10 on hip-yaw and wheels), 6S2P 21700 battery, AI HAT+, PJRC Teensy 4.0 Dual-CAN (or Feather M4 CAN) + ICM-42688-P SPI IMU: **5.79 kg**.
+* `open_duck_wheeled_v2_gim6010.xml`: **Default model = the build configuration.** SteadyWin GIM6010-8 on hip-pitch and knees (GIM4305-10 on hip-yaw, hip-roll and wheels), 6S2P 21700 battery, AI HAT+, PJRC Teensy 4.0 Dual-CAN (or Feather M4 CAN) + ICM-42688-P SPI IMU: **5.32 kg**.
 
 * `open_duck_wheeled_v2.xml`: The original standalone MuJoCo MJCF robot and scene model (`open_duck_mini_v2_scaled_wheeled`), all GIM4305-10. Selected with `--robot gim4305`.
 
