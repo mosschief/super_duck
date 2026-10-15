@@ -1,0 +1,400 @@
+<mujoco model="open_duck_mini_v2_scaled_wheeled">
+  <!--
+    1.35x Scaled & Wheeled Open Duck Mini v2 (BDX Droid Replica)
+    Directly based on apirrone/Open_Duck_Mini (`open_duck_mini_v2.xml`):
+      - Preserves the exact Open Duck Mini v2 body tree and naming convention:
+        `base` -> `trunk_assembly` ->
+          * Left leg:  `hip_roll_assembly` -> `left_roll_to_pitch_assembly` -> `knee_and_ankle_assembly`
+                       -> `knee_and_ankle_assembly_2` -> `foot_assembly` (driven wheel)
+          * Right leg: `hip_roll_assembly_2` -> `right_roll_to_pitch_assembly` -> `knee_and_ankle_assembly_3`
+                       -> `knee_and_ankle_assembly_4` -> `foot_assembly_2` (driven wheel)
+          * Neck/Head: `neck_pitch_assembly` -> `head_pitch_to_yaw` -> `neck_yaw_assembly` -> `head_assembly`
+      - Uniform 1.35x linear scale factor (42 cm -> 56.7 cm tall) so the original Open Duck Mini v2
+        shell proportions and aesthetic fit:
+          1. Raspberry Pi 5 (86 x 56 x 16 mm) + Active Cooler + 6S 24V Li-Ion pack inside `trunk_assembly`
+          2. Upper leg joints: 4x SteadyWin GIM6010-8 (Ø80 x 44 mm incl. driver, 388 g, 11 N*m stall / 5 N*m rated) on
+             hip-pitch + knee, and 4x GIM4305-10 (Ø53 x 26 mm, 150 g, ±3.47 N*m) on hip-yaw + hip-roll.
+             (Variant of open_duck_wheeled_v2.xml: GIM6010-8 masses added at the hip-pitch / knee joint centres.)
+          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius TPU wheels at `foot_assembly` & `foot_assembly_2`
+          4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
+             inside the iconic BDX binocular head bezel + 1 downward-angled chest camera (`trunk_nav_cam`)
+      - Uses the authentic Open Duck Mini v2 material palette (`body_front_material` off-white PLA
+        rgba="0.918 0.918 0.918 1" and `foot_bottom_tpu_material` warm charcoal rgba="0.306 0.298 0.278 1").
+      - Includes ready-to-uncomment `<mesh scale="1.35 1.35 1.35" .../>` tags if you drop the original
+        STL files from `apirrone/Open_Duck_Mini` into an `assets/` folder alongside this XML.
+  -->
+
+  <compiler angle="radian" coordinate="local" meshdir="assets" inertiafromgeom="auto" autolimits="true"/>
+
+  <option timestep="0.002" gravity="0 0 -9.81" iterations="25" ls_iterations="10">
+    <flag eulerdamp="disable" warmstart="enable"/>
+  </option>
+
+  <visual>
+    <headlight diffuse="0.65 0.65 0.68" ambient="0.32 0.34 0.38" specular="0.20 0.20 0.22"/>
+    <rgba haze="0.14 0.20 0.28 1"/>
+    <global azimuth="145" elevation="-18" offwidth="1280" offheight="720"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.18 0.26 0.38" rgb2="0.05 0.07 0.11" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.20 0.24 0.30" rgb2="0.15 0.18 0.23" markrgb="0.32 0.38 0.46" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.12"/>
+
+    <!-- Authentic Open Duck Mini v2 Materials from open_duck_mini_v2.xml -->
+    <material name="body_front_material" rgba="0.918 0.918 0.918 1" specular="0.25" shininess="0.3"/>
+    <material name="foot_bottom_tpu_material" rgba="0.306 0.298 0.278 1" specular="0.20" shininess="0.25"/>
+    <material name="bdx_visor_dark" rgba="0.14 0.14 0.15 1" specular="0.50" shininess="0.6"/>
+    <material name="gim4305_housing" rgba="0.22 0.24 0.27 1" specular="0.55" shininess="0.65"/>
+    <material name="bdx_eye_led" rgba="0.96 0.92 0.78 1" emission="0.75"/>
+    <material name="camera_lens" rgba="0.05 0.07 0.10 1" specular="0.90" shininess="0.95"/>
+    <material name="rpi_green" rgba="0.12 0.55 0.28 1"/>
+    <material name="wheel_tpu" rgba="0.18 0.18 0.19 1"/>
+
+    <!--
+      Optional: Uncomment if using the raw STL meshes from apirrone/Open_Duck_Mini in `assets/`
+      <mesh name="body_front" file="body_front.stl" scale="1.35 1.35 1.35"/>
+      <mesh name="body_back" file="body_back.stl" scale="1.35 1.35 1.35"/>
+      <mesh name="head_body" file="head_body.stl" scale="1.35 1.35 1.35"/>
+    -->
+  </asset>
+
+  <default>
+    <default class="open_duck_mini_v2">
+      <geom condim="3" contype="1" conaffinity="1" friction="0.8 0.005 0.0001" solref="0.015 1" solimp="0.9 0.95 0.001"/>
+
+      <default class="visual">
+        <geom contype="0" conaffinity="0" group="2"/>
+      </default>
+
+      <default class="collision">
+        <geom group="3"/>
+      </default>
+
+      <!--
+        SteadyWin GIM4305-10 QDD Planetary Actuator (Used in Pupper v3)
+        Replaces the 8 load-bearing leg STS3215 servos in the 1.35x scaled Open Duck Mini v2:
+          - Ø53 x 26 mm, 150 g with integrated SDC101 FOC CAN driver
+          - 10:1 planetary reduction, reflected rotor armature = 0.0038 kg*m^2
+          - 1.0 N*m nominal continuous torque, 3.47 N*m peak stall torque
+      -->
+      <default class="gim4305">
+        <joint type="hinge" damping="0.12" frictionloss="0.025" armature="0.0038" limited="true"/>
+        <!-- kv raised 1.4 -> 4.0: with kv=1.4 the leg servos acted like an underdamped spring, so a hard wheel-torque
+             step (push recovery) made the legs pogo and the tires bounce off the floor, losing all traction.
+             The controller lowers it back to 1.4 for the jump thrust (MIT-mode kd scheduling, see
+             `ScaledWheeledDuckController.leg_servo_kd`), since damping also resists the fast leg extension. -->
+        <position kp="32.0" kv="4.0" forcerange="-3.47 3.47" inheritrange="1"/>
+      </default>
+
+      <!-- SteadyWin GIM4305-10 Wheel Hub Motor (Direct Torque Control at Ankle/Foot Assembly) -->
+      <default class="gim4305_wheel">
+        <joint type="hinge" axis="0 1 0" limited="false" damping="0.05" frictionloss="0.015" armature="0.0038"/>
+        <motor ctrlrange="-3.47 3.47" forcerange="-3.47 3.47" gear="1.0"/>
+      </default>
+
+      <!-- GIM4305-10 Physical Canister (Ø53 x 26 mm) -->
+      <!-- SteadyWin GIM6010-8: 11 N*m stall / 5 N*m rated, 8:1, 388 g with driver, Ø80 x 44 mm (manual rev1.2).
+           Armature from the GB6010 rotor inertia (748 g*cm^2) x 8^2; the GIM6010-8 figure is unpublished.
+           Same impedance gains as gim4305; the sim also applies the manual's torque-speed curve
+           (simulate_wheeled_duck.py `apply_leg_torque_curve`). -->
+      <default class="gim6010">
+        <joint type="hinge" damping="0.12" frictionloss="0.04" armature="0.0048" limited="true"/>
+        <position kp="32.0" kv="4.0" forcerange="-11.0 11.0" inheritrange="1"/>
+      </default>
+
+      <!-- GIM6010-8 physical envelope (Ø80 x 44 mm incl. driver), visual only -->
+      <default class="gim6010_canister">
+        <geom type="cylinder" size="0.040 0.022" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
+      </default>
+
+      <default class="gim4305_canister">
+        <geom type="cylinder" size="0.0265 0.013" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
+      </default>
+
+      <!-- Original Open Duck Mini v2 Feetech STS3215 (BAM Identified Parameters) for 4-DOF Neck/Head -->
+      <default class="sts3215">
+        <joint type="hinge" damping="0.56" frictionloss="0.068" armature="0.027" limited="true"/>
+        <position kp="13.37" kv="0.8" forcerange="-3.23 3.23" inheritrange="1"/>
+      </default>
+
+      <!-- 1.35x Scaled High-Grip TPU Wheel Tire (Radius = 0.075 m, Width = 0.032 m) -->
+      <default class="wheel_tire">
+        <geom type="cylinder" size="0.075 0.016" euler="1.5707963 0 0" material="wheel_tpu"
+              condim="4" friction="1.25 0.008 0.0002" solref="0.012 1" solimp="0.92 0.97 0.001"/>
+      </default>
+    </default>
+  </default>
+
+  <worldbody>
+    <light pos="0 0 3.0" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <!--
+      BASE & TRUNK ASSEMBLY (1.35x Scaled from open_duck_mini_v2.xml `base` z=0.22 -> z=0.3395 with 75mm wheels)
+      IMU site scaled by 1.35x from original pos="-0.08 0 0.05" -> pos="-0.108 0 0.0675"
+    -->
+    <body name="base" pos="0 0 0.3395">
+      <freejoint name="floating_base"/>
+      <site name="imu" pos="-0.108 0.0 0.0675" size="0.008" rgba="1 0.2 0.2 1"/>
+
+      <body name="trunk_assembly" pos="0 0 0" quat="1 0 0 0" childclass="open_duck_mini_v2">
+        <!--
+          Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
+          Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + BNO055 IMU)
+        -->
+        <inertial pos="-0.0105 -0.0001 -0.0056" mass="1.099" diaginertia="0.00323 0.00399 0.00356"/>
+        <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
+        <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
+        <!-- feather_m4_can: 8 g (folded into the trunk inertial above) -->
+        <geom name="feather_m4_can" class="visual" type="box" size="0.0254 0.0114 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
+
+        <!-- 1.35x Scaled Open Duck Mini v2 BDX Trunk Shell (`body_front` & `body_back` geometry) -->
+        <geom name="trunk_collision" class="collision" type="box" size="0.074 0.063 0.058" material="body_front_material"/>
+        <geom name="body_front_shell" class="visual" type="box" size="0.042 0.062 0.056" pos="0.032 0 0.002" euler="0 0.14 0" material="body_front_material"/>
+        <geom name="body_front_curved_breast" class="visual" type="cylinder" size="0.058 0.038" pos="0.040 0 0.004" euler="0 0.14 0" material="body_front_material"/>
+        <geom name="body_back_shell" class="visual" type="box" size="0.044 0.060 0.052" pos="-0.034 0 -0.002" euler="0 -0.10 0" material="body_front_material"/>
+        <geom name="body_bottom_trim" class="visual" type="box" size="0.066 0.056 0.012" pos="0 0 -0.052" material="foot_bottom_tpu_material"/>
+        <geom name="body_neck_socket" class="visual" type="cylinder" size="0.034 0.010" pos="0.036 0 0.056" euler="0 0.15 0" material="foot_bottom_tpu_material"/>
+
+        <!-- Internal Raspberry Pi 5 (86 x 56 x 16 mm) & Low-Slung 6S Battery Pack -->
+        <geom name="raspberry_pi_5" class="visual" type="box" size="0.043 0.028 0.008" pos="-0.006 0 0.018" material="rpi_green"/>
+        <geom name="battery_pack_6s" class="visual" type="box" size="0.045 0.038 0.015" pos="0.004 0 -0.032" material="foot_bottom_tpu_material"/>
+
+        <!-- Chest Forward-Downward Navigation Camera (Raspberry Pi Camera Module 3 Wide, 25 x 24 x 12.4 mm) -->
+        <geom name="chest_cam_bezel" class="visual" type="cylinder" size="0.014 0.005" pos="0.088 0 -0.014" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
+        <geom name="chest_cam_lens" class="visual" type="cylinder" size="0.009 0.006" pos="0.090 0 -0.014" euler="0 1.5708 0" material="camera_lens"/>
+        <camera name="trunk_nav_cam" pos="0.093 0 -0.014" euler="0 -1.22 -1.5708" fovy="75"/>
+
+        <!-- ==================== NECK & HEAD CHAIN (Exact open_duck_mini_v2 Hierarchy, 1.35x Scaled) ==================== -->
+        <body name="neck_pitch_assembly" pos="0.036 0 0.060">
+          <joint name="neck_pitch" type="hinge" axis="0 1 0" range="-0.349066 1.13446" class="sts3215"/>
+          <inertial pos="0 0 0.028" mass="0.085" diaginertia="0.00006 0.00006 0.00003"/>
+          <geom name="neck_pitch_link" class="visual" type="box" size="0.018 0.022 0.030" pos="0 0 0.028" material="foot_bottom_tpu_material"/>
+
+          <body name="head_pitch_to_yaw" pos="0 0 0.058">
+            <joint name="head_pitch" type="hinge" axis="0 1 0" range="-0.785398 0.785398" class="sts3215"/>
+            <inertial pos="0 0 0.012" mass="0.030" diaginertia="0.00002 0.00002 0.000015"/>
+            <geom name="head_pitch_bracket" class="visual" type="box" size="0.022 0.024 0.014" material="foot_bottom_tpu_material"/>
+
+            <body name="neck_yaw_assembly" pos="0 0 0.022">
+              <joint name="head_yaw" type="hinge" axis="0 0 1" range="-2.79253 2.79253" class="sts3215"/>
+              <inertial pos="0 0 0.015" mass="0.110" diaginertia="0.00007 0.00007 0.00005"/>
+              <geom name="neck_yaw_housing" class="visual" type="cylinder" size="0.024 0.016" material="foot_bottom_tpu_material"/>
+
+              <!--
+                1.35x Scaled Open Duck Mini v2 BDX Binocular-Trapezoid Head (`head_assembly`)
+                Matches the signature flat-browed, boxy-trapezoidal BDX head from apirrone/Open_Duck_Mini:
+                  - Off-white PLA trapezoidal outer hood (`body_front_material`)
+                  - Recessed charcoal front visor cavity (`foot_bottom_tpu_material`)
+                  - Iconic BDX binocular camera/LED eye bezels housing stereo Raspberry Pi Camera Module 3 units
+                  - Twin rear antenna stalks driven by micro servos
+              -->
+              <body name="head_assembly" pos="0.010 0 0.038">
+                <joint name="head_roll" type="hinge" axis="1 0 0" range="-0.523599 0.523599" class="sts3215"/>
+                <inertial pos="0.010 0 0.005" mass="0.480" diaginertia="0.00068 0.00082 0.00088"/>
+
+                <!-- Inner Collision Box -->
+                <geom name="head_collision" class="collision" type="box" size="0.052 0.068 0.036" material="body_front_material"/>
+
+                <!-- BDX Trapezoidal Outer Shell (Off-White PLA `body_front_material`) -->
+                <geom name="head_core_shell" class="visual" type="box" size="0.050 0.060 0.034" material="body_front_material"/>
+                <!-- Wide Flat Overhanging Top Brow Plate (156 mm wide x 112 mm deep) -->
+                <geom name="head_top_brow" class="visual" type="box" size="0.056 0.078 0.006" pos="0.004 0 0.035" euler="0 0.05 0" material="body_front_material"/>
+                <!-- Narrower Flat Bottom Jaw Plate (124 mm wide) -->
+                <geom name="head_bottom_jaw" class="visual" type="box" size="0.048 0.062 0.006" pos="0.002 0 -0.035" material="body_front_material"/>
+                <!-- Inward-Slanted Trapezoidal Left & Right Side Walls -->
+                <geom name="head_left_trapezoid_cheek" class="visual" type="box" size="0.052 0.007 0.036" pos="0.002 0.068 0.001" euler="-0.24 0 -0.06" material="body_front_material"/>
+                <geom name="head_right_trapezoid_cheek" class="visual" type="box" size="0.052 0.007 0.036" pos="0.002 -0.068 0.001" euler="0.24 0 0.06" material="body_front_material"/>
+                <!-- Slanted Rear Head Backplate -->
+                <geom name="head_back_plate" class="visual" type="box" size="0.008 0.062 0.033" pos="-0.048 0 0.001" euler="0 -0.18 0" material="foot_bottom_tpu_material"/>
+
+                <!-- Recessed Dark Charcoal BDX Face Cavity -->
+                <geom name="head_face_recess" class="visual" type="box" size="0.006 0.064 0.028" pos="0.048 0 0.000" material="bdx_visor_dark"/>
+
+                <!--
+                  Iconic BDX Asymmetric/Binocular LED Eye Bezels + Stereo Raspberry Pi Camera Module 3 Units
+                  (70 mm Stereo Baseline in the 1.35x Scaled Head)
+                -->
+                <!-- Left Eye Binocular Barrel (Slightly Larger BDX Primary Scope) -->
+                <geom name="left_eye_housing" class="visual" type="cylinder" size="0.024 0.008" pos="0.052 0.035 0.002" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
+                <geom name="left_eye_led_ring" class="visual" type="cylinder" size="0.019 0.0085" pos="0.053 0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
+                <geom name="left_eye_cam_lens" class="visual" type="cylinder" size="0.012 0.009" pos="0.054 0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
+                <geom name="left_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 0.035 0.002" material="rpi_green"/>
+                <camera name="left_eye_cam" pos="0.058 0.035 0.002" euler="0 -1.5708 -1.5708" fovy="67"/>
+
+                <!-- Right Eye Binocular Barrel (BDX Secondary Scope) -->
+                <geom name="right_eye_housing" class="visual" type="cylinder" size="0.021 0.008" pos="0.052 -0.035 0.002" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
+                <geom name="right_eye_led_ring" class="visual" type="cylinder" size="0.016 0.0085" pos="0.053 -0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
+                <geom name="right_eye_cam_lens" class="visual" type="cylinder" size="0.010 0.009" pos="0.054 -0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
+                <geom name="right_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 -0.035 0.002" material="rpi_green"/>
+                <camera name="right_eye_cam" pos="0.058 -0.035 0.002" euler="0 -1.5708 -1.5708" fovy="67"/>
+
+                <!-- BDX Twin Rear Antenna Ears -->
+                <geom name="left_antenna_base" class="visual" type="cylinder" size="0.008 0.008" pos="-0.032 0.046 0.038" material="foot_bottom_tpu_material"/>
+                <geom name="left_antenna_stalk" class="visual" type="capsule" fromto="-0.032 0.046 0.042 -0.046 0.054 0.098" size="0.0035" material="foot_bottom_tpu_material"/>
+                <geom name="right_antenna_base" class="visual" type="cylinder" size="0.008 0.008" pos="-0.032 -0.046 0.038" material="foot_bottom_tpu_material"/>
+                <geom name="right_antenna_stalk" class="visual" type="capsule" fromto="-0.032 -0.046 0.042 -0.046 -0.054 0.098" size="0.0035" material="foot_bottom_tpu_material"/>
+              </body>
+            </body>
+          </body>
+        </body>
+
+        <!-- ==================== LEFT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
+        <body name="hip_roll_assembly" pos="0 0.084 -0.044">
+          <joint name="left_hip_yaw" type="hinge" axis="0 0 1" range="-0.5235987755982979 0.5235987755982997" class="gim4305"/>
+          <inertial pos="0 0 -0.012" mass="0.180" diaginertia="0.00009 0.00009 0.00008"/>
+          <geom name="left_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
+          <geom name="left_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
+
+          <body name="left_roll_to_pitch_assembly" pos="0 0.018 -0.030">
+            <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
+            <inertial pos="0 0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <geom name="left_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
+            <geom name="left_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 0.014 0" material="foot_bottom_tpu_material"/>
+
+            <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m) -->
+            <body name="knee_and_ankle_assembly" pos="0 0.026 0">
+              <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim6010"/>
+              <inertial pos="0.0000 0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
+              <geom name="left_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
+              <geom name="left_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
+              <geom name="left_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
+
+              <!-- Shin Link (`knee_and_ankle_assembly_2`, 1.35x scaled length = 0.118 m) -->
+              <body name="knee_and_ankle_assembly_2" pos="0 0 -0.118">
+                <joint name="left_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
+                <inertial pos="0.0000 0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <geom name="left_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
+                <geom name="left_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0 -0.059" material="foot_bottom_tpu_material"/>
+                <geom name="left_shin_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
+                <geom name="left_wheel_gim4305_stator" class="gim4305_canister" pos="0 0.015 -0.118" euler="1.5708 0 0"/>
+
+                <!-- Distal Wheel Assembly (`foot_assembly`, 1.35x scaled wheel radius = 0.075 m) -->
+                <body name="foot_assembly" pos="0 0.034 -0.118">
+                  <joint name="left_wheel" class="gim4305_wheel" axis="0 1 0"/>
+                  <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
+                  <geom name="left_foot_bottom_tpu" class="wheel_tire"/>
+                  <geom name="left_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
+                  <geom name="left_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
+                  <geom name="left_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
+                  <site name="left_foot" pos="0 0 0" size="0.005"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+
+        <!-- ==================== RIGHT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
+        <body name="hip_roll_assembly_2" pos="0 -0.084 -0.044">
+          <joint name="right_hip_yaw" type="hinge" axis="0 0 1" range="-0.5235987755982979 0.5235987755982997" class="gim4305"/>
+          <inertial pos="0 0 -0.012" mass="0.180" diaginertia="0.00009 0.00009 0.00008"/>
+          <geom name="right_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
+          <geom name="right_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
+
+          <body name="right_roll_to_pitch_assembly" pos="0 -0.018 -0.030">
+            <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
+            <inertial pos="0 -0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <geom name="right_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
+            <geom name="right_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 -0.014 0" material="foot_bottom_tpu_material"/>
+
+            <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m) -->
+            <body name="knee_and_ankle_assembly_3" pos="0 -0.026 0">
+              <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim6010"/>
+              <inertial pos="0.0000 -0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
+              <geom name="right_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
+              <geom name="right_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
+              <geom name="right_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
+
+              <!-- Shin Link (`knee_and_ankle_assembly_4`, 1.35x scaled length = 0.118 m) -->
+              <body name="knee_and_ankle_assembly_4" pos="0 0 -0.118">
+                <joint name="right_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
+                <inertial pos="0.0000 -0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <geom name="right_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
+                <geom name="right_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0 -0.059" material="foot_bottom_tpu_material"/>
+                <geom name="right_shin_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
+                <geom name="right_wheel_gim4305_stator" class="gim4305_canister" pos="0 -0.015 -0.118" euler="1.5708 0 0"/>
+
+                <!-- Distal Wheel Assembly (`foot_assembly_2`, 1.35x scaled wheel radius = 0.075 m) -->
+                <body name="foot_assembly_2" pos="0 -0.034 -0.118">
+                  <joint name="right_wheel" class="gim4305_wheel" axis="0 1 0"/>
+                  <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
+                  <geom name="right_foot_bottom_tpu" class="wheel_tire"/>
+                  <geom name="right_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
+                  <geom name="right_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
+                  <geom name="right_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
+                  <site name="right_foot" pos="0 0 0" size="0.005"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- ==================== ACTUATORS (8 GIM4305-10 Leg DOFs + 4 STS3215 Head DOFs + 2 GIM4305-10 Wheels) ==================== -->
+  <actuator>
+    <!-- Left Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
+    <position name="left_hip_yaw" joint="left_hip_yaw" class="gim4305"/>
+    <position name="left_hip_roll" joint="left_hip_roll" class="gim4305"/>
+    <position name="left_hip_pitch" joint="left_hip_pitch" class="gim6010"/>
+    <position name="left_knee" joint="left_knee" class="gim6010"/>
+
+    <!-- Right Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
+    <position name="right_hip_yaw" joint="right_hip_yaw" class="gim4305"/>
+    <position name="right_hip_roll" joint="right_hip_roll" class="gim4305"/>
+    <position name="right_hip_pitch" joint="right_hip_pitch" class="gim6010"/>
+    <position name="right_knee" joint="right_knee" class="gim6010"/>
+
+    <!-- Neck & Head Camera Gimbal Servos (Feetech STS3215) -->
+    <position name="neck_pitch" joint="neck_pitch" class="sts3215"/>
+    <position name="head_pitch" joint="head_pitch" class="sts3215"/>
+    <position name="head_yaw" joint="head_yaw" class="sts3215"/>
+    <position name="head_roll" joint="head_roll" class="sts3215"/>
+
+    <!-- Left & Right Wheel Hub Motors (SteadyWin GIM4305-10 Direct Torque Control) -->
+    <motor name="left_wheel_motor" joint="left_wheel" class="gim4305_wheel"/>
+    <motor name="right_wheel_motor" joint="right_wheel" class="gim4305_wheel"/>
+  </actuator>
+
+  <!-- ==================== SENSORS (Exact open_duck_mini_v2 `sensors.xml` Suite + Wheel Odometry) ==================== -->
+  <sensor>
+    <!-- IMU Sensors from Open Duck Mini v2 `xmls/sensors.xml` -->
+    <gyro site="imu" name="gyro"/>
+    <velocimeter site="imu" name="local_linvel"/>
+    <accelerometer site="imu" name="accelerometer"/>
+    <framezaxis objtype="site" objname="imu" name="upvector"/>
+    <framexaxis objtype="site" objname="imu" name="forwardvector"/>
+    <framelinvel objtype="site" objname="imu" name="global_linvel"/>
+    <frameangvel objtype="site" objname="imu" name="global_angvel"/>
+    <framepos objtype="site" objname="imu" name="position"/>
+    <framequat objtype="site" objname="imu" name="orientation"/>
+
+    <!-- Foot / Wheel Site Sensors from Open Duck Mini v2 `xmls/sensors.xml` -->
+    <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
+    <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
+    <framexaxis objtype="site" objname="left_foot" name="left_foot_upvector"/>
+    <framexaxis objtype="site" objname="right_foot" name="right_foot_upvector"/>
+    <framepos objtype="site" objname="left_foot" name="left_foot_pos"/>
+    <framepos objtype="site" objname="right_foot" name="right_foot_pos"/>
+
+    <!-- 14-Bit Magnetic Wheel Encoders (GIM4305-10 SDC101 Feedback) -->
+    <jointpos joint="left_wheel" name="left_wheel_pos"/>
+    <jointpos joint="right_wheel" name="right_wheel_pos"/>
+    <jointvel joint="left_wheel" name="left_wheel_vel"/>
+    <jointvel joint="right_wheel" name="right_wheel_vel"/>
+  </sensor>
+
+  <!-- ==================== KEYFRAMES (1.35x Scaled Balanced Crouch Posture) ==================== -->
+  <keyframe>
+    <!--
+      With 0.118 m thigh & shin links at hip_pitch = -0.50 rad, knee = +1.00 rad,
+      vertical leg drop = 2 * 0.118 * cos(0.50) = 0.2071 m; plus hip offset (0.074 m) and wheel radius (0.075 m)
+      -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
+    -->
+    <key name="home_balanced"
+         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
+         ctrl="0 0 -0.50 1.00 0 0 -0.50 1.00 0.15 -0.15 0 0 0 0"/>
+  </keyframe>
+</mujoco>
