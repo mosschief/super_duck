@@ -3,8 +3,9 @@
 Active Balancing, Posture & Live Keyboard Driving Controller for the 1.35x Scaled
 Wheeled Open Duck Mini v2 (based on `apirrone/Open_Duck_Mini`).
 
-Robot profiles (`--robot`): `gim6010` (default) = SteadyWin GIM6010-8 on hip-pitch and knees
-(`open_duck_wheeled_v2_gim6010.xml`); `gim4305` = the original all-GIM4305-10 design (`open_duck_wheeled_v2.xml`).
+Robot profiles (`--robot`): `gim6010` (default, the build) = SteadyWin GIM6010-8 on hip-roll, hip-pitch and knees,
+6S2P battery (`open_duck_wheeled_v2_gim6010.xml`); `gim4305` = the original all-GIM4305-10 design with a 6S1P pack
+(`open_duck_wheeled_v2.xml`).
 
 Live Keyboard Driving Controls (inside the 3D MuJoCo Viewer Window):
   - Up Arrow    or 'I' / 'W' : Increase forward speed (+0.15 m/s per press, up to +1.50 m/s)
@@ -89,21 +90,24 @@ class RobotProfile:
     # Leg (hip-pitch + knee) motor torque-speed curve: torque <= min(stall, (no_load_rpm - rpm) / rpm_per_nm).
     # None = not modelled (MuJoCo's forcerange is otherwise speed-independent).
     leg_torque_curve: Tuple[float, float, float] = None   # (stall N*m, no-load rpm, rpm drop per N*m)
+    curve_actuators: Tuple[int, ...] = ()                 # actuator indices the curve applies to
 
 
 PROFILES = {
-    # SteadyWin GIM6010-8 on hip-pitch and knees (default). Specs: SteadyWin GIM6010-8 manual rev1.2.
+    # Build configuration (default): SteadyWin GIM6010-8 on hip-roll, hip-pitch and knees (GIM4305-10 on hip-yaw and
+    # wheels), 6S2P 21700 battery. Specs: SteadyWin GIM6010-8 manual rev1.2. Body params: tools/derive_lqr_params.py.
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=4.386, com_height=0.2345, body_pitch_inertia=0.0681),
-        initial_pitch_trim=-0.0930,
-        posture_coeffs=(-0.1560, -0.0575),
+        params=ScaledWheeledDuckParams(body_mass=5.282, com_height=0.2337, body_pitch_inertia=0.0694),
+        initial_pitch_trim=-0.0824,
+        posture_coeffs=(-0.1391, -0.0489),
         # The strong legs finish extending in ~50 ms; holding "thrust" longer only delays the tuck that lifts the
         # wheels. With the wheels limp during thrust: 27 mm clearance, 13 deg peak lean, 12/12 randomized robots.
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
+        curve_actuators=(1, 2, 3, 5, 6, 7),     # hip roll, hip pitch, knee (both legs)
     ),
     # Original design: SteadyWin GIM4305-10 on every joint (open_duck_wheeled_v2.xml as first downloaded).
     "gim4305": RobotProfile(
@@ -699,21 +703,19 @@ def read_sensors(model, data) -> tuple:
             float(s("left_wheel_vel")[0]), float(s("right_wheel_vel")[0]), float(leg_fold), float(leg_fold_rate))
 
 
-HIP_KNEE_ACTUATORS = [2, 3, 6, 7]  # left/right hip_pitch and knee
-
-
-def apply_leg_torque_curve(model, data, curve) -> None:
-    """Caps the hip-pitch/knee torque at what the motor can deliver at its current speed.
+def apply_leg_torque_curve(model, data, curve, actuators) -> None:
+    """Caps the GIM6010-8 joints' torque at what the motor can deliver at its current speed.
 
     MuJoCo's forcerange is speed-independent, but a real motor runs out of voltage as it speeds up: the GIM6010-8
     gives 11 N*m at standstill but only ~6 N*m at the ~185 rpm the jump thrust reaches.
     """
     stall, no_load_rpm, rpm_per_nm = curve
-    dof = model.jnt_dofadr[model.actuator_trnid[HIP_KNEE_ACTUATORS, 0]]
+    actuators = list(actuators)
+    dof = model.jnt_dofadr[model.actuator_trnid[actuators, 0]]
     rpm = np.abs(data.qvel[dof]) * 60.0 / (2.0 * math.pi)
     limit = np.clip((no_load_rpm - rpm) / rpm_per_nm, 0.5, stall)
-    model.actuator_forcerange[HIP_KNEE_ACTUATORS, 0] = -limit
-    model.actuator_forcerange[HIP_KNEE_ACTUATORS, 1] = limit
+    model.actuator_forcerange[actuators, 0] = -limit
+    model.actuator_forcerange[actuators, 1] = limit
 
 
 def step_robot(model, data, controller: "ScaledWheeledDuckController", realism: "SimToReal" = None) -> dict:
@@ -726,7 +728,7 @@ def step_robot(model, data, controller: "ScaledWheeledDuckController", realism: 
     data.ctrl[:] = realism.actuate(ctrl) if realism is not None else ctrl
     apply_leg_servo_kd(model, controller.leg_servo_kd())
     if controller.profile.leg_torque_curve is not None:
-        apply_leg_torque_curve(model, data, controller.profile.leg_torque_curve)
+        apply_leg_torque_curve(model, data, controller.profile.leg_torque_curve, controller.profile.curve_actuators)
     mujoco.mj_step(model, data)
     return info
 

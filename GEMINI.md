@@ -34,11 +34,13 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
 
 ## 3. Files in This Workspace
 
-* `open_duck_wheeled_v2_gim6010.xml`: **Default model.** Same robot with SteadyWin GIM6010-8 on the hip-pitch and knee joints (+0.95 kg).
+* `open_duck_wheeled_v2_gim6010.xml`: **Default model = the build configuration.** SteadyWin GIM6010-8 on hip-roll, hip-pitch and knees (GIM4305-10 on hip-yaw and wheels), 6S2P 21700 battery, AI HAT+, Feather M4 CAN: **5.79 kg**.
 
 * `open_duck_wheeled_v2.xml`: The original standalone MuJoCo MJCF robot and scene model (`open_duck_mini_v2_scaled_wheeled`), all GIM4305-10. Selected with `--robot gim4305`.
 
 * `simulate_wheeled_duck.py`: 500 Hz (`dt = 0.002 s`) full-state LQR wheel-balancing, 4-DOF leg posture, stereo-camera horizon leveling, and live keyboard driving controller. `--robot gim6010|gim4305` picks a `RobotProfile` (model file + per-robot tuning; default `gim6010`). `--realism SEED` runs it on a randomized robot with noisy sensors and CAN latency (`SimToReal`).
+
+* `tools/`: `upgrade_motor.py` (swap a joint to GIM6010-8), `battery_pack.py` (set pack mass/size), `add_trunk_electronics.py` (AI HAT+, Feather), `derive_lqr_params.py` (profile body params from an MJCF), `fit_balance_trim.py` (profile trim/posture fit), `power_budget.py`. After any mass change: run `derive_lqr_params.py`, then `fit_balance_trim.py`, paste both into the profile, then re-run `test_scenarios.py`.
 
 * `test_scenarios.py`: Scripted scenario tests scored against MuJoCo ground truth (stand, drive/turn/brake, brake settle, crouch, pushes ±20–40 N, jumps). `--robot` as above; `--realism N` runs each scenario on N randomized robots and reports pass rates; `-k name` filters scenarios; `thermal` compares RMS joint torque to each motor's continuous rating.
 
@@ -93,6 +95,7 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
      * *Power (`tools/power_budget.py`)*: standing ~35 W, cruising ~52 W, mixed use ~43 W → a 90 Wh 6S pack gives ~100 min. Jump thrust pulls ~80 A for ~50 ms (4 knees/hips near stall): use high-drain cells / 6S2P, bus capacitance, or cap the jump thrust current. 5 V rail peak ~3.8 A (Pi 5 + Hailo-8 at max) → 5.1 V/5 A buck is OK.
      * *IMU*: fast raw IMU (ICM-42688-P: 2.8 mdps/√Hz, up to 32 kHz ODR, SPI 24 MHz; or BMI088) on SPI to the Feather, filtered there; the sim's fast-IMU noise (0.3 °/s RMS) is conservative.
      * *Tires*: grip is the push-recovery limit. Soft cast urethane (≈Shore 45A) treads on printed 150 mm hubs; vendor μ on MDF ≈1.75 urethane vs 1.30 silicone vs 1.05 rubber (unverified). Measure on your floors (incline test, μ = tan θ) and set `RealismConfig.friction`.
+   * **Build configuration (2026-10-14)**: hip roll also moved to GIM6010-8 (fixes its 72–83% heat: now 21%) and the battery to 6S2P (+0.42 kg vs the assumed 6S1P baseline). 5.79 kg total. Ideal sensors: every scenario passes, incl. ±40 N pushes (22° / 15° peak) and a 30–32 mm jump. 12 randomized robots: stand, drive, ±20–30 N pushes, jumps, thermal 12/12; ±40 N 9/12; brake settle 9/12; crouch 3/12. Heat: knees 37%, wheels 44%, hip roll 21%, hip yaw 16%. Power: ~40 W mixed use → ~214 min on a 180 Wh pack; jump thrust still ~80 A for ~50 ms. Note: at full crouch the heavier robot's knees sag to ~0.04 rad from their joint stop (was ~0.09).
    * **Open issues**: (a) on robots with a ±6–8 mm CoM offset the trim starts wrong and the learner (τ ≈ 7 s; faster gains oscillate) leaves 7–22 cm offsets after braking/crouching — on hardware, persist the learned trim between runs; (b) jump while driving still falls on 4/12 low-grip/latency robots (lands with ~60° lean).
 
 3. Fork the Open Duck Mini v2 Onshape CAD, scale shells by `1.35x`, and adapt leg servo pockets to `Ø53 x 26 mm` GIM4305-10 flanges (`6x M2.5` bolt circle).
