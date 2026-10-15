@@ -10,7 +10,8 @@ them.
   AI HAT+ 26 TOPS (Hailo-8): 65 x 56.5 x 5.5 mm board, 34-35 g (Waveshare / Probots listings) + ~6 g header and
       standoffs = 41 g, stacked on 16 mm standoffs above the Pi 5 + active cooler.
   PJRC Teensy 4.0 (600 MHz Cortex-M7, 35 x 18 mm) + Dual 3.3V CAN Transceiver Carrier + ICM-42688-P SPI IMU: ~8 g
-      total (same mass envelope as the Feather M4 CAN Express single-bus alternative), mounted next to the IMU.
+      total (same mass envelope as the Feather M4 CAN Express single-bus alternative), mounted next to the IMU on the
+      upper rear wall.
 
 Usage: python3 tools/add_trunk_electronics.py open_duck_wheeled_v2.xml open_duck_wheeled_v2_gim6010.xml
 """
@@ -21,7 +22,8 @@ import numpy as np
 
 PARTS = [  # name, mass (kg), position in trunk frame (m), half-size (m), material
     ("ai_hat_plus_26tops", 0.041, (-0.006, 0.0, 0.042), (0.0325, 0.0283, 0.0028), "rpi_green"),
-    ("teensy_40_dual_can", 0.008, (-0.095, 0.0, 0.060), (0.0210, 0.0110, 0.0035), "gim4305_housing"),
+    # Upper rear wall, long side along y, beside the IMU (was x = -0.095: outside the trunk shell)
+    ("teensy_40_dual_can", 0.008, (-0.062, -0.030, 0.045), (0.0110, 0.0210, 0.0035), "gim4305_housing"),
 ]
 
 def inertial_re(body: str):

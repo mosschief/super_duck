@@ -13,7 +13,7 @@
         shell proportions and aesthetic fit:
           1. Raspberry Pi 5 (86 x 56 x 16 mm) + Active Cooler + 6S 24V Li-Ion pack inside `trunk_assembly`
           2. Upper leg joints: 4x SteadyWin GIM6010-8 (Ø80 x 44 mm incl. driver, 388 g, 11 N*m stall / 5 N*m rated) on
-             hip-pitch + knee, and 4x GIM4305-10 (Ø53 x 26 mm, 150 g, ±3.47 N*m) on hip-yaw + hip-roll.
+             hip-pitch + knee, and 4x GIM4305-10 (Ø53 x 33 mm, 150 g, ±3.47 N*m) on hip-yaw + hip-roll.
              (Variant of open_duck_wheeled_v2.xml: GIM6010-8 masses added at the hip-pitch / knee joint centres.)
           3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius TPU wheels at `foot_assembly` & `foot_assembly_2`
           4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
@@ -79,7 +79,7 @@
       <!--
         SteadyWin GIM4305-10 QDD Planetary Actuator (Used in Pupper v3)
         Replaces the 8 load-bearing leg STS3215 servos in the 1.35x scaled Open Duck Mini v2:
-          - Ø53 x 26 mm, 150 g with integrated SDC101 FOC CAN driver
+          - Ø53 x 33 mm overall (26 mm housing), 150 g with integrated SDC101 FOC CAN driver
           - 10:1 planetary reduction, reflected rotor armature = 0.0038 kg*m^2
           - 1.0 N*m nominal continuous torque, 3.47 N*m peak stall torque
       -->
@@ -98,7 +98,6 @@
         <motor ctrlrange="-3.47 3.47" forcerange="-3.47 3.47" gear="1.0"/>
       </default>
 
-      <!-- GIM4305-10 Physical Canister (Ø53 x 26 mm) -->
       <!-- SteadyWin GIM6010-8: 11 N*m stall / 5 N*m rated, 8:1, 388 g with driver, Ø80 x 44 mm (manual rev1.2).
            Armature from the GB6010 rotor inertia (748 g*cm^2) x 8^2; the GIM6010-8 figure is unpublished.
            Same impedance gains as gim4305; the sim also applies the manual's torque-speed curve
@@ -113,8 +112,11 @@
         <geom type="cylinder" size="0.040 0.022" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
       </default>
 
+      <!-- GIM4305-10SHS physical envelope: Ø53 x 33 overall (Ø37 x 1 output step + Ø53 x 26 housing + Ø40 x 6
+           driver boss; SteadyWin installation drawing / STEP), visual only. Camera Module 3 standard lens:
+           41 deg vertical FOV (the eye cameras' fovy). -->
       <default class="gim4305_canister">
-        <geom type="cylinder" size="0.0265 0.013" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
+        <geom type="cylinder" size="0.0265 0.0165" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
       </default>
 
       <!-- Original Open Duck Mini v2 Feetech STS3215 (BAM Identified Parameters) for 4-DOF Neck/Head -->
@@ -144,18 +146,19 @@
 
     <!--
       BASE & TRUNK ASSEMBLY (1.35x Scaled from open_duck_mini_v2.xml `base` z=0.22 -> z=0.3395 with 75mm wheels)
-      IMU site scaled by 1.35x from original pos="-0.08 0 0.05" -> pos="-0.108 0 0.0675"
+      IMU site: the 1.35x-scaled Open Duck Mini position (-0.108 0 0.0675) was outside the trunk shell; moved inside,
+      beside the Teensy carrier on the upper rear wall (tools/check_cad_clearances.py packing check)
     -->
     <body name="base" pos="0 0 0.3395">
       <freejoint name="floating_base"/>
-      <site name="imu" pos="-0.108 0.0 0.0675" size="0.008" rgba="1 0.2 0.2 1"/>
+      <site name="imu" pos="-0.062 0.008 0.045" size="0.008" rgba="1 0.2 0.2 1"/>
 
       <body name="trunk_assembly" pos="0 0 0" quat="1 0 0 0" childclass="open_duck_mini_v2">
         <!--
           Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
           Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + ICM-42688-P IMU)
         -->
-        <inertial pos="-0.0246 0.0005 -0.0114" mass="1.649" diaginertia="0.00402 0.00490 0.00461"/>
+        <inertial pos="-0.0244 0.0004 -0.0115" mass="1.649" diaginertia="0.00401 0.00486 0.00460"/>
         <!-- speaker_40mm_3w: 18 g (folded into the trunk_assembly inertial above) -->
         <!-- max98357a_i2s_amp: 2 g (folded into the trunk_assembly inertial above) -->
         <geom name="max98357a_i2s_amp" class="visual" type="box" size="0.009 0.0095 0.0015" pos="-0.06 0.035 0.035" material="rpi_green"/>
@@ -164,7 +167,7 @@
         <!-- main_fuse_40a: 10 g (folded into the trunk_assembly inertial above) -->
         <geom name="main_fuse_40a" class="visual" type="box" size="0.012 0.005 0.01" pos="-0.026 -0.053 -0.04" material="foot_bottom_tpu_material"/>
         <!-- antispark_switch_120a: 25 g (folded into the trunk_assembly inertial above) -->
-        <geom name="antispark_switch_120a" class="visual" type="box" size="0.02 0.01 0.008" pos="0.03 -0.048 -0.03" material="gim4305_housing"/>
+        <geom name="antispark_switch_120a" class="visual" type="box" size="0.02 0.01 0.008" pos="0.033 -0.048 -0.03" material="gim4305_housing"/>
         <!-- peripheral_5v_buck: 10 g (folded into the trunk_assembly inertial above) -->
         <geom name="peripheral_5v_buck" class="visual" type="box" size="0.011 0.008 0.006" pos="0.03 0.048 -0.03" material="rpi_green"/>
         <!-- estop_22mm: 25 g (folded into the trunk_assembly inertial above) -->
@@ -172,7 +175,7 @@
         <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
         <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
         <!-- teensy_40_dual_can (PJRC Teensy 4.0 + Dual CAN transceiver carrier + ICM-42688-P IMU): 8 g (folded into the trunk inertial above) -->
-        <geom name="teensy_40_dual_can" class="visual" type="box" size="0.0210 0.0110 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
+        <geom name="teensy_40_dual_can" class="visual" type="box" size="0.0110 0.0210 0.0035" pos="-0.062 -0.03 0.045" material="gim4305_housing"/>
 
         <!-- 1.35x Scaled Open Duck Mini v2 BDX Trunk Shell (`body_front` & `body_back` geometry) -->
         <geom name="trunk_collision" class="collision" type="box" size="0.074 0.063 0.058" material="body_front_material"/>
@@ -184,7 +187,7 @@
 
         <!-- Internal Raspberry Pi 5 (86 x 56 x 16 mm) & Low-Slung 6S Battery Pack -->
         <geom name="raspberry_pi_5" class="visual" type="box" size="0.043 0.028 0.008" pos="-0.006 0 0.018" material="rpi_green"/>
-        <geom name="battery_pack_6s" class="visual" type="box" size="0.035 0.042 0.0315" pos="-0.026 0.0 -0.026" material="foot_bottom_tpu_material"/>
+        <geom name="battery_pack_6s" class="visual" type="box" size="0.0365 0.0445 0.034" pos="-0.026 0.0 -0.026" material="foot_bottom_tpu_material"/>
         <geom name="speaker_40mm_3w" class="visual" type="cylinder" size="0.020 0.003" pos="-0.066 0 0.012" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
         <geom name="estop_bezel" class="visual" type="cylinder" size="0.012 0.004" pos="-0.080 0 0.015" euler="0 1.5708 0" material="estop_yellow"/>
         <geom name="estop_mushroom" class="visual" type="cylinder" size="0.016 0.004" pos="-0.087 0 0.015" euler="0 1.5708 0" material="estop_red"/>
@@ -258,7 +261,7 @@
                 <geom name="left_eye_led_ring" class="visual" type="cylinder" size="0.019 0.0085" pos="0.053 0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
                 <geom name="left_eye_cam_lens" class="visual" type="cylinder" size="0.012 0.009" pos="0.054 0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
                 <geom name="left_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 0.035 0.002" material="rpi_green"/>
-                <camera name="left_eye_cam" pos="0.058 0.035 0.002" euler="0 -1.5708 -1.5708" fovy="67"/>
+                <camera name="left_eye_cam" pos="0.058 0.035 0.002" euler="0 -1.5708 -1.5708" fovy="41"/>
 
                 <!-- Right Eye Binocular Barrel (BDX Secondary Scope) -->
                 <geom name="right_eye_housing" class="visual" type="cylinder" size="0.021 0.008" pos="0.052 -0.035 0.002" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
@@ -267,7 +270,7 @@
                 <geom name="right_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 -0.035 0.002" material="rpi_green"/>
                 <geom name="projector_lens" class="visual" type="cylinder" size="0.007 0.003" pos="0.055 0 -0.018" euler="0 1.5708 0" material="bdx_eye_led"/>
                 <light name="projector" pos="0.059 0 -0.018" dir="1 0 -0.25" cutoff="20" exponent="8" diffuse="0.9 0.85 0.7" specular="0.2 0.2 0.2" castshadow="false" active="false"/>
-                <camera name="right_eye_cam" pos="0.058 -0.035 0.002" euler="0 -1.5708 -1.5708" fovy="67"/>
+                <camera name="right_eye_cam" pos="0.058 -0.035 0.002" euler="0 -1.5708 -1.5708" fovy="41"/>
 
                 <!-- BDX Twin Rear Antenna Ears, each swung fore/aft by a 9 g micro servo (servo bodies folded into the
                      head inertial above; Open Duck Mini `antennas.py`: 1-2 ms PWM = +/-45 deg) -->

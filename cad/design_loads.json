@@ -1,0 +1,2577 @@
+{
+ "model": "open_duck_wheeled_v2_gim6010.xml",
+ "weight_N": 53.8,
+ "scenarios": {
+  "stand": {
+   "wheel_contact_peak_N": 28.7,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 8.14,
+      "p99.5": 7.52
+     },
+     "M_axis_Nm": {
+      "peak": 0.53,
+      "p99.5": 0.15
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 7.27,
+      "p99.5": 6.65
+     },
+     "M_axis_Nm": {
+      "peak": 0.29,
+      "p99.5": 0.1
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 6.48,
+      "p99.5": 6.26
+     },
+     "F_radial_N": {
+      "peak": 2.82,
+      "p99.5": 0.83
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.22,
+      "p99.5": 0.1
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 2.36,
+      "p99.5": 0.68
+     },
+     "F_radial_N": {
+      "peak": 5.34,
+      "p99.5": 5.18
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.07,
+      "p99.5": 0.05
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.03,
+      "p99.5": 0.03
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.03,
+      "p99.5": 0.03
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 12.58,
+      "p99.5": 12.01
+     },
+     "F_radial_N": {
+      "peak": 2.11,
+      "p99.5": 1.43
+     },
+     "M_axis_Nm": {
+      "peak": 0.25,
+      "p99.5": 0.06
+     },
+     "M_bend_Nm": {
+      "peak": 0.57,
+      "p99.5": 0.36
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 1.46,
+      "p99.5": 0.93
+     },
+     "F_radial_N": {
+      "peak": 14.53,
+      "p99.5": 13.87
+     },
+     "M_axis_Nm": {
+      "peak": 0.25,
+      "p99.5": 0.25
+     },
+     "M_bend_Nm": {
+      "peak": 0.6,
+      "p99.5": 0.18
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 1.3,
+      "p99.5": 1.25
+     },
+     "F_radial_N": {
+      "peak": 16.44,
+      "p99.5": 15.68
+     },
+     "M_axis_Nm": {
+      "peak": 0.57,
+      "p99.5": 0.18
+     },
+     "M_bend_Nm": {
+      "peak": 1.02,
+      "p99.5": 1.02
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 1.3,
+      "p99.5": 1.24
+     },
+     "F_radial_N": {
+      "peak": 21.39,
+      "p99.5": 20.45
+     },
+     "M_axis_Nm": {
+      "peak": 1.48,
+      "p99.5": 1.28
+     },
+     "M_bend_Nm": {
+      "peak": 1.0,
+      "p99.5": 1.0
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 1.32,
+      "p99.5": 1.24
+     },
+     "F_radial_N": {
+      "peak": 26.09,
+      "p99.5": 24.95
+     },
+     "M_axis_Nm": {
+      "peak": 0.55,
+      "p99.5": 0.09
+     },
+     "M_bend_Nm": {
+      "peak": 0.17,
+      "p99.5": 0.17
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 12.52,
+      "p99.5": 11.95
+     },
+     "F_radial_N": {
+      "peak": 2.11,
+      "p99.5": 1.43
+     },
+     "M_axis_Nm": {
+      "peak": 0.25,
+      "p99.5": 0.06
+     },
+     "M_bend_Nm": {
+      "peak": 0.57,
+      "p99.5": 0.36
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 1.46,
+      "p99.5": 0.93
+     },
+     "F_radial_N": {
+      "peak": 14.47,
+      "p99.5": 13.81
+     },
+     "M_axis_Nm": {
+      "peak": 0.25,
+      "p99.5": 0.25
+     },
+     "M_bend_Nm": {
+      "peak": 0.6,
+      "p99.5": 0.18
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 1.3,
+      "p99.5": 1.24
+     },
+     "F_radial_N": {
+      "peak": 16.37,
+      "p99.5": 15.62
+     },
+     "M_axis_Nm": {
+      "peak": 0.57,
+      "p99.5": 0.18
+     },
+     "M_bend_Nm": {
+      "peak": 1.02,
+      "p99.5": 1.02
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 1.3,
+      "p99.5": 1.24
+     },
+     "F_radial_N": {
+      "peak": 21.33,
+      "p99.5": 20.39
+     },
+     "M_axis_Nm": {
+      "peak": 1.48,
+      "p99.5": 1.28
+     },
+     "M_bend_Nm": {
+      "peak": 1.0,
+      "p99.5": 1.0
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 1.32,
+      "p99.5": 1.24
+     },
+     "F_radial_N": {
+      "peak": 26.02,
+      "p99.5": 24.89
+     },
+     "M_axis_Nm": {
+      "peak": 0.55,
+      "p99.5": 0.09
+     },
+     "M_bend_Nm": {
+      "peak": 0.17,
+      "p99.5": 0.17
+     }
+    }
+   }
+  },
+  "drive 0.6 m/s weaving": {
+   "wheel_contact_peak_N": 36.2,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 1.88,
+      "p99.5": 1.04
+     },
+     "F_radial_N": {
+      "peak": 8.14,
+      "p99.5": 7.42
+     },
+     "M_axis_Nm": {
+      "peak": 0.53,
+      "p99.5": 0.18
+     },
+     "M_bend_Nm": {
+      "peak": 0.27,
+      "p99.5": 0.16
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 1.85,
+      "p99.5": 0.99
+     },
+     "F_radial_N": {
+      "peak": 7.27,
+      "p99.5": 6.57
+     },
+     "M_axis_Nm": {
+      "peak": 0.29,
+      "p99.5": 0.11
+     },
+     "M_bend_Nm": {
+      "peak": 0.18,
+      "p99.5": 0.12
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 6.68,
+      "p99.5": 6.26
+     },
+     "F_radial_N": {
+      "peak": 2.82,
+      "p99.5": 1.02
+     },
+     "M_axis_Nm": {
+      "peak": 0.13,
+      "p99.5": 0.11
+     },
+     "M_bend_Nm": {
+      "peak": 0.22,
+      "p99.5": 0.11
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 2.36,
+      "p99.5": 0.26
+     },
+     "F_radial_N": {
+      "peak": 5.51,
+      "p99.5": 5.2
+     },
+     "M_axis_Nm": {
+      "peak": 0.02,
+      "p99.5": 0.01
+     },
+     "M_bend_Nm": {
+      "peak": 0.12,
+      "p99.5": 0.1
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.01,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 0.03,
+      "p99.5": 0.03
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.01,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 0.03,
+      "p99.5": 0.03
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 20.47,
+      "p99.5": 19.78
+     },
+     "F_radial_N": {
+      "peak": 5.48,
+      "p99.5": 5.12
+     },
+     "M_axis_Nm": {
+      "peak": 0.37,
+      "p99.5": 0.33
+     },
+     "M_bend_Nm": {
+      "peak": 2.61,
+      "p99.5": 2.52
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 5.73,
+      "p99.5": 5.23
+     },
+     "F_radial_N": {
+      "peak": 22.31,
+      "p99.5": 21.57
+     },
+     "M_axis_Nm": {
+      "peak": 0.94,
+      "p99.5": 0.89
+     },
+     "M_bend_Nm": {
+      "peak": 2.46,
+      "p99.5": 2.34
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 5.36,
+      "p99.5": 5.18
+     },
+     "F_radial_N": {
+      "peak": 24.31,
+      "p99.5": 23.53
+     },
+     "M_axis_Nm": {
+      "peak": 2.43,
+      "p99.5": 2.31
+     },
+     "M_bend_Nm": {
+      "peak": 1.89,
+      "p99.5": 1.76
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 5.76,
+      "p99.5": 5.59
+     },
+     "F_radial_N": {
+      "peak": 29.03,
+      "p99.5": 28.08
+     },
+     "M_axis_Nm": {
+      "peak": 2.94,
+      "p99.5": 2.74
+     },
+     "M_bend_Nm": {
+      "peak": 1.84,
+      "p99.5": 1.69
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 6.04,
+      "p99.5": 5.94
+     },
+     "F_radial_N": {
+      "peak": 33.59,
+      "p99.5": 32.63
+     },
+     "M_axis_Nm": {
+      "peak": 0.74,
+      "p99.5": 0.69
+     },
+     "M_bend_Nm": {
+      "peak": 0.4,
+      "p99.5": 0.35
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 20.04,
+      "p99.5": 19.69
+     },
+     "F_radial_N": {
+      "peak": 5.37,
+      "p99.5": 5.22
+     },
+     "M_axis_Nm": {
+      "peak": 0.37,
+      "p99.5": 0.34
+     },
+     "M_bend_Nm": {
+      "peak": 2.61,
+      "p99.5": 2.51
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 5.65,
+      "p99.5": 5.45
+     },
+     "F_radial_N": {
+      "peak": 21.87,
+      "p99.5": 21.52
+     },
+     "M_axis_Nm": {
+      "peak": 0.93,
+      "p99.5": 0.87
+     },
+     "M_bend_Nm": {
+      "peak": 2.47,
+      "p99.5": 2.32
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 5.37,
+      "p99.5": 4.99
+     },
+     "F_radial_N": {
+      "peak": 23.83,
+      "p99.5": 23.55
+     },
+     "M_axis_Nm": {
+      "peak": 2.44,
+      "p99.5": 2.3
+     },
+     "M_bend_Nm": {
+      "peak": 1.85,
+      "p99.5": 1.75
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 5.75,
+      "p99.5": 5.45
+     },
+     "F_radial_N": {
+      "peak": 28.51,
+      "p99.5": 28.21
+     },
+     "M_axis_Nm": {
+      "peak": 2.95,
+      "p99.5": 2.55
+     },
+     "M_bend_Nm": {
+      "peak": 1.79,
+      "p99.5": 1.7
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 6.03,
+      "p99.5": 5.85
+     },
+     "F_radial_N": {
+      "peak": 33.03,
+      "p99.5": 32.73
+     },
+     "M_axis_Nm": {
+      "peak": 0.74,
+      "p99.5": 0.69
+     },
+     "M_bend_Nm": {
+      "peak": 0.42,
+      "p99.5": 0.36
+     }
+    }
+   }
+  },
+  "crouch / stand cycles": {
+   "wheel_contact_peak_N": 79.4,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.02,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 29.33,
+      "p99.5": 8.65
+     },
+     "M_axis_Nm": {
+      "peak": 1.36,
+      "p99.5": 0.38
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.02,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 26.05,
+      "p99.5": 7.69
+     },
+     "M_axis_Nm": {
+      "peak": 0.8,
+      "p99.5": 0.22
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 24.24,
+      "p99.5": 7.19
+     },
+     "F_radial_N": {
+      "peak": 6.67,
+      "p99.5": 2.48
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.65,
+      "p99.5": 0.17
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 5.58,
+      "p99.5": 2.08
+     },
+     "F_radial_N": {
+      "peak": 20.03,
+      "p99.5": 5.91
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.23,
+      "p99.5": 0.06
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.12,
+      "p99.5": 0.04
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.12,
+      "p99.5": 0.04
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 42.09,
+      "p99.5": 14.43
+     },
+     "F_radial_N": {
+      "peak": 4.24,
+      "p99.5": 2.45
+     },
+     "M_axis_Nm": {
+      "peak": 0.31,
+      "p99.5": 0.18
+     },
+     "M_bend_Nm": {
+      "peak": 1.26,
+      "p99.5": 0.55
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 5.41,
+      "p99.5": 2.45
+     },
+     "F_radial_N": {
+      "peak": 48.49,
+      "p99.5": 16.61
+     },
+     "M_axis_Nm": {
+      "peak": 0.32,
+      "p99.5": 0.29
+     },
+     "M_bend_Nm": {
+      "peak": 0.9,
+      "p99.5": 0.56
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 1.78,
+      "p99.5": 1.2
+     },
+     "F_radial_N": {
+      "peak": 55.46,
+      "p99.5": 18.97
+     },
+     "M_axis_Nm": {
+      "peak": 0.89,
+      "p99.5": 0.55
+     },
+     "M_bend_Nm": {
+      "peak": 3.01,
+      "p99.5": 1.21
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 1.68,
+      "p99.5": 1.19
+     },
+     "F_radial_N": {
+      "peak": 70.93,
+      "p99.5": 24.48
+     },
+     "M_axis_Nm": {
+      "peak": 6.0,
+      "p99.5": 2.21
+     },
+     "M_bend_Nm": {
+      "peak": 3.09,
+      "p99.5": 1.2
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 1.67,
+      "p99.5": 1.18
+     },
+     "F_radial_N": {
+      "peak": 77.47,
+      "p99.5": 29.4
+     },
+     "M_axis_Nm": {
+      "peak": 0.55,
+      "p99.5": 0.33
+     },
+     "M_bend_Nm": {
+      "peak": 0.48,
+      "p99.5": 0.24
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 41.95,
+      "p99.5": 14.36
+     },
+     "F_radial_N": {
+      "peak": 4.22,
+      "p99.5": 2.44
+     },
+     "M_axis_Nm": {
+      "peak": 0.31,
+      "p99.5": 0.18
+     },
+     "M_bend_Nm": {
+      "peak": 1.25,
+      "p99.5": 0.55
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 5.4,
+      "p99.5": 2.44
+     },
+     "F_radial_N": {
+      "peak": 48.37,
+      "p99.5": 16.54
+     },
+     "M_axis_Nm": {
+      "peak": 0.32,
+      "p99.5": 0.29
+     },
+     "M_bend_Nm": {
+      "peak": 0.91,
+      "p99.5": 0.56
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 1.77,
+      "p99.5": 1.2
+     },
+     "F_radial_N": {
+      "peak": 55.34,
+      "p99.5": 18.9
+     },
+     "M_axis_Nm": {
+      "peak": 0.9,
+      "p99.5": 0.55
+     },
+     "M_bend_Nm": {
+      "peak": 3.01,
+      "p99.5": 1.21
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 1.68,
+      "p99.5": 1.19
+     },
+     "F_radial_N": {
+      "peak": 70.81,
+      "p99.5": 24.42
+     },
+     "M_axis_Nm": {
+      "peak": 6.0,
+      "p99.5": 2.2
+     },
+     "M_bend_Nm": {
+      "peak": 3.09,
+      "p99.5": 1.2
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 1.67,
+      "p99.5": 1.18
+     },
+     "F_radial_N": {
+      "peak": 77.36,
+      "p99.5": 29.33
+     },
+     "M_axis_Nm": {
+      "peak": 0.55,
+      "p99.5": 0.33
+     },
+     "M_bend_Nm": {
+      "peak": 0.48,
+      "p99.5": 0.24
+     }
+    }
+   }
+  },
+  "jump (standing)": {
+   "wheel_contact_peak_N": 260.0,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.11,
+      "p99.5": 0.04
+     },
+     "F_radial_N": {
+      "peak": 82.83,
+      "p99.5": 37.63
+     },
+     "M_axis_Nm": {
+      "peak": 5.38,
+      "p99.5": 2.46
+     },
+     "M_bend_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.01
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.1,
+      "p99.5": 0.04
+     },
+     "F_radial_N": {
+      "peak": 73.56,
+      "p99.5": 33.56
+     },
+     "M_axis_Nm": {
+      "peak": 2.99,
+      "p99.5": 1.31
+     },
+     "M_bend_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 67.98,
+      "p99.5": 25.58
+     },
+     "F_radial_N": {
+      "peak": 32.29,
+      "p99.5": 18.56
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 2.26,
+      "p99.5": 0.99
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 27.09,
+      "p99.5": 15.61
+     },
+     "F_radial_N": {
+      "peak": 56.15,
+      "p99.5": 21.21
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.73,
+      "p99.5": 0.36
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.33,
+      "p99.5": 0.15
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.33,
+      "p99.5": 0.15
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 116.72,
+      "p99.5": 48.53
+     },
+     "F_radial_N": {
+      "peak": 16.99,
+      "p99.5": 12.18
+     },
+     "M_axis_Nm": {
+      "peak": 1.71,
+      "p99.5": 0.93
+     },
+     "M_bend_Nm": {
+      "peak": 5.48,
+      "p99.5": 3.3
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.43,
+      "p99.5": 10.75
+     },
+     "F_radial_N": {
+      "peak": 135.19,
+      "p99.5": 56.23
+     },
+     "M_axis_Nm": {
+      "peak": 0.41,
+      "p99.5": 0.28
+     },
+     "M_bend_Nm": {
+      "peak": 5.0,
+      "p99.5": 3.8
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 13.93,
+      "p99.5": 3.61
+     },
+     "F_radial_N": {
+      "peak": 152.7,
+      "p99.5": 64.96
+     },
+     "M_axis_Nm": {
+      "peak": 5.04,
+      "p99.5": 3.68
+     },
+     "M_bend_Nm": {
+      "peak": 7.93,
+      "p99.5": 3.51
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 13.55,
+      "p99.5": 3.38
+     },
+     "F_radial_N": {
+      "peak": 199.58,
+      "p99.5": 84.02
+     },
+     "M_axis_Nm": {
+      "peak": 7.98,
+      "p99.5": 6.86
+     },
+     "M_bend_Nm": {
+      "peak": 9.27,
+      "p99.5": 3.83
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 15.75,
+      "p99.5": 2.58
+     },
+     "F_radial_N": {
+      "peak": 245.4,
+      "p99.5": 95.66
+     },
+     "M_axis_Nm": {
+      "peak": 6.22,
+      "p99.5": 1.53
+     },
+     "M_bend_Nm": {
+      "peak": 1.36,
+      "p99.5": 0.58
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 115.78,
+      "p99.5": 48.33
+     },
+     "F_radial_N": {
+      "peak": 17.17,
+      "p99.5": 12.13
+     },
+     "M_axis_Nm": {
+      "peak": 1.71,
+      "p99.5": 0.93
+     },
+     "M_bend_Nm": {
+      "peak": 5.47,
+      "p99.5": 3.32
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.36,
+      "p99.5": 10.69
+     },
+     "F_radial_N": {
+      "peak": 134.25,
+      "p99.5": 56.03
+     },
+     "M_axis_Nm": {
+      "peak": 0.41,
+      "p99.5": 0.28
+     },
+     "M_bend_Nm": {
+      "peak": 5.0,
+      "p99.5": 3.81
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 14.01,
+      "p99.5": 3.65
+     },
+     "F_radial_N": {
+      "peak": 151.73,
+      "p99.5": 64.78
+     },
+     "M_axis_Nm": {
+      "peak": 5.03,
+      "p99.5": 3.69
+     },
+     "M_bend_Nm": {
+      "peak": 7.87,
+      "p99.5": 3.49
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 13.6,
+      "p99.5": 3.43
+     },
+     "F_radial_N": {
+      "peak": 198.54,
+      "p99.5": 83.85
+     },
+     "M_axis_Nm": {
+      "peak": 7.97,
+      "p99.5": 6.84
+     },
+     "M_bend_Nm": {
+      "peak": 9.22,
+      "p99.5": 3.82
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 15.75,
+      "p99.5": 2.57
+     },
+     "F_radial_N": {
+      "peak": 244.62,
+      "p99.5": 95.51
+     },
+     "M_axis_Nm": {
+      "peak": 6.21,
+      "p99.5": 1.53
+     },
+     "M_bend_Nm": {
+      "peak": 1.36,
+      "p99.5": 0.58
+     }
+    }
+   }
+  },
+  "jump while driving": {
+   "wheel_contact_peak_N": 234.0,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.48,
+      "p99.5": 0.02
+     },
+     "F_radial_N": {
+      "peak": 73.31,
+      "p99.5": 25.53
+     },
+     "M_axis_Nm": {
+      "peak": 5.37,
+      "p99.5": 2.28
+     },
+     "M_bend_Nm": {
+      "peak": 0.06,
+      "p99.5": 0.0
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.45,
+      "p99.5": 0.02
+     },
+     "F_radial_N": {
+      "peak": 65.06,
+      "p99.5": 22.69
+     },
+     "M_axis_Nm": {
+      "peak": 2.99,
+      "p99.5": 1.21
+     },
+     "M_bend_Nm": {
+      "peak": 0.03,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 60.73,
+      "p99.5": 19.2
+     },
+     "F_radial_N": {
+      "peak": 32.19,
+      "p99.5": 16.71
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 2.26,
+      "p99.5": 0.82
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 27.01,
+      "p99.5": 14.04
+     },
+     "F_radial_N": {
+      "peak": 50.14,
+      "p99.5": 15.99
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.73,
+      "p99.5": 0.21
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.29,
+      "p99.5": 0.12
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.29,
+      "p99.5": 0.12
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 106.45,
+      "p99.5": 36.21
+     },
+     "F_radial_N": {
+      "peak": 14.47,
+      "p99.5": 10.64
+     },
+     "M_axis_Nm": {
+      "peak": 1.38,
+      "p99.5": 0.75
+     },
+     "M_bend_Nm": {
+      "peak": 5.45,
+      "p99.5": 3.05
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.47,
+      "p99.5": 9.36
+     },
+     "F_radial_N": {
+      "peak": 123.2,
+      "p99.5": 41.83
+     },
+     "M_axis_Nm": {
+      "peak": 0.48,
+      "p99.5": 0.3
+     },
+     "M_bend_Nm": {
+      "peak": 4.99,
+      "p99.5": 3.41
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 12.39,
+      "p99.5": 2.13
+     },
+     "F_radial_N": {
+      "peak": 139.11,
+      "p99.5": 48.07
+     },
+     "M_axis_Nm": {
+      "peak": 5.03,
+      "p99.5": 3.32
+     },
+     "M_bend_Nm": {
+      "peak": 7.27,
+      "p99.5": 2.7
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 11.97,
+      "p99.5": 1.97
+     },
+     "F_radial_N": {
+      "peak": 181.56,
+      "p99.5": 62.3
+     },
+     "M_axis_Nm": {
+      "peak": 7.98,
+      "p99.5": 5.35
+     },
+     "M_bend_Nm": {
+      "peak": 8.46,
+      "p99.5": 2.94
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 11.99,
+      "p99.5": 1.71
+     },
+     "F_radial_N": {
+      "peak": 222.31,
+      "p99.5": 75.69
+     },
+     "M_axis_Nm": {
+      "peak": 5.2,
+      "p99.5": 1.45
+     },
+     "M_bend_Nm": {
+      "peak": 1.37,
+      "p99.5": 0.59
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 104.7,
+      "p99.5": 35.95
+     },
+     "F_radial_N": {
+      "peak": 14.75,
+      "p99.5": 10.6
+     },
+     "M_axis_Nm": {
+      "peak": 1.38,
+      "p99.5": 0.76
+     },
+     "M_bend_Nm": {
+      "peak": 5.44,
+      "p99.5": 3.07
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.4,
+      "p99.5": 9.31
+     },
+     "F_radial_N": {
+      "peak": 121.48,
+      "p99.5": 41.57
+     },
+     "M_axis_Nm": {
+      "peak": 0.47,
+      "p99.5": 0.3
+     },
+     "M_bend_Nm": {
+      "peak": 4.99,
+      "p99.5": 3.41
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 12.65,
+      "p99.5": 2.14
+     },
+     "F_radial_N": {
+      "peak": 137.36,
+      "p99.5": 47.81
+     },
+     "M_axis_Nm": {
+      "peak": 5.03,
+      "p99.5": 3.33
+     },
+     "M_bend_Nm": {
+      "peak": 7.1,
+      "p99.5": 2.68
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 12.27,
+      "p99.5": 1.97
+     },
+     "F_radial_N": {
+      "peak": 179.78,
+      "p99.5": 62.05
+     },
+     "M_axis_Nm": {
+      "peak": 7.98,
+      "p99.5": 5.34
+     },
+     "M_bend_Nm": {
+      "peak": 8.33,
+      "p99.5": 2.92
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 12.08,
+      "p99.5": 1.72
+     },
+     "F_radial_N": {
+      "peak": 220.64,
+      "p99.5": 75.46
+     },
+     "M_axis_Nm": {
+      "peak": 5.14,
+      "p99.5": 1.46
+     },
+     "M_bend_Nm": {
+      "peak": 1.32,
+      "p99.5": 0.6
+     }
+    }
+   }
+  },
+  "push +40 N": {
+   "wheel_contact_peak_N": 43.4,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.02,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 37.73,
+      "p99.5": 15.26
+     },
+     "M_axis_Nm": {
+      "peak": 4.15,
+      "p99.5": 1.31
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.02,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 34.12,
+      "p99.5": 13.54
+     },
+     "M_axis_Nm": {
+      "peak": 2.08,
+      "p99.5": 0.63
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 14.12,
+      "p99.5": 7.94
+     },
+     "F_radial_N": {
+      "peak": 32.65,
+      "p99.5": 11.5
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 1.34,
+      "p99.5": 0.42
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 27.13,
+      "p99.5": 9.49
+     },
+     "F_radial_N": {
+      "peak": 11.78,
+      "p99.5": 6.58
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.28,
+      "p99.5": 0.13
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.17,
+      "p99.5": 0.06
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.17,
+      "p99.5": 0.06
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 20.73,
+      "p99.5": 12.42
+     },
+     "F_radial_N": {
+      "peak": 11.87,
+      "p99.5": 5.24
+     },
+     "M_axis_Nm": {
+      "peak": 1.14,
+      "p99.5": 0.69
+     },
+     "M_bend_Nm": {
+      "peak": 6.02,
+      "p99.5": 5.95
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.84,
+      "p99.5": 4.56
+     },
+     "F_radial_N": {
+      "peak": 23.6,
+      "p99.5": 14.61
+     },
+     "M_axis_Nm": {
+      "peak": 0.54,
+      "p99.5": 0.48
+     },
+     "M_bend_Nm": {
+      "peak": 5.94,
+      "p99.5": 5.87
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 3.4,
+      "p99.5": 3.4
+     },
+     "F_radial_N": {
+      "peak": 28.75,
+      "p99.5": 16.39
+     },
+     "M_axis_Nm": {
+      "peak": 5.89,
+      "p99.5": 5.83
+     },
+     "M_bend_Nm": {
+      "peak": 1.59,
+      "p99.5": 1.42
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 3.44,
+      "p99.5": 3.44
+     },
+     "F_radial_N": {
+      "peak": 36.44,
+      "p99.5": 24.44
+     },
+     "M_axis_Nm": {
+      "peak": 3.4,
+      "p99.5": 3.32
+     },
+     "M_bend_Nm": {
+      "peak": 1.6,
+      "p99.5": 1.4
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 3.47,
+      "p99.5": 3.47
+     },
+     "F_radial_N": {
+      "peak": 43.0,
+      "p99.5": 32.79
+     },
+     "M_axis_Nm": {
+      "peak": 2.26,
+      "p99.5": 2.19
+     },
+     "M_bend_Nm": {
+      "peak": 0.3,
+      "p99.5": 0.21
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 20.63,
+      "p99.5": 12.36
+     },
+     "F_radial_N": {
+      "peak": 11.82,
+      "p99.5": 5.21
+     },
+     "M_axis_Nm": {
+      "peak": 1.14,
+      "p99.5": 0.7
+     },
+     "M_bend_Nm": {
+      "peak": 6.01,
+      "p99.5": 5.94
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 12.78,
+      "p99.5": 4.57
+     },
+     "F_radial_N": {
+      "peak": 23.51,
+      "p99.5": 14.46
+     },
+     "M_axis_Nm": {
+      "peak": 0.52,
+      "p99.5": 0.46
+     },
+     "M_bend_Nm": {
+      "peak": 5.93,
+      "p99.5": 5.86
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 3.43,
+      "p99.5": 3.42
+     },
+     "F_radial_N": {
+      "peak": 28.64,
+      "p99.5": 16.48
+     },
+     "M_axis_Nm": {
+      "peak": 5.88,
+      "p99.5": 5.82
+     },
+     "M_bend_Nm": {
+      "peak": 1.58,
+      "p99.5": 1.41
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 3.47,
+      "p99.5": 3.47
+     },
+     "F_radial_N": {
+      "peak": 36.34,
+      "p99.5": 24.5
+     },
+     "M_axis_Nm": {
+      "peak": 3.4,
+      "p99.5": 3.32
+     },
+     "M_bend_Nm": {
+      "peak": 1.6,
+      "p99.5": 1.4
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 3.52,
+      "p99.5": 3.52
+     },
+     "F_radial_N": {
+      "peak": 42.9,
+      "p99.5": 32.72
+     },
+     "M_axis_Nm": {
+      "peak": 2.26,
+      "p99.5": 2.19
+     },
+     "M_bend_Nm": {
+      "peak": 0.3,
+      "p99.5": 0.21
+     }
+    }
+   }
+  },
+  "push -40 N": {
+   "wheel_contact_peak_N": 37.9,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 0.03,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 40.15,
+      "p99.5": 15.84
+     },
+     "M_axis_Nm": {
+      "peak": 4.46,
+      "p99.5": 1.63
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 0.03,
+      "p99.5": 0.01
+     },
+     "F_radial_N": {
+      "peak": 36.27,
+      "p99.5": 14.07
+     },
+     "M_axis_Nm": {
+      "peak": 2.29,
+      "p99.5": 0.83
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 11.16,
+      "p99.5": 6.59
+     },
+     "F_radial_N": {
+      "peak": 32.9,
+      "p99.5": 11.94
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 1.54,
+      "p99.5": 0.56
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 27.34,
+      "p99.5": 9.86
+     },
+     "F_radial_N": {
+      "peak": 9.34,
+      "p99.5": 5.42
+     },
+     "M_axis_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.32,
+      "p99.5": 0.11
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.18,
+      "p99.5": 0.06
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     },
+     "F_radial_N": {
+      "peak": 0.18,
+      "p99.5": 0.06
+     },
+     "M_axis_Nm": {
+      "peak": 0.01,
+      "p99.5": 0.0
+     },
+     "M_bend_Nm": {
+      "peak": 0.0,
+      "p99.5": 0.0
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 19.27,
+      "p99.5": 13.8
+     },
+     "F_radial_N": {
+      "peak": 11.94,
+      "p99.5": 6.78
+     },
+     "M_axis_Nm": {
+      "peak": 1.12,
+      "p99.5": 0.71
+     },
+     "M_bend_Nm": {
+      "peak": 6.05,
+      "p99.5": 5.96
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 11.03,
+      "p99.5": 6.25
+     },
+     "F_radial_N": {
+      "peak": 22.19,
+      "p99.5": 16.2
+     },
+     "M_axis_Nm": {
+      "peak": 0.61,
+      "p99.5": 0.54
+     },
+     "M_bend_Nm": {
+      "peak": 6.04,
+      "p99.5": 5.95
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 4.02,
+      "p99.5": 3.74
+     },
+     "F_radial_N": {
+      "peak": 26.59,
+      "p99.5": 19.0
+     },
+     "M_axis_Nm": {
+      "peak": 6.0,
+      "p99.5": 5.9
+     },
+     "M_bend_Nm": {
+      "peak": 1.42,
+      "p99.5": 1.4
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 4.07,
+      "p99.5": 3.78
+     },
+     "F_radial_N": {
+      "peak": 32.54,
+      "p99.5": 25.32
+     },
+     "M_axis_Nm": {
+      "peak": 5.83,
+      "p99.5": 5.76
+     },
+     "M_bend_Nm": {
+      "peak": 1.59,
+      "p99.5": 1.46
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 4.21,
+      "p99.5": 3.82
+     },
+     "F_radial_N": {
+      "peak": 38.24,
+      "p99.5": 33.74
+     },
+     "M_axis_Nm": {
+      "peak": 2.26,
+      "p99.5": 2.19
+     },
+     "M_bend_Nm": {
+      "peak": 0.23,
+      "p99.5": 0.19
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 19.34,
+      "p99.5": 13.96
+     },
+     "F_radial_N": {
+      "peak": 11.96,
+      "p99.5": 6.77
+     },
+     "M_axis_Nm": {
+      "peak": 1.12,
+      "p99.5": 0.72
+     },
+     "M_bend_Nm": {
+      "peak": 6.04,
+      "p99.5": 5.95
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 10.97,
+      "p99.5": 6.27
+     },
+     "F_radial_N": {
+      "peak": 22.25,
+      "p99.5": 16.34
+     },
+     "M_axis_Nm": {
+      "peak": 0.59,
+      "p99.5": 0.53
+     },
+     "M_bend_Nm": {
+      "peak": 6.03,
+      "p99.5": 5.94
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 3.97,
+      "p99.5": 3.76
+     },
+     "F_radial_N": {
+      "peak": 26.67,
+      "p99.5": 19.15
+     },
+     "M_axis_Nm": {
+      "peak": 5.99,
+      "p99.5": 5.9
+     },
+     "M_bend_Nm": {
+      "peak": 1.42,
+      "p99.5": 1.4
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 4.0,
+      "p99.5": 3.81
+     },
+     "F_radial_N": {
+      "peak": 32.61,
+      "p99.5": 25.29
+     },
+     "M_axis_Nm": {
+      "peak": 5.83,
+      "p99.5": 5.76
+     },
+     "M_bend_Nm": {
+      "peak": 1.6,
+      "p99.5": 1.46
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 4.12,
+      "p99.5": 3.86
+     },
+     "F_radial_N": {
+      "peak": 38.3,
+      "p99.5": 33.72
+     },
+     "M_axis_Nm": {
+      "peak": 2.26,
+      "p99.5": 2.19
+     },
+     "M_bend_Nm": {
+      "peak": 0.23,
+      "p99.5": 0.19
+     }
+    }
+   }
+  },
+  "fall (push +90 N, indicative)": {
+   "wheel_contact_peak_N": 209.0,
+   "joints": {
+    "neck_pitch": {
+     "F_axial_N": {
+      "peak": 150.59,
+      "p99.5": 36.97
+     },
+     "F_radial_N": {
+      "peak": 511.22,
+      "p99.5": 142.14
+     },
+     "M_axis_Nm": {
+      "peak": 40.81,
+      "p99.5": 17.05
+     },
+     "M_bend_Nm": {
+      "peak": 30.74,
+      "p99.5": 5.32
+     }
+    },
+    "head_pitch": {
+     "F_axial_N": {
+      "peak": 153.09,
+      "p99.5": 34.38
+     },
+     "F_radial_N": {
+      "peak": 530.69,
+      "p99.5": 144.16
+     },
+     "M_axis_Nm": {
+      "peak": 29.27,
+      "p99.5": 12.25
+     },
+     "M_bend_Nm": {
+      "peak": 33.5,
+      "p99.5": 3.85
+     }
+    },
+    "head_yaw": {
+     "F_axial_N": {
+      "peak": 334.59,
+      "p99.5": 72.29
+     },
+     "F_radial_N": {
+      "peak": 423.56,
+      "p99.5": 137.55
+     },
+     "M_axis_Nm": {
+      "peak": 33.5,
+      "p99.5": 2.46
+     },
+     "M_bend_Nm": {
+      "peak": 20.16,
+      "p99.5": 8.86
+     }
+    },
+    "head_roll": {
+     "F_axial_N": {
+      "peak": 474.27,
+      "p99.5": 146.94
+     },
+     "F_radial_N": {
+      "peak": 335.97,
+      "p99.5": 64.69
+     },
+     "M_axis_Nm": {
+      "peak": 8.18,
+      "p99.5": 1.26
+     },
+     "M_bend_Nm": {
+      "peak": 36.06,
+      "p99.5": 4.71
+     }
+    },
+    "left_antenna": {
+     "F_axial_N": {
+      "peak": 0.55,
+      "p99.5": 0.2
+     },
+     "F_radial_N": {
+      "peak": 2.59,
+      "p99.5": 0.51
+     },
+     "M_axis_Nm": {
+      "peak": 0.09,
+      "p99.5": 0.02
+     },
+     "M_bend_Nm": {
+      "peak": 0.02,
+      "p99.5": 0.01
+     }
+    },
+    "right_antenna": {
+     "F_axial_N": {
+      "peak": 0.55,
+      "p99.5": 0.19
+     },
+     "F_radial_N": {
+      "peak": 2.23,
+      "p99.5": 0.5
+     },
+     "M_axis_Nm": {
+      "peak": 0.08,
+      "p99.5": 0.02
+     },
+     "M_bend_Nm": {
+      "peak": 0.02,
+      "p99.5": 0.01
+     }
+    },
+    "left_hip_yaw": {
+     "F_axial_N": {
+      "peak": 231.72,
+      "p99.5": 99.6
+     },
+     "F_radial_N": {
+      "peak": 269.23,
+      "p99.5": 84.5
+     },
+     "M_axis_Nm": {
+      "peak": 5.27,
+      "p99.5": 2.64
+     },
+     "M_bend_Nm": {
+      "peak": 22.45,
+      "p99.5": 11.5
+     }
+    },
+    "left_hip_roll": {
+     "F_axial_N": {
+      "peak": 158.76,
+      "p99.5": 51.38
+     },
+     "F_radial_N": {
+      "peak": 294.37,
+      "p99.5": 124.35
+     },
+     "M_axis_Nm": {
+      "peak": 8.17,
+      "p99.5": 3.94
+     },
+     "M_bend_Nm": {
+      "peak": 17.33,
+      "p99.5": 10.51
+     }
+    },
+    "left_hip_pitch": {
+     "F_axial_N": {
+      "peak": 270.52,
+      "p99.5": 26.99
+     },
+     "F_radial_N": {
+      "peak": 275.41,
+      "p99.5": 132.07
+     },
+     "M_axis_Nm": {
+      "peak": 15.91,
+      "p99.5": 10.47
+     },
+     "M_bend_Nm": {
+      "peak": 19.55,
+      "p99.5": 9.85
+     }
+    },
+    "left_knee": {
+     "F_axial_N": {
+      "peak": 66.28,
+      "p99.5": 23.48
+     },
+     "F_radial_N": {
+      "peak": 199.51,
+      "p99.5": 126.83
+     },
+     "M_axis_Nm": {
+      "peak": 18.44,
+      "p99.5": 8.66
+     },
+     "M_bend_Nm": {
+      "peak": 19.05,
+      "p99.5": 9.3
+     }
+    },
+    "left_wheel": {
+     "F_axial_N": {
+      "peak": 125.15,
+      "p99.5": 39.73
+     },
+     "F_radial_N": {
+      "peak": 245.05,
+      "p99.5": 202.23
+     },
+     "M_axis_Nm": {
+      "peak": 13.19,
+      "p99.5": 10.86
+     },
+     "M_bend_Nm": {
+      "peak": 8.93,
+      "p99.5": 4.74
+     }
+    },
+    "right_hip_yaw": {
+     "F_axial_N": {
+      "peak": 134.08,
+      "p99.5": 96.7
+     },
+     "F_radial_N": {
+      "peak": 152.47,
+      "p99.5": 65.35
+     },
+     "M_axis_Nm": {
+      "peak": 4.77,
+      "p99.5": 3.43
+     },
+     "M_bend_Nm": {
+      "peak": 16.67,
+      "p99.5": 11.11
+     }
+    },
+    "right_hip_roll": {
+     "F_axial_N": {
+      "peak": 77.66,
+      "p99.5": 41.54
+     },
+     "F_radial_N": {
+      "peak": 154.75,
+      "p99.5": 101.33
+     },
+     "M_axis_Nm": {
+      "peak": 6.01,
+      "p99.5": 3.8
+     },
+     "M_bend_Nm": {
+      "peak": 10.97,
+      "p99.5": 10.17
+     }
+    },
+    "right_hip_pitch": {
+     "F_axial_N": {
+      "peak": 61.51,
+      "p99.5": 23.49
+     },
+     "F_radial_N": {
+      "peak": 147.31,
+      "p99.5": 104.85
+     },
+     "M_axis_Nm": {
+      "peak": 10.96,
+      "p99.5": 9.91
+     },
+     "M_bend_Nm": {
+      "peak": 13.2,
+      "p99.5": 8.32
+     }
+    },
+    "right_knee": {
+     "F_axial_N": {
+      "peak": 34.59,
+      "p99.5": 19.31
+     },
+     "F_radial_N": {
+      "peak": 181.29,
+      "p99.5": 121.26
+     },
+     "M_axis_Nm": {
+      "peak": 13.94,
+      "p99.5": 7.8
+     },
+     "M_bend_Nm": {
+      "peak": 12.28,
+      "p99.5": 7.48
+     }
+    },
+    "right_wheel": {
+     "F_axial_N": {
+      "peak": 33.31,
+      "p99.5": 18.18
+     },
+     "F_radial_N": {
+      "peak": 232.0,
+      "p99.5": 199.99
+     },
+     "M_axis_Nm": {
+      "peak": 11.92,
+      "p99.5": 10.62
+     },
+     "M_bend_Nm": {
+      "peak": 4.98,
+      "p99.5": 3.93
+     }
+    }
+   }
+  }
+ },
+ "design_envelope (non-fall scenarios)": {
+  "neck_pitch": {
+   "F_axial_N": 1.04,
+   "F_radial_N": 37.63,
+   "M_axis_Nm": 2.46,
+   "M_bend_Nm": 0.16,
+   "peak": {
+    "F_axial_N": 1.88,
+    "F_radial_N": 82.83,
+    "M_axis_Nm": 5.38,
+    "M_bend_Nm": 0.27
+   },
+   "over_actuator": "hard stop or rotor-inertia shock"
+  },
+  "head_pitch": {
+   "F_axial_N": 0.99,
+   "F_radial_N": 33.56,
+   "M_axis_Nm": 1.31,
+   "M_bend_Nm": 0.12,
+   "peak": {
+    "F_axial_N": 1.85,
+    "F_radial_N": 73.56,
+    "M_axis_Nm": 2.99,
+    "M_bend_Nm": 0.18
+   }
+  },
+  "head_yaw": {
+   "F_axial_N": 25.58,
+   "F_radial_N": 18.56,
+   "M_axis_Nm": 0.11,
+   "M_bend_Nm": 0.99,
+   "peak": {
+    "F_axial_N": 67.98,
+    "F_radial_N": 32.9,
+    "M_axis_Nm": 0.13,
+    "M_bend_Nm": 2.26
+   }
+  },
+  "head_roll": {
+   "F_axial_N": 15.61,
+   "F_radial_N": 21.21,
+   "M_axis_Nm": 0.01,
+   "M_bend_Nm": 0.36,
+   "peak": {
+    "F_axial_N": 27.34,
+    "F_radial_N": 56.15,
+    "M_axis_Nm": 0.02,
+    "M_bend_Nm": 0.73
+   }
+  },
+  "left_antenna": {
+   "F_axial_N": 0.01,
+   "F_radial_N": 0.15,
+   "M_axis_Nm": 0.0,
+   "M_bend_Nm": 0.0,
+   "peak": {
+    "F_axial_N": 0.01,
+    "F_radial_N": 0.33,
+    "M_axis_Nm": 0.01,
+    "M_bend_Nm": 0.0
+   }
+  },
+  "right_antenna": {
+   "F_axial_N": 0.01,
+   "F_radial_N": 0.15,
+   "M_axis_Nm": 0.0,
+   "M_bend_Nm": 0.0,
+   "peak": {
+    "F_axial_N": 0.01,
+    "F_radial_N": 0.33,
+    "M_axis_Nm": 0.01,
+    "M_bend_Nm": 0.0
+   }
+  },
+  "left_hip_yaw": {
+   "F_axial_N": 48.53,
+   "F_radial_N": 12.18,
+   "M_axis_Nm": 0.93,
+   "M_bend_Nm": 5.96,
+   "peak": {
+    "F_axial_N": 116.72,
+    "F_radial_N": 16.99,
+    "M_axis_Nm": 1.71,
+    "M_bend_Nm": 6.05
+   },
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.93,
+    "radial_used": 0.03
+   }
+  },
+  "left_hip_roll": {
+   "F_axial_N": 10.75,
+   "F_radial_N": 56.23,
+   "M_axis_Nm": 0.89,
+   "M_bend_Nm": 5.95,
+   "peak": {
+    "F_axial_N": 12.84,
+    "F_radial_N": 135.19,
+    "M_axis_Nm": 0.94,
+    "M_bend_Nm": 6.04
+   },
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.1,
+    "radial_used": 0.27
+   }
+  },
+  "left_hip_pitch": {
+   "F_axial_N": 5.18,
+   "F_radial_N": 64.96,
+   "M_axis_Nm": 5.9,
+   "M_bend_Nm": 3.51,
+   "peak": {
+    "F_axial_N": 13.93,
+    "F_radial_N": 152.7,
+    "M_axis_Nm": 6.0,
+    "M_bend_Nm": 7.93
+   }
+  },
+  "left_knee": {
+   "F_axial_N": 5.59,
+   "F_radial_N": 84.02,
+   "M_axis_Nm": 6.86,
+   "M_bend_Nm": 3.83,
+   "peak": {
+    "F_axial_N": 13.55,
+    "F_radial_N": 199.58,
+    "M_axis_Nm": 7.98,
+    "M_bend_Nm": 9.27
+   }
+  },
+  "left_wheel": {
+   "F_axial_N": 5.94,
+   "F_radial_N": 95.66,
+   "M_axis_Nm": 2.19,
+   "M_bend_Nm": 0.59,
+   "peak": {
+    "F_axial_N": 15.75,
+    "F_radial_N": 245.4,
+    "M_axis_Nm": 6.22,
+    "M_bend_Nm": 1.37
+   },
+   "over_actuator": "rotor-inertia shock",
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.13,
+    "radial_used": 0.49
+   }
+  },
+  "right_hip_yaw": {
+   "F_axial_N": 48.33,
+   "F_radial_N": 12.13,
+   "M_axis_Nm": 0.93,
+   "M_bend_Nm": 5.95,
+   "peak": {
+    "F_axial_N": 115.78,
+    "F_radial_N": 17.17,
+    "M_axis_Nm": 1.71,
+    "M_bend_Nm": 6.04
+   },
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.93,
+    "radial_used": 0.03
+   }
+  },
+  "right_hip_roll": {
+   "F_axial_N": 10.69,
+   "F_radial_N": 56.03,
+   "M_axis_Nm": 0.87,
+   "M_bend_Nm": 5.94,
+   "peak": {
+    "F_axial_N": 12.78,
+    "F_radial_N": 134.25,
+    "M_axis_Nm": 0.93,
+    "M_bend_Nm": 6.03
+   },
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.1,
+    "radial_used": 0.27
+   }
+  },
+  "right_hip_pitch": {
+   "F_axial_N": 4.99,
+   "F_radial_N": 64.78,
+   "M_axis_Nm": 5.9,
+   "M_bend_Nm": 3.49,
+   "peak": {
+    "F_axial_N": 14.01,
+    "F_radial_N": 151.73,
+    "M_axis_Nm": 5.99,
+    "M_bend_Nm": 7.87
+   }
+  },
+  "right_knee": {
+   "F_axial_N": 5.45,
+   "F_radial_N": 83.85,
+   "M_axis_Nm": 6.84,
+   "M_bend_Nm": 3.82,
+   "peak": {
+    "F_axial_N": 13.6,
+    "F_radial_N": 198.54,
+    "M_axis_Nm": 7.98,
+    "M_bend_Nm": 9.22
+   }
+  },
+  "right_wheel": {
+   "F_axial_N": 5.85,
+   "F_radial_N": 95.51,
+   "M_axis_Nm": 2.19,
+   "M_bend_Nm": 0.6,
+   "peak": {
+    "F_axial_N": 15.75,
+    "F_radial_N": 244.62,
+    "M_axis_Nm": 6.21,
+    "M_bend_Nm": 1.36
+   },
+   "over_actuator": "rotor-inertia shock",
+   "bearing": {
+    "motor": "GIM4305-10",
+    "axial_used": 0.13,
+    "radial_used": 0.49
+   }
+  }
+ }
+}

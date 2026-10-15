@@ -7,7 +7,8 @@ The original model doesn't say how much of the trunk mass is battery; this assum
 (6 x ~70 g cells + BMS/wiring ~ 0.48 kg), the size the power budget first pointed to.
 
   6s1p: 6 x 21700, ~0.48 kg, ~90-108 Wh   (baseline, no mass change)
-  6s2p: 12 x 21700, ~0.90 kg, ~180-216 Wh (+0.42 kg), ~70 x 84 x 63 mm, as low as fits under the Pi
+  6s2p: 12 x 21700, ~0.90 kg, ~180-216 Wh (+0.42 kg), 73 x 89 x 68 mm (4 x 3 Molicel P45B cells lying along x,
+        Ø21.55 x 70.15 max, +1.5 mm per side for strip and wrap: cad/purchased_parts.json), as low as fits under the Pi
 
 Idempotent: records the applied pack in a comment and refuses to apply a second time.
 
@@ -19,7 +20,7 @@ import sys
 import numpy as np
 
 PACKS = {  # extra mass vs. baseline (kg), box half-size (m), box centre in trunk frame (m)
-    "6s2p": (0.42, (0.035, 0.042, 0.0315), (0.004, 0.0, -0.026)),
+    "6s2p": (0.42, (0.0365, 0.0445, 0.034), (-0.026, 0.0, -0.026)),
 }
 MARK = "battery pack set by tools/battery_pack.py"
 
