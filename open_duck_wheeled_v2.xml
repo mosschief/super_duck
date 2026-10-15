@@ -16,6 +16,9 @@
           3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius TPU wheels at `foot_assembly` & `foot_assembly_2`
           4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
              inside the iconic BDX binocular head bezel + 1 downward-angled chest camera (`trunk_nav_cam`)
+          5. Open Duck Mini expression package: hinged antennas on 9 g servos (`left/right_antenna`), WS2812B eye
+             rings, projector LED (`projector` light), I2S mic + speaker/amp; 6S BMS, fuse, anti-spark switch,
+             e-stop; wheel touch sensors (tools/add_expression_hardware.py)
       - Uses the authentic Open Duck Mini v2 material palette (`body_front_material` off-white PLA
         rgba="0.918 0.918 0.918 1" and `foot_bottom_tpu_material` warm charcoal rgba="0.306 0.298 0.278 1").
       - Includes ready-to-uncomment `<mesh scale="1.35 1.35 1.35" .../>` tags if you drop the original
@@ -46,6 +49,8 @@
     <material name="gim4305_housing" rgba="0.22 0.24 0.27 1" specular="0.55" shininess="0.65"/>
     <material name="bdx_eye_led" rgba="0.96 0.92 0.78 1" emission="0.75"/>
     <material name="camera_lens" rgba="0.05 0.07 0.10 1" specular="0.90" shininess="0.95"/>
+    <material name="estop_red" rgba="0.80 0.08 0.06 1" specular="0.40" shininess="0.5"/>
+    <material name="estop_yellow" rgba="0.95 0.78 0.10 1"/>
     <material name="rpi_green" rgba="0.12 0.55 0.28 1"/>
     <material name="wheel_tpu" rgba="0.18 0.18 0.19 1"/>
 
@@ -102,6 +107,13 @@
         <position kp="13.37" kv="0.8" forcerange="-3.23 3.23" inheritrange="1"/>
       </default>
 
+      <!-- 9 g micro servo (SG90/MG90S class, 4.8-6 V): ~0.18 N*m stall, 0.1 s/60 deg. Armature: rotor x ~300:1 gear.
+           Range = Open Duck Mini's +/-1 command (1-2 ms PWM). -->
+      <default class="micro_servo_9g">
+        <joint type="hinge" axis="0 1 0" range="-0.785398 0.785398" damping="0.002" frictionloss="0.002" armature="0.0001" limited="true"/>
+        <position kp="0.3" kv="0.008" forcerange="-0.18 0.18" inheritrange="1"/>
+      </default>
+
       <!-- 1.35x Scaled High-Grip TPU Wheel Tire (Radius = 0.075 m, Width = 0.032 m) -->
       <default class="wheel_tire">
         <geom type="cylinder" size="0.075 0.016" euler="1.5707963 0 0" material="wheel_tpu"
@@ -127,7 +139,19 @@
           Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
           Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + BNO055 IMU)
         -->
-        <inertial pos="-0.0105 -0.0001 -0.0056" mass="1.099" diaginertia="0.00323 0.00399 0.00356"/>
+        <inertial pos="-0.0123 0.0007 -0.0065" mass="1.229" diaginertia="0.00352 0.00431 0.00404"/>
+        <!-- speaker_40mm_3w: 18 g (folded into the trunk_assembly inertial above) -->
+        <!-- max98357a_i2s_amp: 2 g (folded into the trunk_assembly inertial above) -->
+        <geom name="max98357a_i2s_amp" class="visual" type="box" size="0.009 0.0095 0.0015" pos="-0.06 0.035 0.035" material="rpi_green"/>
+        <!-- bms_6s_100a: 40 g (folded into the trunk_assembly inertial above) -->
+        <geom name="bms_6s_100a" class="visual" type="box" size="0.03 0.004 0.02" pos="-0.026 0.053 -0.026" material="gim4305_housing"/>
+        <!-- main_fuse_40a: 10 g (folded into the trunk_assembly inertial above) -->
+        <geom name="main_fuse_40a" class="visual" type="box" size="0.012 0.005 0.01" pos="-0.026 -0.053 -0.04" material="foot_bottom_tpu_material"/>
+        <!-- antispark_switch_120a: 25 g (folded into the trunk_assembly inertial above) -->
+        <geom name="antispark_switch_120a" class="visual" type="box" size="0.02 0.01 0.008" pos="0.03 -0.048 -0.03" material="gim4305_housing"/>
+        <!-- peripheral_5v_buck: 10 g (folded into the trunk_assembly inertial above) -->
+        <geom name="peripheral_5v_buck" class="visual" type="box" size="0.011 0.008 0.006" pos="0.03 0.048 -0.03" material="rpi_green"/>
+        <!-- estop_22mm: 25 g (folded into the trunk_assembly inertial above) -->
         <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
         <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
         <!-- teensy_40_dual_can (PJRC Teensy 4.0 + Dual CAN transceiver carrier + ICM-42688-P IMU): 8 g (folded into the trunk inertial above) -->
@@ -144,6 +168,9 @@
         <!-- Internal Raspberry Pi 5 (86 x 56 x 16 mm) & Low-Slung 6S Battery Pack -->
         <geom name="raspberry_pi_5" class="visual" type="box" size="0.043 0.028 0.008" pos="-0.006 0 0.018" material="rpi_green"/>
         <geom name="battery_pack_6s" class="visual" type="box" size="0.045 0.038 0.015" pos="0.004 0 -0.032" material="foot_bottom_tpu_material"/>
+        <geom name="speaker_40mm_3w" class="visual" type="cylinder" size="0.020 0.003" pos="-0.066 0 0.012" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
+        <geom name="estop_bezel" class="visual" type="cylinder" size="0.012 0.004" pos="-0.080 0 0.015" euler="0 1.5708 0" material="estop_yellow"/>
+        <geom name="estop_mushroom" class="visual" type="cylinder" size="0.016 0.004" pos="-0.087 0 0.015" euler="0 1.5708 0" material="estop_red"/>
 
         <!-- Chest Forward-Downward Navigation Camera (Raspberry Pi Camera Module 3 Wide, 25 x 24 x 12.4 mm) -->
         <geom name="chest_cam_bezel" class="visual" type="cylinder" size="0.014 0.005" pos="0.088 0 -0.014" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
@@ -176,7 +203,16 @@
               -->
               <body name="head_assembly" pos="0.010 0 0.038">
                 <joint name="head_roll" type="hinge" axis="1 0 0" range="-0.523599 0.523599" class="sts3215"/>
-                <inertial pos="0.010 0 0.005" mass="0.480" diaginertia="0.00068 0.00082 0.00088"/>
+                <inertial pos="0.0095 0.0000 0.0053" mass="0.511" diaginertia="0.00073 0.00088 0.00098"/>
+                <!-- left_antenna_servo_9g: 9 g (folded into the head_assembly inertial above) -->
+                <geom name="left_antenna_servo_9g" class="visual" type="box" size="0.0115 0.006 0.0145" pos="-0.032 0.046 0.02" material="gim4305_housing"/>
+                <!-- right_antenna_servo_9g: 9 g (folded into the head_assembly inertial above) -->
+                <geom name="right_antenna_servo_9g" class="visual" type="box" size="0.0115 0.006 0.0145" pos="-0.032 -0.046 0.02" material="gim4305_housing"/>
+                <!-- left_eye_ws2812_ring: 2 g (folded into the head_assembly inertial above) -->
+                <!-- right_eye_ws2812_ring: 2 g (folded into the head_assembly inertial above) -->
+                <!-- projector_led_reflector: 6 g (folded into the head_assembly inertial above) -->
+                <!-- microphone_inmp441: 2 g (folded into the head_assembly inertial above) -->
+                <geom name="microphone_inmp441" class="visual" type="box" size="0.007 0.007 0.001" pos="0.03 0.0 0.032" material="rpi_green"/>
 
                 <!-- Inner Collision Box -->
                 <geom name="head_collision" class="collision" type="box" size="0.052 0.068 0.036" material="body_front_material"/>
@@ -212,13 +248,24 @@
                 <geom name="right_eye_led_ring" class="visual" type="cylinder" size="0.016 0.0085" pos="0.053 -0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
                 <geom name="right_eye_cam_lens" class="visual" type="cylinder" size="0.010 0.009" pos="0.054 -0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
                 <geom name="right_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 -0.035 0.002" material="rpi_green"/>
+                <geom name="projector_lens" class="visual" type="cylinder" size="0.007 0.003" pos="0.055 0 -0.018" euler="0 1.5708 0" material="bdx_eye_led"/>
+                <light name="projector" pos="0.059 0 -0.018" dir="1 0 -0.25" cutoff="20" exponent="8" diffuse="0.9 0.85 0.7" specular="0.2 0.2 0.2" castshadow="false" active="false"/>
                 <camera name="right_eye_cam" pos="0.058 -0.035 0.002" euler="0 -1.5708 -1.5708" fovy="67"/>
 
-                <!-- BDX Twin Rear Antenna Ears -->
-                <geom name="left_antenna_base" class="visual" type="cylinder" size="0.008 0.008" pos="-0.032 0.046 0.038" material="foot_bottom_tpu_material"/>
-                <geom name="left_antenna_stalk" class="visual" type="capsule" fromto="-0.032 0.046 0.042 -0.046 0.054 0.098" size="0.0035" material="foot_bottom_tpu_material"/>
-                <geom name="right_antenna_base" class="visual" type="cylinder" size="0.008 0.008" pos="-0.032 -0.046 0.038" material="foot_bottom_tpu_material"/>
-                <geom name="right_antenna_stalk" class="visual" type="capsule" fromto="-0.032 -0.046 0.042 -0.046 -0.054 0.098" size="0.0035" material="foot_bottom_tpu_material"/>
+                <!-- BDX Twin Rear Antenna Ears, each swung fore/aft by a 9 g micro servo (servo bodies folded into the
+                     head inertial above; Open Duck Mini `antennas.py`: 1-2 ms PWM = +/-45 deg) -->
+                <body name="left_antenna" pos="-0.032 0.046 0.038">
+                  <joint name="left_antenna" class="micro_servo_9g"/>
+                  <inertial pos="-0.007 0.004 0.032" mass="0.003" diaginertia="0.0000009 0.0000009 0.0000001"/>
+                  <geom name="left_antenna_base" class="visual" type="cylinder" size="0.008 0.008" material="foot_bottom_tpu_material"/>
+                  <geom name="left_antenna_stalk" class="visual" type="capsule" fromto="0 0 0.004 -0.014 0.008 0.060" size="0.0035" material="foot_bottom_tpu_material"/>
+                </body>
+                <body name="right_antenna" pos="-0.032 -0.046 0.038">
+                  <joint name="right_antenna" class="micro_servo_9g"/>
+                  <inertial pos="-0.007 -0.004 0.032" mass="0.003" diaginertia="0.0000009 0.0000009 0.0000001"/>
+                  <geom name="right_antenna_base" class="visual" type="cylinder" size="0.008 0.008" material="foot_bottom_tpu_material"/>
+                  <geom name="right_antenna_stalk" class="visual" type="capsule" fromto="0 0 0.004 -0.014 -0.008 0.060" size="0.0035" material="foot_bottom_tpu_material"/>
+                </body>
               </body>
             </body>
           </body>
@@ -263,6 +310,7 @@
                   <geom name="left_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
                   <geom name="left_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
                   <site name="left_foot" pos="0 0 0" size="0.005"/>
+                  <site name="left_wheel_touch" type="cylinder" size="0.077 0.017" euler="1.5707963 0 0" group="5" rgba="0 0 0 0"/>
                 </body>
               </body>
             </body>
@@ -308,6 +356,7 @@
                   <geom name="right_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
                   <geom name="right_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
                   <site name="right_foot" pos="0 0 0" size="0.005"/>
+                  <site name="right_wheel_touch" type="cylinder" size="0.077 0.017" euler="1.5707963 0 0" group="5" rgba="0 0 0 0"/>
                 </body>
               </body>
             </body>
@@ -340,6 +389,10 @@
     <!-- Left & Right Wheel Hub Motors (SteadyWin GIM4305-10 Direct Torque Control) -->
     <motor name="left_wheel_motor" joint="left_wheel" class="gim4305_wheel"/>
     <motor name="right_wheel_motor" joint="right_wheel" class="gim4305_wheel"/>
+
+    <!-- Antenna 9 g micro servos (Open Duck Mini expression package), ctrl[14:16] -->
+    <position name="left_antenna" joint="left_antenna" class="micro_servo_9g"/>
+    <position name="right_antenna" joint="right_antenna" class="micro_servo_9g"/>
   </actuator>
 
   <!-- ==================== SENSORS (Exact open_duck_mini_v2 `sensors.xml` Suite + Wheel Odometry) ==================== -->
@@ -368,6 +421,10 @@
     <jointpos joint="right_wheel" name="right_wheel_pos"/>
     <jointvel joint="left_wheel" name="left_wheel_vel"/>
     <jointvel joint="right_wheel" name="right_wheel_vel"/>
+
+    <!-- Wheel touch (normal force inside the tire envelope): landing / lift-off detection -->
+    <touch site="left_wheel_touch" name="left_wheel_touch"/>
+    <touch site="right_wheel_touch" name="right_wheel_touch"/>
   </sensor>
 
   <!-- ==================== KEYFRAMES (1.35x Scaled Balanced Crouch Posture) ==================== -->
@@ -378,7 +435,7 @@
       -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
     -->
     <key name="home_balanced"
-         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
-         ctrl="0 0 -0.50 1.00 0 0 -0.50 1.00 0.15 -0.15 0 0 0 0"/>
+         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
+         ctrl="0 0 -0.50 1.00 0 0 -0.50 1.00 0.15 -0.15 0 0 0 0 0 0"/>
   </keyframe>
 </mujoco>

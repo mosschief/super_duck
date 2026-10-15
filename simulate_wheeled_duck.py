@@ -3,7 +3,7 @@
 Active Balancing, Posture & Live Keyboard Driving Controller for the 1.35x Scaled
 Wheeled Open Duck Mini v2 (based on `apirrone/Open_Duck_Mini`).
 
-Robot profiles (`--robot`): `gim6010` (default, the build) = SteadyWin GIM6010-8 on hip-roll, hip-pitch and knees,
+Robot profiles (`--robot`): `gim6010` (default, the build) = SteadyWin GIM6010-8 on hip-pitch and knees,
 6S2P battery (`open_duck_wheeled_v2_gim6010.xml`); `gim4305` = the original all-GIM4305-10 design with a 6S1P pack
 (`open_duck_wheeled_v2.xml`).
 
@@ -16,6 +16,8 @@ Live Keyboard Driving Controls (inside the 3D MuJoCo Viewer Window):
   - 'Z' / 'X'                : Crouch lower ('Z') or stand taller ('X') using symmetric hip/knee kinematics
   - 'U' / 'O'                : Pan the BDX binocular head left ('U') / right ('O')
   - 'C'                      : Jump (deep crouch -> explosive leg thrust -> flight -> soft landing)
+  - 'Q' / 'E'                : Raise ('Q') / lower ('E') the antennas (Open Duck Mini: gamepad triggers)
+  - 'P'                      : Toggle the head projector light (Open Duck Mini: X button)
   - 'R'                      : Reset robot to the home balanced keyframe at the origin
 
 Usage:
@@ -99,9 +101,9 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=4.806, wheel_track=0.224, com_height=0.2442, body_pitch_inertia=0.0668),
-        initial_pitch_trim=-0.0639,
-        posture_coeffs=(-0.1303, -0.0323),
+        params=ScaledWheeledDuckParams(body_mass=4.973, wheel_track=0.224, com_height=0.2467, body_pitch_inertia=0.0791),
+        initial_pitch_trim=-0.0611,
+        posture_coeffs=(-0.1261, -0.0262),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
         # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py (standing lean -3.7 deg).
@@ -117,9 +119,9 @@ PROFILES = {
         # Original LQR body numbers. com_height/inertia here are the whole-robot values *including* the wheels
         # (body-only: 0.2555 m / 0.0559 kg*m^2), but this robot's trim/posture fit and tuning were validated with
         # them, and the body-only values scored slightly worse on it (randomized crouch 7/12 vs 9/12).
-        params=ScaledWheeledDuckParams(body_mass=3.434, com_height=0.222, body_pitch_inertia=0.0310),
-        initial_pitch_trim=-0.0735,
-        posture_coeffs=(-0.1012, -0.0375),
+        params=ScaledWheeledDuckParams(body_mass=3.601, com_height=0.222, body_pitch_inertia=0.0310),
+        initial_pitch_trim=-0.0686,
+        posture_coeffs=(-0.0965, -0.0351),
         # On these weaker legs the LQR's wheel kick during thrust is (accidentally) part of the jump: with the
         # wheels limp the jump shrinks to ~7 mm, so this profile keeps "lqr".
         jump_thrust_time=0.12,
@@ -210,6 +212,8 @@ class ScaledWheeledDuckController:
         self.target_yaw = 0.0
         self.crouch_delta = 0.0       # Adjusts crouch depth while keeping wheels under hips
         self.head_yaw_offset = 0.0    # Manual head pan offset (rad)
+        self.antenna_cmd = 0.0        # Antenna servo target (rad, + = tips swung forward/upright), both sides
+        self.projector_on = False
         self.nominal_hip_pitch = -0.50
         self.nominal_knee_pitch = 1.00
         self.commanded_leg_fold = self.nominal_hip_pitch + self.nominal_knee_pitch
@@ -238,6 +242,7 @@ class ScaledWheeledDuckController:
         self.target_yaw = 0.0
         self.crouch_delta = 0.0
         self.head_yaw_offset = 0.0
+        self.antenna_cmd = 0.0
         self.pitch_trim = self.profile.initial_pitch_trim
         self.jump_phase = "idle"
         self.jump_timer = 0.0
@@ -283,6 +288,15 @@ class ScaledWheeledDuckController:
             if self.jump_phase == "idle":
                 self.jump_requested = True
                 print("[Jump] Crouching for jump...")
+        elif keycode in (ord("Q"), ord("q")):
+            self.antenna_cmd = float(np.clip(self.antenna_cmd + 0.20, -0.78, 0.78))
+            print(f"[Antennas] Raise ({math.degrees(self.antenna_cmd):+.0f} deg)")
+        elif keycode in (ord("E"), ord("e")):
+            self.antenna_cmd = float(np.clip(self.antenna_cmd - 0.20, -0.78, 0.78))
+            print(f"[Antennas] Lower ({math.degrees(self.antenna_cmd):+.0f} deg)")
+        elif keycode in (ord("P"), ord("p")):
+            self.projector_on = not self.projector_on
+            print(f"[Projector] {'On' if self.projector_on else 'Off'}")
         elif keycode in (ord("R"), ord("r")):
             self.reset_requested = True
             print("[Reset] Resetting robot to home balanced pose...")
@@ -303,11 +317,12 @@ class ScaledWheeledDuckController:
         `leg_fold` / `leg_fold_rate` are the measured hip_pitch + knee angle (and its rate), averaged over both legs,
         from the GIM4305 encoders. If omitted, the commanded value is used (no servo lag compensation).
 
-        Computes the 14-element MuJoCo `data.ctrl` vector:
+        Computes the 16-element MuJoCo `data.ctrl` vector:
           [0:4]   left leg GIM4305-10 targets (left_hip_yaw, left_hip_roll, left_hip_pitch, left_knee)
           [4:8]   right leg GIM4305-10 targets (right_hip_yaw, right_hip_roll, right_hip_pitch, right_knee)
           [8:12]  neck & head STS3215 targets (neck_pitch, head_pitch, head_yaw, head_roll)
           [12:14] wheel GIM4305-10 torques (left_wheel_motor, right_wheel_motor)
+          [14:16] antenna 9 g micro servo targets (left_antenna, right_antenna)
         """
         roll, pitch, yaw = quat_to_euler_zyx(quat_wxyz)
         roll_rate, pitch_rate, yaw_rate = gyro_xyz
@@ -451,6 +466,9 @@ class ScaledWheeledDuckController:
             # Driven Wheels (2 GIM4305-10 hub motors)
             tau_left,
             tau_right,
+            # Antennas (2 micro servos)
+            self.antenna_cmd,
+            self.antenna_cmd,
         ], dtype=float)
 
         telemetry = {
@@ -758,6 +776,8 @@ def print_driving_instructions() -> None:
     print("  [Z] / [X]                : Crouch Deeper [Z] / Stand Taller [X]")
     print("  [U] / [O]                : Pan BDX Head Cameras Left [U] / Right [O]")
     print("  [C]                      : Jump (crouch -> thrust -> flight -> land)")
+    print("  [Q] / [E]                : Raise [Q] / Lower [E] Antennas")
+    print("  [P]                      : Toggle Head Projector Light")
     print("  [R]                      : Reset Robot to Home Balanced Pose")
     print("=" * 68)
 
@@ -802,6 +822,7 @@ def run_mujoco_simulation(xml_path: str = None, duration: float = 120.0, headles
 
     print_driving_instructions()
     import mujoco.viewer
+    projector_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_LIGHT, "projector")
     with mujoco.viewer.launch_passive(model, data, key_callback=controller.handle_keypress) as viewer:
         start_wall = time.time()
         while viewer.is_running() and (time.time() - start_wall) < duration:
@@ -812,6 +833,8 @@ def run_mujoco_simulation(xml_path: str = None, duration: float = 120.0, headles
                     mujoco.mj_resetDataKeyframe(model, data, key_id)
                 mujoco.mj_forward(model, data)
                 controller.reset_state()
+            if projector_id >= 0:
+                model.light_active[projector_id] = controller.projector_on
 
             step_robot(model, data, controller, realism)
             viewer.sync()

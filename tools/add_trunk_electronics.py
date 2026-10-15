@@ -24,23 +24,23 @@ PARTS = [  # name, mass (kg), position in trunk frame (m), half-size (m), materi
     ("teensy_40_dual_can", 0.008, (-0.095, 0.0, 0.060), (0.0210, 0.0110, 0.0035), "gim4305_housing"),
 ]
 
-INERTIAL = re.compile(r'(<body name="trunk_assembly"[^>]*>(?:(?!<body).)*?)'
+def inertial_re(body: str):
+    """Matches a body's opening tag up to its explicit <inertial> (before any child body)."""
+    return re.compile(rf'(<body name="{body}"[^>]*>(?:(?!<body).)*?)'
                       r'<inertial pos="([^"]+)" mass="([^"]+)" diaginertia="([^"]+)"/>', re.S)
 
 
-def add(path: str) -> None:
-    s = open(path).read()
-    if PARTS[0][0] in s:
-        print(f"{path}: already has trunk electronics, skipped")
-        return
-    mt = INERTIAL.search(s)
-    assert mt, f"{path}: trunk_assembly inertial not found"
+def fold(s: str, body: str, parts, indent: str = "        ") -> str:
+    """Folds point-mass `parts` (name, mass, pos, half-size, material) into `body`'s <inertial> and adds a visual box
+    for each part whose half-size is not None. Returns the new MJCF text."""
+    mt = inertial_re(body).search(s)
+    assert mt, f"{body} inertial not found"
     com = np.array([float(v) for v in mt.group(2).split()])
     m = float(mt.group(3))
     I = np.array([float(v) for v in mt.group(4).split()])
 
-    masses = [m] + [p[1] for p in PARTS]
-    points = [com] + [np.array(p[2]) for p in PARTS]
+    masses = [m] + [p[1] for p in parts]
+    points = [com] + [np.array(p[2]) for p in parts]
     M = sum(masses)
     c = sum(mi * pi for mi, pi in zip(masses, points)) / M
 
@@ -51,13 +51,21 @@ def add(path: str) -> None:
     new_inertial = (f'<inertial pos="{c[0]:.4f} {c[1]:.4f} {c[2]:.4f}" mass="{M:.3f}" '
                     f'diaginertia="{I_new[0]:.5f} {I_new[1]:.5f} {I_new[2]:.5f}"/>')
     geoms = "".join(
-        f'\n        <!-- {name}: {mass * 1000:.0f} g (folded into the trunk inertial above) -->'
-        f'\n        <geom name="{name}" class="visual" type="box" size="{h[0]} {h[1]} {h[2]}" '
-        f'pos="{p[0]} {p[1]} {p[2]}" material="{mat}"/>'
-        for name, mass, p, h, mat in PARTS)
-    s = s[:mt.start()] + mt.group(1) + new_inertial + geoms + s[mt.end():]
-    open(path, "w").write(s)
-    print(f"{path}: trunk {m:.3f} -> {M:.3f} kg, com {com.round(4).tolist()} -> {c.round(4).tolist()}")
+        f'\n{indent}<!-- {name}: {mass * 1000:.0f} g (folded into the {body} inertial above) -->'
+        + (f'\n{indent}<geom name="{name}" class="visual" type="box" size="{h[0]} {h[1]} {h[2]}" '
+           f'pos="{p[0]} {p[1]} {p[2]}" material="{mat}"/>' if h is not None else "")
+        for name, mass, p, h, mat in parts)
+    print(f"  {body} {m:.3f} -> {M:.3f} kg, com {com.round(4).tolist()} -> {c.round(4).tolist()}")
+    return s[:mt.start()] + mt.group(1) + new_inertial + geoms + s[mt.end():]
+
+
+def add(path: str) -> None:
+    s = open(path).read()
+    if PARTS[0][0] in s:
+        print(f"{path}: already has trunk electronics, skipped")
+        return
+    print(path)
+    open(path, "w").write(fold(s, "trunk_assembly", PARTS))
 
 
 if __name__ == "__main__":

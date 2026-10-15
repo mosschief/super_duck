@@ -37,14 +37,21 @@ DRIVER_IDLE_W = 0.5        # per GIM driver, powered and holding (estimate)
 BUCK_EFF = 0.90
 BUS_V = 21.6               # 6S Li-ion nominal (3.6 V/cell)
 # Electronics (W at the load): (typical, peak). Pi 5: ~5 W mixed / 8.8 W all cores; Hailo-8: 2.5 W typical /
-# 8.65 W max (Waveshare); cameras / head servos / Feather are estimates.
+# 8.65 W max (Waveshare); cameras / servos / Teensy / expression parts are estimates.
 ELECTRONICS = {
     "Raspberry Pi 5": (5.0, 8.8),
     "AI HAT+ 26 TOPS (Hailo-8)": (2.5, 8.65),
-    "3x Camera Module 3 (est.)": (0.9, 1.2),
+    "2x Camera Module 3 + USB wide chest cam (est.)": (1.2, 1.6),
     "Teensy 4.0 + Dual CAN + ICM-42688-P IMU (est.)": (0.5, 0.6),
     "4x STS3215 head servos (est.)": (2.0, 6.0),
+    # Expression package (on the peripheral 5 V buck). Eye rings capped at ~35% brightness in firmware
+    # (24 WS2812B at full white would be 7.2 W).
+    "2x 9 g antenna servos (est.)": (0.1, 2.0),
+    "2x WS2812B 12-LED eye rings (est.)": (0.5, 2.5),
+    "Projector 1 W LED (est.)": (0.3, 1.0),
+    "MAX98357A amp + 3 W speaker + INMP441 mic (est.)": (0.2, 3.0),
 }
+PERIPHERAL_5V = [k for k in ELECTRONICS if k.startswith(("2x 9 g", "2x WS2812B", "Projector", "MAX98357A"))]
 
 ACTIVITIES = {
     "stand": ([], 12.0, (4, 12)),
@@ -80,7 +87,8 @@ def main():
     elec_pk = sum(v[1] for v in ELECTRONICS.values()) / BUCK_EFF
     print(f"Robot '{args.robot}', bus {BUS_V} V. Electronics: {elec_typ:.1f} W typical, {elec_pk:.1f} W peak "
           f"(incl. {100 * (1 - BUCK_EFF):.0f}% buck loss); 5 V rail peak "
-          f"{(ELECTRONICS['Raspberry Pi 5'][1] + ELECTRONICS['AI HAT+ 26 TOPS (Hailo-8)'][1] + 1.6) / 5.0:.1f} A\n")
+          f"{(ELECTRONICS['Raspberry Pi 5'][1] + ELECTRONICS['AI HAT+ 26 TOPS (Hailo-8)'][1] + 1.6) / 5.0:.1f} A, "
+          f"peripheral 5 V rail peak {sum(ELECTRONICS[k][1] for k in PERIPHERAL_5V) / 5.0:.1f} A\n")
     print(f"{'activity':26s} {'motors avg':>10s} {'motors peak':>11s} {'total avg':>10s} {'bus avg':>8s} {'bus peak':>9s}")
     avgs = {}
     for name, (events, duration, (t0, t1)) in ACTIVITIES.items():

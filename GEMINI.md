@@ -34,13 +34,13 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
 
 ## 3. Files in This Workspace
 
-* `open_duck_wheeled_v2_gim6010.xml`: **Default model = the build configuration.** SteadyWin GIM6010-8 on hip-pitch and knees (GIM4305-10 on hip-yaw, hip-roll and wheels), 6S2P 21700 battery, AI HAT+, PJRC Teensy 4.0 Dual-CAN (or Feather M4 CAN) + ICM-42688-P SPI IMU: **5.32 kg**.
+* `open_duck_wheeled_v2_gim6010.xml`: **Default model = the build configuration.** SteadyWin GIM6010-8 on hip-pitch and knees (GIM4305-10 on hip-yaw, hip-roll and wheels), 6S2P 21700 battery, AI HAT+, PJRC Teensy 4.0 Dual-CAN (or Feather M4 CAN) + ICM-42688-P SPI IMU, Open Duck Mini expression package (antennas, eye LEDs, projector, speaker, mic) and battery protection: **5.48 kg**.
 
 * `open_duck_wheeled_v2.xml`: The original standalone MuJoCo MJCF robot and scene model (`open_duck_mini_v2_scaled_wheeled`), all GIM4305-10. Selected with `--robot gim4305`.
 
 * `simulate_wheeled_duck.py`: 500 Hz (`dt = 0.002 s`) full-state LQR wheel-balancing, 4-DOF leg posture, stereo-camera horizon leveling, and live keyboard driving controller. `--robot gim6010|gim4305` picks a `RobotProfile` (model file + per-robot tuning; default `gim6010`). `--realism SEED` runs it on a randomized robot with noisy sensors and CAN latency (`SimToReal`).
 
-* `tools/`: `upgrade_motor.py` (swap a joint to GIM6010-8), `battery_pack.py` (set pack mass/size), `add_trunk_electronics.py` (AI HAT+, Feather), `derive_lqr_params.py` (profile body params from an MJCF), `fit_balance_trim.py` (profile trim/posture fit), `power_budget.py`. After any mass change: run `derive_lqr_params.py`, then `fit_balance_trim.py`, paste both into the profile, then re-run `test_scenarios.py`.
+* `tools/`: `upgrade_motor.py` (swap a joint to GIM6010-8), `battery_pack.py` (set pack mass/size), `add_trunk_electronics.py` (AI HAT+, Teensy), `add_expression_hardware.py` (antennas, eye LEDs, projector, speaker, mic, battery protection), `derive_lqr_params.py` (profile body params from an MJCF), `fit_balance_trim.py` (profile trim/posture fit), `power_budget.py`. After any mass change: run `derive_lqr_params.py`, then `fit_balance_trim.py`, paste both into the profile, then re-run `test_scenarios.py`.
 
 * `test_scenarios.py`: Scripted scenario tests scored against MuJoCo ground truth (stand, drive/turn/brake, brake settle, crouch, pushes ±20–40 N, jumps). `--robot` as above; `--realism N` runs each scenario on N randomized robots and reports pass rates; `-k name` filters scenarios; `thermal` compares RMS joint torque to each motor's continuous rating.
 
@@ -76,6 +76,10 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
   * `Z` / `X`: Crouch deeper / stand taller (`Δknee = -2 * Δhip_pitch`)
 
   * `U` / `O`: Pan BDX head cameras left / right
+
+  * `Q` / `E`: Raise / lower the antennas (9 g micro servos, `ctrl[14:16]`)
+
+  * `P`: Toggle the head projector light
 
   * `R`: Reset to `home_balanced` keyframe
 
