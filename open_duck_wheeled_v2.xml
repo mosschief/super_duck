@@ -130,8 +130,8 @@
         <inertial pos="-0.0105 -0.0001 -0.0056" mass="1.099" diaginertia="0.00323 0.00399 0.00356"/>
         <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
         <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
-        <!-- feather_m4_can: 8 g (folded into the trunk inertial above) -->
-        <geom name="feather_m4_can" class="visual" type="box" size="0.0254 0.0114 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
+        <!-- teensy_40_dual_can (PJRC Teensy 4.0 + Dual CAN transceiver carrier + ICM-42688-P IMU): 8 g (folded into the trunk inertial above) -->
+        <geom name="teensy_40_dual_can" class="visual" type="box" size="0.0210 0.0110 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
 
         <!-- 1.35x Scaled Open Duck Mini v2 BDX Trunk Shell (`body_front` & `body_back` geometry) -->
         <geom name="trunk_collision" class="collision" type="box" size="0.074 0.063 0.058" material="body_front_material"/>

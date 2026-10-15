@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Adds the AI HAT+ (26 TOPS) and the Adafruit Feather M4 CAN to the trunk of an MJCF model, in place.
+Adds the AI HAT+ (26 TOPS) and the PJRC Teensy 4.0 + Dual CAN Transceiver carrier (or Feather M4 CAN, both ~8 g)
+to the trunk of an MJCF model, in place.
 
 Masses are folded into the trunk's explicit <inertial> (point masses + parallel-axis shift, their own inertia is
 negligible) and visual-only boxes are added so they show in the viewer. Idempotent: skips a model that already has
@@ -8,7 +9,8 @@ them.
 
   AI HAT+ 26 TOPS (Hailo-8): 65 x 56.5 x 5.5 mm board, 34-35 g (Waveshare / Probots listings) + ~6 g header and
       standoffs = 41 g, stacked on 16 mm standoffs above the Pi 5 + active cooler.
-  Feather M4 CAN Express (ATSAME51): 50.8 x 22.8 x 7 mm, 5.5 g + ~2.5 g CAN/IMU wiring = 8 g, next to the IMU.
+  PJRC Teensy 4.0 (600 MHz Cortex-M7, 35 x 18 mm) + Dual 3.3V CAN Transceiver Carrier + ICM-42688-P SPI IMU: ~8 g
+      total (same mass envelope as the Feather M4 CAN Express single-bus alternative), mounted next to the IMU.
 
 Usage: python3 tools/add_trunk_electronics.py open_duck_wheeled_v2.xml open_duck_wheeled_v2_gim6010.xml
 """
@@ -19,7 +21,7 @@ import numpy as np
 
 PARTS = [  # name, mass (kg), position in trunk frame (m), half-size (m), material
     ("ai_hat_plus_26tops", 0.041, (-0.006, 0.0, 0.042), (0.0325, 0.0283, 0.0028), "rpi_green"),
-    ("feather_m4_can", 0.008, (-0.095, 0.0, 0.060), (0.0254, 0.0114, 0.0035), "gim4305_housing"),
+    ("teensy_40_dual_can", 0.008, (-0.095, 0.0, 0.060), (0.0210, 0.0110, 0.0035), "gim4305_housing"),
 ]
 
 INERTIAL = re.compile(r'(<body name="trunk_assembly"[^>]*>(?:(?!<body).)*?)'

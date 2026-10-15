@@ -143,12 +143,12 @@
           Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
           Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + BNO055 IMU)
         -->
-        <inertial pos="-0.0065 -0.0001 -0.0112" mass="1.519" diaginertia="0.00374 0.00449 0.00404"/>
+        <inertial pos="-0.0243 -0.0001 -0.0112" mass="1.519" diaginertia="0.00374 0.00462 0.00417"/>
         <!-- battery pack set by tools/battery_pack.py: 6s2p (+420 g vs. the 6S1P baseline, folded into the inertial above) -->
         <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
         <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
-        <!-- feather_m4_can: 8 g (folded into the trunk inertial above) -->
-        <geom name="feather_m4_can" class="visual" type="box" size="0.0254 0.0114 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
+        <!-- teensy_40_dual_can (PJRC Teensy 4.0 + Dual CAN transceiver carrier + ICM-42688-P IMU): 8 g (folded into the trunk inertial above) -->
+        <geom name="teensy_40_dual_can" class="visual" type="box" size="0.0210 0.0110 0.0035" pos="-0.095 0.0 0.06" material="gim4305_housing"/>
 
         <!-- 1.35x Scaled Open Duck Mini v2 BDX Trunk Shell (`body_front` & `body_back` geometry) -->
         <geom name="trunk_collision" class="collision" type="box" size="0.074 0.063 0.058" material="body_front_material"/>
@@ -160,7 +160,7 @@
 
         <!-- Internal Raspberry Pi 5 (86 x 56 x 16 mm) & Low-Slung 6S Battery Pack -->
         <geom name="raspberry_pi_5" class="visual" type="box" size="0.043 0.028 0.008" pos="-0.006 0 0.018" material="rpi_green"/>
-        <geom name="battery_pack_6s" class="visual" type="box" size="0.035 0.042 0.0315" pos="0.004 0.0 -0.026" material="foot_bottom_tpu_material"/>
+        <geom name="battery_pack_6s" class="visual" type="box" size="0.035 0.042 0.0315" pos="-0.026 0.0 -0.026" material="foot_bottom_tpu_material"/>
 
         <!-- Chest Forward-Downward Navigation Camera (Raspberry Pi Camera Module 3 Wide, 25 x 24 x 12.4 mm) -->
         <geom name="chest_cam_bezel" class="visual" type="cylinder" size="0.014 0.005" pos="0.088 0 -0.014" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
@@ -179,7 +179,7 @@
             <geom name="head_pitch_bracket" class="visual" type="box" size="0.022 0.024 0.014" material="foot_bottom_tpu_material"/>
 
             <body name="neck_yaw_assembly" pos="0 0 0.022">
-              <joint name="head_yaw" type="hinge" axis="0 0 1" range="-2.79253 2.79253" class="sts3215"/>
+              <joint name="head_yaw" type="hinge" axis="0 0 1" range="-1.65 1.65" class="sts3215"/>
               <inertial pos="0 0 0.015" mass="0.110" diaginertia="0.00007 0.00007 0.00005"/>
               <geom name="neck_yaw_housing" class="visual" type="cylinder" size="0.024 0.016" material="foot_bottom_tpu_material"/>
 
@@ -248,31 +248,31 @@
           <geom name="left_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
           <geom name="left_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
 
-          <body name="left_roll_to_pitch_assembly" pos="0 0.018 -0.030">
-            <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim6010"/>
-            <inertial pos="0.0000 0.0061 0.0000" mass="0.423" diaginertia="0.000301 0.000234 0.000244"/>
-            <geom name="left_hip_roll_gim6010" class="gim6010_canister" euler="0 1.5708 0"/>
-            <geom name="left_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 0.014 0" material="foot_bottom_tpu_material"/>
+          <body name="left_roll_to_pitch_assembly" pos="0 0.024 -0.044">
+            <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
+            <inertial pos="0 0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <geom name="left_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
+            <geom name="left_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 0.018 0" material="foot_bottom_tpu_material"/>
 
-            <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m) -->
-            <body name="knee_and_ankle_assembly" pos="0 0.026 0">
+            <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m, +52 mm Y offset clears hip_roll) -->
+            <body name="knee_and_ankle_assembly" pos="0 0.052 0">
               <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim6010"/>
               <inertial pos="0.0000 0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
               <geom name="left_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
               <geom name="left_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
               <geom name="left_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
 
-              <!-- Shin Link (`knee_and_ankle_assembly_2`, 1.35x scaled length = 0.118 m) -->
+              <!-- Shin Link (`knee_and_ankle_assembly_2`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
               <body name="knee_and_ankle_assembly_2" pos="0 0 -0.118">
                 <joint name="left_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="0.0000 0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <inertial pos="0.0000 -0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
                 <geom name="left_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-                <geom name="left_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0 -0.059" material="foot_bottom_tpu_material"/>
-                <geom name="left_shin_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
-                <geom name="left_wheel_gim4305_stator" class="gim4305_canister" pos="0 0.015 -0.118" euler="1.5708 0 0"/>
+                <geom name="left_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 -0.024 -0.059" material="foot_bottom_tpu_material"/>
+                <geom name="left_shin_collision" class="collision" type="capsule" fromto="0 -0.024 0 0 -0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
+                <geom name="left_wheel_gim4305_stator" class="gim4305_canister" pos="0 -0.029 -0.118" euler="1.5708 0 0"/>
 
-                <!-- Distal Wheel Assembly (`foot_assembly`, 1.35x scaled wheel radius = 0.075 m) -->
-                <body name="foot_assembly" pos="0 0.034 -0.118">
+                <!-- Distal Wheel Assembly (`foot_assembly`, aligned at y = +112 mm directly under hip_roll y = +108 mm) -->
+                <body name="foot_assembly" pos="0 -0.048 -0.118">
                   <joint name="left_wheel" class="gim4305_wheel" axis="0 1 0"/>
                   <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
                   <geom name="left_foot_bottom_tpu" class="wheel_tire"/>
@@ -293,31 +293,31 @@
           <geom name="right_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
           <geom name="right_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
 
-          <body name="right_roll_to_pitch_assembly" pos="0 -0.018 -0.030">
-            <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim6010"/>
-            <inertial pos="0.0000 -0.0061 0.0000" mass="0.423" diaginertia="0.000301 0.000234 0.000244"/>
-            <geom name="right_hip_roll_gim6010" class="gim6010_canister" euler="0 1.5708 0"/>
-            <geom name="right_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 -0.014 0" material="foot_bottom_tpu_material"/>
+          <body name="right_roll_to_pitch_assembly" pos="0 -0.024 -0.044">
+            <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
+            <inertial pos="0 -0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <geom name="right_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
+            <geom name="right_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 -0.018 0" material="foot_bottom_tpu_material"/>
 
-            <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m) -->
-            <body name="knee_and_ankle_assembly_3" pos="0 -0.026 0">
+            <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m, -52 mm Y offset clears hip_roll) -->
+            <body name="knee_and_ankle_assembly_3" pos="0 -0.052 0">
               <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim6010"/>
               <inertial pos="0.0000 -0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
               <geom name="right_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
               <geom name="right_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
               <geom name="right_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
 
-              <!-- Shin Link (`knee_and_ankle_assembly_4`, 1.35x scaled length = 0.118 m) -->
+              <!-- Shin Link (`knee_and_ankle_assembly_4`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
               <body name="knee_and_ankle_assembly_4" pos="0 0 -0.118">
                 <joint name="right_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="0.0000 -0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <inertial pos="0.0000 0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
                 <geom name="right_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-                <geom name="right_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0 -0.059" material="foot_bottom_tpu_material"/>
-                <geom name="right_shin_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
-                <geom name="right_wheel_gim4305_stator" class="gim4305_canister" pos="0 -0.015 -0.118" euler="1.5708 0 0"/>
+                <geom name="right_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0.024 -0.059" material="foot_bottom_tpu_material"/>
+                <geom name="right_shin_collision" class="collision" type="capsule" fromto="0 0.024 0 0 0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
+                <geom name="right_wheel_gim4305_stator" class="gim4305_canister" pos="0 0.029 -0.118" euler="1.5708 0 0"/>
 
-                <!-- Distal Wheel Assembly (`foot_assembly_2`, 1.35x scaled wheel radius = 0.075 m) -->
-                <body name="foot_assembly_2" pos="0 -0.034 -0.118">
+                <!-- Distal Wheel Assembly (`foot_assembly_2`, aligned at y = -112 mm directly under hip_roll y = -108 mm) -->
+                <body name="foot_assembly_2" pos="0 0.048 -0.118">
                   <joint name="right_wheel" class="gim4305_wheel" axis="0 1 0"/>
                   <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
                   <geom name="right_foot_bottom_tpu" class="wheel_tire"/>
@@ -338,13 +338,13 @@
   <actuator>
     <!-- Left Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
     <position name="left_hip_yaw" joint="left_hip_yaw" class="gim4305"/>
-    <position name="left_hip_roll" joint="left_hip_roll" class="gim6010"/>
+    <position name="left_hip_roll" joint="left_hip_roll" class="gim4305"/>
     <position name="left_hip_pitch" joint="left_hip_pitch" class="gim6010"/>
     <position name="left_knee" joint="left_knee" class="gim6010"/>
 
     <!-- Right Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
     <position name="right_hip_yaw" joint="right_hip_yaw" class="gim4305"/>
-    <position name="right_hip_roll" joint="right_hip_roll" class="gim6010"/>
+    <position name="right_hip_roll" joint="right_hip_roll" class="gim4305"/>
     <position name="right_hip_pitch" joint="right_hip_pitch" class="gim6010"/>
     <position name="right_knee" joint="right_knee" class="gim6010"/>
 
@@ -395,7 +395,7 @@
       -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
     -->
     <key name="home_balanced"
-         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
+         qpos="0 0 0.3701 1 0 0 0 0.15 -0.15 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
          ctrl="0 0 -0.50 1.00 0 0 -0.50 1.00 0.15 -0.15 0 0 0 0"/>
   </keyframe>
 </mujoco>

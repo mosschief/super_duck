@@ -99,15 +99,16 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=5.282, com_height=0.2337, body_pitch_inertia=0.0694),
-        initial_pitch_trim=-0.0824,
+        params=ScaledWheeledDuckParams(body_mass=4.806, wheel_track=0.224, com_height=0.2442, body_pitch_inertia=0.0668),
+        initial_pitch_trim=-0.0118,
         posture_coeffs=(-0.1391, -0.0489),
-        # The strong legs finish extending in ~50 ms; holding "thrust" longer only delays the tuck that lifts the
-        # wheels. With the wheels limp during thrust: 27 mm clearance, 13 deg peak lean, 12/12 randomized robots.
+        # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
+        # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
+        # to x = -26 mm so standing balance trim is nearly level (-0.68 deg).
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
-        curve_actuators=(1, 2, 3, 5, 6, 7),     # hip roll, hip pitch, knee (both legs)
+        curve_actuators=(2, 3, 6, 7),           # hip pitch, knee (both legs)
     ),
     # Original design: SteadyWin GIM4305-10 on every joint (open_duck_wheeled_v2.xml as first downloaded).
     "gim4305": RobotProfile(
@@ -548,13 +549,15 @@ class RealismConfig:
     Each range is sampled once per run (a "different robot on a different floor"); noise terms are sampled every step.
 
     Control architectures (`arch`):
-      "mcu": balance loop on the Adafruit Feather M4 CAN (ATSAME51, Cortex-M4F) with the IMU wired to it over I2C.
-             Bare-metal timing: ~0.3-0.8 ms from sensor read to torque applied, no scheduling stalls.
-      "pi":  balance loop in Linux user space on the Raspberry Pi 5: 2-4 ms latency plus occasional scheduling stalls
-             (missed ticks, the drivers keep applying the last command).
-    The GIM drivers speak classic CAN (11-bit ID, 8-byte frames, 1 Mbps max; GIM6010-8 manual sec 4.1), and the Feather
-    has one CAN port, so the 10 GIM motors share one bus: wheels update every tick, legs at `leg_rate_hz` (their
-    impedance loop runs inside each driver, so they only need occasional setpoint/feedback updates).
+      "mcu":     balance loop on the PJRC Teensy 4.0 (600 MHz Cortex-M7) with Dual 1 Mbps CAN buses (`CAN1` left leg +
+                 wheel, `CAN2` right leg + wheel; `can_buses = 2`) and an ICM-42688-P SPI IMU (~0.25-0.55 ms latency).
+      "feather": balance loop on the single-bus Adafruit Feather M4 CAN Express (120 MHz Cortex-M4F, `can_buses = 1`,
+                 ~0.3-0.8 ms latency).
+      "pi":      balance loop in Linux user space on the Raspberry Pi 5: 2-4 ms latency plus occasional scheduling stalls
+                 (missed ticks, the drivers keep applying the last command).
+    The GIM drivers speak classic CAN (11-bit ID, 8-byte frames, 1 Mbps max; GIM6010-8 manual sec 4.1). On the Teensy
+    4.0 (`CAN1` + `CAN2`), the 10 GIM motors split 5-per-bus (halving bus load to 25% at 100 Hz legs, or 68% even with
+    all 10 motors at 500 Hz); on the Feather M4 CAN (`can_buses = 1`), all 10 share one bus (50% load at 100 Hz legs).
     """
     arch: str = "mcu"
     imu: str = "fast"                           # "fast" (default): raw 1 kHz-class IMU on the Feather, filtered there every
@@ -571,6 +574,7 @@ class RealismConfig:
     pi_stall_ms: Tuple[float, float] = (4.0, 12.0)      # ...lasting this long (ticks missed, last command held)
     leg_rate_hz: float = 100.0                  # leg setpoint + feedback rate (GIM default encoder feedback: 10 ms)
     can_bitrate: float = 1e6                    # classic CAN, GIM driver maximum
+    can_buses: int = 2                          # 2 on Teensy 4.0 (CAN1 left, CAN2 right); 1 on Feather M4 CAN
     can_frame_bits: int = 135                   # 11-bit ID, 8 data bytes, worst-case bit stuffing
     friction: Tuple[float, float] = (0.8, 1.25)          # tire/floor friction (TPU on tile/wood ~0.8, on rubber mat ~1.25)
     trunk_mass_scale: Tuple[float, float] = (0.9, 1.1)   # battery/payload variation
@@ -579,9 +583,11 @@ class RealismConfig:
 
 
 def can_bus_load(cfg: RealismConfig, wheel_rate_hz: float) -> float:
-    """Fraction of the single 1 Mbps CAN bus used: one command + one feedback frame per motor update, plus 10 Hz
-    heartbeats. 2 wheel motors at the control rate, 8 leg motors at `leg_rate_hz`. Keep it under ~0.7."""
-    frames_per_s = 2 * 2 * wheel_rate_hz + 8 * 2 * cfg.leg_rate_hz + 10 * 10
+    """Per-channel fraction of the 1 Mbps CAN bus used: one command + one feedback frame per motor update, plus 10 Hz
+    heartbeats. Split across `cfg.can_buses` (2 channels on Teensy 4.0 = 1 wheel + 4 leg motors per bus; 1 on Feather).
+    Keep under ~0.7."""
+    buses = cfg.can_buses if cfg.arch == "mcu" else 1
+    frames_per_s = (2 * 2 * wheel_rate_hz + 8 * 2 * cfg.leg_rate_hz + 10 * 10) / buses
     return frames_per_s * cfg.can_frame_bits / cfg.can_bitrate
 
 
@@ -590,7 +596,7 @@ class SimToReal:
 
     def __init__(self, model, cfg: RealismConfig = RealismConfig(), seed: int = 0):
         import mujoco
-        assert cfg.arch in ("mcu", "pi") and cfg.imu in ("bno055", "fast"), (cfg.arch, cfg.imu)
+        assert cfg.arch in ("mcu", "feather", "pi") and cfg.imu in ("bno055", "fast"), (cfg.arch, cfg.imu)
         self.cfg = cfg
         self.rng = np.random.default_rng(seed)
         u = lambda r: float(self.rng.uniform(*r))
@@ -609,7 +615,7 @@ class SimToReal:
         model.body_ipos[trunk, 0] += self.trunk_com_shift
         self.motor_strength = u(cfg.motor_strength)
         model.actuator_gear[WHEEL_ACTUATORS, 0] *= self.motor_strength
-        self.latency_ms = u(cfg.mcu_latency_ms if cfg.arch == "mcu" else cfg.pi_latency_ms)
+        self.latency_ms = u((0.25, 0.55) if cfg.arch == "mcu" else (cfg.mcu_latency_ms if cfg.arch == "feather" else cfg.pi_latency_ms))
 
         # --- Sensor / actuation state ---
         self.gyro_bias = np.radians(self.rng.uniform(-cfg.gyro_bias_dps, cfg.gyro_bias_dps, 3))
@@ -824,7 +830,7 @@ if __name__ == "__main__":
     parser.add_argument("--headless", action="store_true", help="Run without GUI viewer and print telemetry.")
     parser.add_argument("--realism", type=int, default=None, metavar="SEED",
                         help="Enable sim-to-real mode (sensor noise, CAN latency, randomized robot) with this seed.")
-    parser.add_argument("--arch", choices=("mcu", "pi"), default="mcu",
+    parser.add_argument("--arch", choices=("mcu", "feather", "pi"), default="mcu",
                         help="With --realism: balance loop on the Feather M4 CAN (mcu) or in Linux on the Pi (pi).")
     parser.add_argument("--imu", choices=("bno055", "fast"), default="fast",
                         help="With --realism: fast raw IMU filtered on the MCU (default) or BNO055 (100 Hz fused).")

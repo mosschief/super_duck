@@ -192,7 +192,7 @@ def main():
     ap.add_argument("--robot", choices=sorted(swd.PROFILES), default=swd.DEFAULT_ROBOT,
                     help="robot profile to test (default: %(default)s)")
     ap.add_argument("--xml", default=None, help="override the profile's MJCF model")
-    ap.add_argument("--arch", choices=("mcu", "pi"), default="mcu", help="realism: balance loop on the Feather (mcu) or Pi")
+    ap.add_argument("--arch", choices=("mcu", "feather", "pi"), default="mcu", help="realism: Teensy 4.0 dual-CAN (mcu), Feather 1-CAN (feather), or Pi (pi)")
     ap.add_argument("--imu", choices=("bno055", "fast"), default="fast", help="realism: IMU model")
     ap.add_argument("--leg-rate", type=float, default=100.0, help="realism: leg CAN update rate (Hz)")
     args = ap.parse_args()

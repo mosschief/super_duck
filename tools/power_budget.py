@@ -42,7 +42,7 @@ ELECTRONICS = {
     "Raspberry Pi 5": (5.0, 8.8),
     "AI HAT+ 26 TOPS (Hailo-8)": (2.5, 8.65),
     "3x Camera Module 3 (est.)": (0.9, 1.2),
-    "Feather M4 CAN + IMU (est.)": (0.3, 0.4),
+    "Teensy 4.0 + Dual CAN + ICM-42688-P IMU (est.)": (0.5, 0.6),
     "4x STS3215 head servos (est.)": (2.0, 6.0),
 }
 
