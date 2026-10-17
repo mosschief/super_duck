@@ -77,7 +77,7 @@ def key_dimensions(m, d):
         "wheel_radius": mm(m.geom_size[tire][0])[0],
         "tire_width": mm(2 * m.geom_size[tire][1])[0],
         "wheel_track (wheel centre to centre)": mm(lw[1] - rw[1])[0],
-        "hip_yaw axes, lateral spacing": mm(jt("left_hip_yaw")[1] - jt("right_hip_yaw")[1])[0],
+        "hip mounts, lateral spacing": mm(body("hip_roll_assembly")[1] - body("hip_roll_assembly_2")[1])[0],
         "thigh length (hip_pitch axis to knee axis)": mm(np.linalg.norm(jt("left_knee") - jt("left_hip_pitch")))[0],
         "shin length (knee axis to wheel axle, in the leg plane)": mm(np.linalg.norm((lw - jt("left_knee"))[[0, 2]]))[0],
         "wheel axle lateral offset from the knee axis origin (inboard routing)": mm(lw[1] - jt("left_knee")[1])[0],

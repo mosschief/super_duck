@@ -67,11 +67,11 @@ def motor_power(tq: np.ndarray, model) -> np.ndarray:
     nu = model.nu
     force, vel = tq[:, 1:1 + nu], tq[:, 1 + nu:1 + 2 * nu]
     total = np.zeros(len(tq))
-    for a in [*range(8), 12, 13]:
+    for a in [*range(6), 10, 11]:
         mot = MOTORS[round(float(model.actuator_forcerange[a, 1]), 2)]
         current = force[:, a] / mot["kt"]
         total += 1.5 * current ** 2 * mot["r"] + np.maximum(force[:, a] * vel[:, a], 0.0) / ETA_MECH
-    return total + 10 * DRIVER_IDLE_W
+    return total + 8 * DRIVER_IDLE_W
 
 
 def main():

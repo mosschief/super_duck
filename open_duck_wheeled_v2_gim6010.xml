@@ -293,10 +293,10 @@
 
         <!-- ==================== LEFT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
         <body name="hip_roll_assembly" pos="0 0.084 -0.044">
-          <joint name="left_hip_yaw" type="hinge" axis="0 0 1" range="-0.5235987755982979 0.5235987755982997" class="gim4305"/>
-          <inertial pos="0 0 -0.012" mass="0.180" diaginertia="0.00009 0.00009 0.00008"/>
-          <geom name="left_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
-          <geom name="left_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
+          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Aluminium / PA-CF bracket from the
+               trunk floor to the hip-roll motor, ~60 g; carries the leg loads (cad/design_loads.md). -->
+          <inertial pos="0 0 -0.026" mass="0.060" diaginertia="0.0000164 0.0000186 0.0000292"/>
+          <geom name="left_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
 
           <body name="left_roll_to_pitch_assembly" pos="0 0.024 -0.044">
             <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
@@ -339,10 +339,10 @@
 
         <!-- ==================== RIGHT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
         <body name="hip_roll_assembly_2" pos="0 -0.084 -0.044">
-          <joint name="right_hip_yaw" type="hinge" axis="0 0 1" range="-0.5235987755982979 0.5235987755982997" class="gim4305"/>
-          <inertial pos="0 0 -0.012" mass="0.180" diaginertia="0.00009 0.00009 0.00008"/>
-          <geom name="right_hip_yaw_gim4305" class="gim4305_canister" pos="0 0 0"/>
-          <geom name="right_hip_yaw_bracket" class="visual" type="box" size="0.028 0.026 0.018" pos="0 0 -0.016" material="body_front_material"/>
+          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Aluminium / PA-CF bracket from the
+               trunk floor to the hip-roll motor, ~60 g; carries the leg loads (cad/design_loads.md). -->
+          <inertial pos="0 0 -0.026" mass="0.060" diaginertia="0.0000164 0.0000186 0.0000292"/>
+          <geom name="right_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
 
           <body name="right_roll_to_pitch_assembly" pos="0 -0.024 -0.044">
             <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
@@ -386,16 +386,14 @@
     </body>
   </worldbody>
 
-  <!-- ==================== ACTUATORS (8 GIM4305-10 Leg DOFs + 4 STS3215 Head DOFs + 2 GIM4305-10 Wheels) ==================== -->
+  <!-- ==================== ACTUATORS (6 Leg DOFs + 4 STS3215 Head DOFs + 2 GIM4305-10 Wheels + 2 Antenna Servos) ==================== -->
   <actuator>
-    <!-- Left Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
-    <position name="left_hip_yaw" joint="left_hip_yaw" class="gim4305"/>
+    <!-- Left Leg 3 Upper Joints (hip roll GIM4305-10, hip pitch / knee per profile) -->
     <position name="left_hip_roll" joint="left_hip_roll" class="gim4305"/>
     <position name="left_hip_pitch" joint="left_hip_pitch" class="gim6010"/>
     <position name="left_knee" joint="left_knee" class="gim6010"/>
 
-    <!-- Right Leg 4 Upper Joints (SteadyWin GIM4305-10 QDD Position/Impedance Control) -->
-    <position name="right_hip_yaw" joint="right_hip_yaw" class="gim4305"/>
+    <!-- Right Leg 3 Upper Joints (hip roll GIM4305-10, hip pitch / knee per profile) -->
     <position name="right_hip_roll" joint="right_hip_roll" class="gim4305"/>
     <position name="right_hip_pitch" joint="right_hip_pitch" class="gim6010"/>
     <position name="right_knee" joint="right_knee" class="gim6010"/>
@@ -410,7 +408,7 @@
     <motor name="left_wheel_motor" joint="left_wheel" class="gim4305_wheel"/>
     <motor name="right_wheel_motor" joint="right_wheel" class="gim4305_wheel"/>
 
-    <!-- Antenna 9 g micro servos (Open Duck Mini expression package), ctrl[14:16] -->
+    <!-- Antenna 9 g micro servos (Open Duck Mini expression package), ctrl[12:14] -->
     <position name="left_antenna" joint="left_antenna" class="micro_servo_9g"/>
     <position name="right_antenna" joint="right_antenna" class="micro_servo_9g"/>
   </actuator>
@@ -455,7 +453,7 @@
       -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
     -->
     <key name="home_balanced"
-         qpos="0 0 0.3701 1 0 0 0 0.15 -0.15 0 0 0 0 0 0 -0.50 1.00 0 0 0 -0.50 1.00 0"
-         ctrl="0 0 -0.50 1.00 0 0 -0.50 1.00 0.15 -0.15 0 0 0 0 0 0"/>
+         qpos="0 0 0.3701 1 0 0 0 0.15 -0.15 0 0 0 0 0 -0.50 1.00 0 0 -0.50 1.00 0"
+         ctrl="0 -0.50 1.00 0 -0.50 1.00 0.15 -0.15 0 0 0 0 0 0"/>
   </keyframe>
 </mujoco>

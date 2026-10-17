@@ -101,16 +101,16 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=4.973, wheel_track=0.224, com_height=0.2467, body_pitch_inertia=0.0791),
-        initial_pitch_trim=-0.0611,
-        posture_coeffs=(-0.1261, -0.0262),
+        params=ScaledWheeledDuckParams(body_mass=4.733, wheel_track=0.224, com_height=0.2467, body_pitch_inertia=0.0789),
+        initial_pitch_trim=-0.0631,
+        posture_coeffs=(-0.1305, -0.0263),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
         # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py (standing lean -3.7 deg).
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
-        curve_actuators=(2, 3, 6, 7),           # hip pitch, knee (both legs)
+        curve_actuators=(1, 2, 4, 5),           # hip pitch, knee (both legs)
     ),
     # Original design: SteadyWin GIM4305-10 on every joint (open_duck_wheeled_v2.xml as first downloaded).
     "gim4305": RobotProfile(
@@ -119,9 +119,9 @@ PROFILES = {
         # Original LQR body numbers. com_height/inertia here are the whole-robot values *including* the wheels
         # (body-only: 0.2555 m / 0.0559 kg*m^2), but this robot's trim/posture fit and tuning were validated with
         # them, and the body-only values scored slightly worse on it (randomized crouch 7/12 vs 9/12).
-        params=ScaledWheeledDuckParams(body_mass=3.601, com_height=0.222, body_pitch_inertia=0.0310),
-        initial_pitch_trim=-0.0686,
-        posture_coeffs=(-0.0965, -0.0351),
+        params=ScaledWheeledDuckParams(body_mass=3.361, com_height=0.222, body_pitch_inertia=0.0310),
+        initial_pitch_trim=-0.0730,
+        posture_coeffs=(-0.1013, -0.0324),
         # On these weaker legs the LQR's wheel kick during thrust is (accidentally) part of the jump: with the
         # wheels limp the jump shrinks to ~7 mm, so this profile keeps "lqr".
         jump_thrust_time=0.12,
@@ -317,12 +317,13 @@ class ScaledWheeledDuckController:
         `leg_fold` / `leg_fold_rate` are the measured hip_pitch + knee angle (and its rate), averaged over both legs,
         from the GIM4305 encoders. If omitted, the commanded value is used (no servo lag compensation).
 
-        Computes the 16-element MuJoCo `data.ctrl` vector:
-          [0:4]   left leg GIM4305-10 targets (left_hip_yaw, left_hip_roll, left_hip_pitch, left_knee)
-          [4:8]   right leg GIM4305-10 targets (right_hip_yaw, right_hip_roll, right_hip_pitch, right_knee)
-          [8:12]  neck & head STS3215 targets (neck_pitch, head_pitch, head_yaw, head_roll)
-          [12:14] wheel GIM4305-10 torques (left_wheel_motor, right_wheel_motor)
-          [14:16] antenna 9 g micro servo targets (left_antenna, right_antenna)
+        Computes the 14-element MuJoCo `data.ctrl` vector (no hip yaw: the hips are fixed mounts, steering is by
+        wheel torque difference):
+          [0:3]   left leg targets (left_hip_roll, left_hip_pitch, left_knee)
+          [3:6]   right leg targets (right_hip_roll, right_hip_pitch, right_knee)
+          [6:10]  neck & head STS3215 targets (neck_pitch, head_pitch, head_yaw, head_roll)
+          [10:12] wheel GIM4305-10 torques (left_wheel_motor, right_wheel_motor)
+          [12:14] antenna 9 g micro servo targets (left_antenna, right_antenna)
         """
         roll, pitch, yaw = quat_to_euler_zyx(quat_wxyz)
         roll_rate, pitch_rate, yaw_rate = gyro_xyz
@@ -448,13 +449,11 @@ class ScaledWheeledDuckController:
         head_roll_cmd = np.clip(-roll, -0.45, 0.45)
 
         ctrl = np.array([
-            # Left leg (4 GIM4305-10 QDD joints)
-            0.0,
+            # Left leg (hip roll, hip pitch, knee)
             roll_comp,
             hip_pitch_cmd,
             knee_cmd,
-            # Right leg (4 GIM4305-10 QDD joints)
-            0.0,
+            # Right leg
             roll_comp,
             hip_pitch_cmd,
             knee_cmd,
@@ -550,8 +549,8 @@ class ScaledWheeledDuckController:
         return self.JUMP_LAND_DELTA + a * (self.crouch_delta - self.JUMP_LAND_DELTA), False
 
 
-LEG_ACTUATORS = slice(0, 8)  # ctrl[0:8] are the eight GIM4305 leg position servos
-WHEEL_ACTUATORS = slice(12, 14)
+LEG_ACTUATORS = slice(0, 6)  # ctrl[0:6] are the six leg position servos (hip roll, hip pitch, knee x2)
+WHEEL_ACTUATORS = slice(10, 12)
 TIRE_GEOMS = ("floor", "left_foot_bottom_tpu", "right_foot_bottom_tpu")
 
 
@@ -574,8 +573,8 @@ class RealismConfig:
       "pi":      balance loop in Linux user space on the Raspberry Pi 5: 2-4 ms latency plus occasional scheduling stalls
                  (missed ticks, the drivers keep applying the last command).
     The GIM drivers speak classic CAN (11-bit ID, 8-byte frames, 1 Mbps max; GIM6010-8 manual sec 4.1). On the Teensy
-    4.0 (`CAN1` + `CAN2`), the 10 GIM motors split 5-per-bus (halving bus load to 25% at 100 Hz legs, or 68% even with
-    all 10 motors at 500 Hz); on the Feather M4 CAN (`can_buses = 1`), all 10 share one bus (50% load at 100 Hz legs).
+    4.0 (`CAN1` + `CAN2`), the 8 GIM motors split 4-per-bus; on the Feather M4 CAN (`can_buses = 1`), all 8 share one
+    bus (`can_bus_load` gives the numbers).
     """
     arch: str = "mcu"
     imu: str = "fast"                           # "fast" (default): raw 1 kHz-class IMU (ICM-42688-P) on the MCU, filtered every
@@ -603,10 +602,10 @@ class RealismConfig:
 
 def can_bus_load(cfg: RealismConfig, wheel_rate_hz: float) -> float:
     """Per-channel fraction of the 1 Mbps CAN bus used: one command + one feedback frame per motor update, plus 10 Hz
-    heartbeats. Split across `cfg.can_buses` (2 channels on Teensy 4.0 = 1 wheel + 4 leg motors per bus; 1 on Feather).
+    heartbeats. Split across `cfg.can_buses` (2 channels on Teensy 4.0 = 1 wheel + 3 leg motors per bus; 1 on Feather).
     Keep under ~0.7."""
     buses = cfg.can_buses if cfg.arch == "mcu" else 1
-    frames_per_s = (2 * 2 * wheel_rate_hz + 8 * 2 * cfg.leg_rate_hz + 10 * 10) / buses
+    frames_per_s = (2 * 2 * wheel_rate_hz + 6 * 2 * cfg.leg_rate_hz + 8 * 10) / buses
     return frames_per_s * cfg.can_frame_bits / cfg.can_bitrate
 
 

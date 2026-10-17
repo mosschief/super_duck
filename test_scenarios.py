@@ -129,7 +129,7 @@ def push(force):
 
 
 # GIM motor groups by actuator index: (left, right). Neck/head (8-11) are STS3215 serial servos, not checked here.
-MOTOR_GROUPS = {"hip_yaw": (0, 4), "hip_roll": (1, 5), "hip_pitch": (2, 6), "knee": (3, 7), "wheel": (12, 13)}
+MOTOR_GROUPS = {"hip_roll": (0, 3), "hip_pitch": (1, 4), "knee": (2, 5), "wheel": (10, 11)}
 DRIVE_EVENTS = ([(1.0 + 0.01 * i, "up") for i in range(4)]                       # 0.6 m/s ...
                 + [(3.0 + 4.0 * k + 0.01 * i, "left" if k % 2 == 0 else "right")  # ... weaving +/-45 deg every 4 s
                    for k in range(5) for i in range(3)])

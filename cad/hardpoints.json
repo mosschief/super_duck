@@ -2,12 +2,12 @@
  "model": "open_duck_wheeled_v2_gim6010.xml",
  "units": "mm, deg, g, N*m",
  "frame": "world at keyframe home_balanced; floor z = 0; x forward, y left, z up",
- "total_mass_g": 5483.0,
+ "total_mass_g": 5243.0,
  "key_dimensions": {
   "wheel_radius": 75.0,
   "tire_width": 32.0,
   "wheel_track (wheel centre to centre)": 224.0,
-  "hip_yaw axes, lateral spacing": 168.0,
+  "hip mounts, lateral spacing": 168.0,
   "thigh length (hip_pitch axis to knee axis)": 118.0,
   "shin length (knee axis to wheel axle, in the leg plane)": 118.0,
   "wheel axle lateral offset from the knee axis origin (inboard routing)": -48.0,
@@ -242,38 +242,6 @@
    "force_limit_Nm": 0.18
   },
   {
-   "name": "left_hip_yaw",
-   "type": "hinge",
-   "body": "hip_roll_assembly",
-   "parent": "trunk_assembly",
-   "anchor_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "axis_local": [
-    0.0,
-    0.0,
-    1.0
-   ],
-   "anchor_world_mm": [
-    0.0,
-    84.0,
-    326.1
-   ],
-   "axis_world": [
-    0.0,
-    0.0,
-    1.0
-   ],
-   "range_deg": [
-    -30.0,
-    30.0
-   ],
-   "actuator": "left_hip_yaw",
-   "force_limit_Nm": 3.47
-  },
-  {
    "name": "left_hip_roll",
    "type": "hinge",
    "body": "left_roll_to_pitch_assembly",
@@ -396,38 +364,6 @@
    ],
    "range_deg": null,
    "actuator": "left_wheel_motor",
-   "force_limit_Nm": 3.47
-  },
-  {
-   "name": "right_hip_yaw",
-   "type": "hinge",
-   "body": "hip_roll_assembly_2",
-   "parent": "trunk_assembly",
-   "anchor_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "axis_local": [
-    0.0,
-    0.0,
-    1.0
-   ],
-   "anchor_world_mm": [
-    0.0,
-    -84.0,
-    326.1
-   ],
-   "axis_world": [
-    0.0,
-    0.0,
-    1.0
-   ],
-   "range_deg": [
-    -30.0,
-    30.0
-   ],
-   "actuator": "right_hip_yaw",
    "force_limit_Nm": 3.47
   },
   {
@@ -784,11 +720,11 @@
     84.0,
     326.1
    ],
-   "mass_g": 180.0,
+   "mass_g": 60.0,
    "com_local_mm": [
     0.0,
     0.0,
-    -12.0
+    -26.0
    ]
   },
   {
@@ -914,11 +850,11 @@
     -84.0,
     326.1
    ],
-   "mass_g": 180.0,
+   "mass_g": 60.0,
    "com_local_mm": [
     0.0,
     0.0,
-    -12.0
+    -26.0
    ]
   },
   {
@@ -2278,44 +2214,18 @@
    "role": "visual"
   },
   {
-   "name": "left_hip_yaw_gim4305",
-   "body": "hip_roll_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    53.0,
-    33.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    0.0,
-    84.0,
-    326.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_hip_yaw_bracket",
+   "name": "left_hip_mount",
    "body": "hip_roll_assembly",
    "type": "box",
    "dims_mm": [
     56.0,
     52.0,
-    36.0
+    24.0
    ],
    "pos_local_mm": [
     0.0,
     0.0,
-    -16.0
+    -26.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -2326,7 +2236,7 @@
    "centre_world_mm": [
     0.0,
     84.0,
-    310.1
+    300.1
    ],
    "role": "visual"
   },
@@ -2673,44 +2583,18 @@
    "role": "visual"
   },
   {
-   "name": "right_hip_yaw_gim4305",
-   "body": "hip_roll_assembly_2",
-   "type": "cylinder",
-   "dims_mm": [
-    53.0,
-    33.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    0.0,
-    -84.0,
-    326.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_hip_yaw_bracket",
+   "name": "right_hip_mount",
    "body": "hip_roll_assembly_2",
    "type": "box",
    "dims_mm": [
     56.0,
     52.0,
-    36.0
+    24.0
    ],
    "pos_local_mm": [
     0.0,
     0.0,
-    -16.0
+    -26.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -2721,7 +2605,7 @@
    "centre_world_mm": [
     0.0,
     -84.0,
-    310.1
+    300.1
    ],
    "role": "visual"
   },

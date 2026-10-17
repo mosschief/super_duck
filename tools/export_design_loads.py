@@ -4,7 +4,8 @@ Design loads for CAD: the force and moment every joint transmits (the load path 
 and the printed brackets on both sides of it), from the scripted scenarios with ideal sensors.
 
 Per joint and 2 ms step, from MuJoCo's body interaction forces (`cfrc_int`, what the parent applies to the child),
-moved to the joint anchor and split along the joint axis:
+moved to the joint anchor and split along the joint axis. Fixed mounts (bodies welded to their parent, like the hip
+mounts) are reported the same way at the body origin, with "axis" = the body's z axis (the bolting direction):
   F_axial  force along the axis        F_radial  force across it
   M_axis   moment about the axis (motor torque + joint friction/damping)   M_bend  moment across it (tilts the bearing)
 Reported as peak and 99.5th percentile (the peak of a contact impact depends on simulated contact stiffness; use p99.5
@@ -52,6 +53,7 @@ def simulate(m, events, pushes, duration):
     ctl = swd.ScaledWheeledDuckController(T.PROFILE)
     base = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "base")
     joints = [j for j in range(m.njnt) if m.jnt_type[j] == 3]
+    fixed = [b for b in range(2, m.nbody) if m.body_jntnum[b] == 0 and m.body_mass[m.body_parentid[b]] > 0]
     events = sorted(events)
     rows, contact = [], []
     with contextlib.redirect_stdout(io.StringIO()):
@@ -74,9 +76,17 @@ def simulate(m, events, pushes, duration):
                 tq_p = tq + np.cross(d.subtree_com[m.body_rootid[b]] - p, f)
                 fa, ma = f @ a, tq_p @ a
                 r.append((abs(fa), np.linalg.norm(f - fa * a), abs(ma), np.linalg.norm(tq_p - ma * a)))
+            for b in fixed:
+                f, tq = d.cfrc_int[b, 3:], d.cfrc_int[b, :3]
+                p, a = d.xpos[b], d.xmat[b].reshape(3, 3)[:, 2]
+                tq_p = tq + np.cross(d.subtree_com[m.body_rootid[b]] - p, f)
+                fa, ma = f @ a, tq_p @ a
+                r.append((abs(fa), np.linalg.norm(f - fa * a), abs(ma), np.linalg.norm(tq_p - ma * a)))
             rows.append(r)
             contact.append((float(d.sensor("left_wheel_touch").data[0]), float(d.sensor("right_wheel_touch").data[0])))
-    return joints, np.array(rows), np.array(contact)
+    labels = ([mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) for j in joints]
+              + [f"fixed: {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, b)}" for b in fixed])
+    return labels, np.array(rows), np.array(contact)
 
 
 def main():
@@ -91,10 +101,9 @@ def main():
 
     out = {"model": xml.name, "weight_N": round(float(m.body_mass.sum()) * 9.81, 1), "scenarios": {}}
     for label, (events, pushes, dur) in SCENARIOS.items():
-        joints, rows, contact = simulate(m, events, pushes, dur)
+        labels, rows, contact = simulate(m, events, pushes, dur)
         sc = {"wheel_contact_peak_N": round(float(contact.max()), 1), "joints": {}}
-        for k, j in enumerate(joints):
-            jn = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j)
+        for k, jn in enumerate(labels):
             sc["joints"][jn] = {n: {"peak": round(float(rows[:, k, i].max()), 2),
                                     "p99.5": round(float(np.percentile(rows[:, k, i], 99.5)), 2)}
                                 for i, n in enumerate(names)}
@@ -108,7 +117,7 @@ def main():
         e = {n: max(s["joints"][jn][n]["p99.5"] for s in normal) for n in names}
         e["peak"] = {n: max(s["joints"][jn][n]["peak"] for s in normal) for n in names}
         j = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, jn)
-        a = act_of.get(j)
+        a = act_of.get(j) if j >= 0 else None
         lim = BEARING_LIMITS.get(round(float(m.actuator_forcerange[a, 1]), 2)) if a is not None else None
         if a is not None and e["peak"]["M_axis_Nm"] > 1.05 * m.actuator_forcerange[a, 1]:
             # More moment about the axis than the actuator can make: a joint-limit hit, or the reflected rotor inertia
@@ -138,7 +147,9 @@ def main():
         b = e.get("bearing")
         bear = (f"{b['motor']}: axial {100 * b['axial_used']:.0f}%, radial {100 * b['radial_used']:.0f}%"
                 + (" **OVER**" if max(b["axial_used"], b["radial_used"]) > 1 else "")) if b else "limits not published"
-        if "antenna" in jn:
+        if jn.startswith("fixed: "):
+            bear = "fixed mount: bracket + bolts to the parent (axis = mount z)"
+        elif "antenna" in jn:
             bear = "micro servo"
         elif jn.startswith(("neck", "head")):
             bear = "STS3215 servo"

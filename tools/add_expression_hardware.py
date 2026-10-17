@@ -19,7 +19,7 @@ a microphone and a camera. This adds the ones the 1.35x model lacked, plus the 6
   Wheels: `touch` sensors (`left/right_wheel_touch`) for landing / lift-off detection.
 
 Masses are folded into the explicit <inertial> of each body (see add_trunk_electronics.py). Adds two actuators at
-ctrl[14:16] (after the wheels, so existing indices are unchanged) and two joints after `head_roll` in qpos.
+ctrl[12:14] (after the wheels, so existing indices are unchanged) and two joints after `head_roll` in qpos.
 Idempotent: skips a model that already has them. Re-run tools/derive_lqr_params.py and tools/fit_balance_trim.py after.
 
 Usage: python3 tools/add_expression_hardware.py open_duck_wheeled_v2.xml open_duck_wheeled_v2_gim6010.xml
@@ -87,7 +87,7 @@ SENSORS = '''
     <touch site="right_wheel_touch" name="right_wheel_touch"/>'''
 ACTUATORS = '''
 
-    <!-- Antenna 9 g micro servos (Open Duck Mini expression package), ctrl[14:16] -->
+    <!-- Antenna 9 g micro servos (Open Duck Mini expression package), ctrl[12:14] -->
     <position name="left_antenna" joint="left_antenna" class="micro_servo_9g"/>
     <position name="right_antenna" joint="right_antenna" class="micro_servo_9g"/>'''
 
