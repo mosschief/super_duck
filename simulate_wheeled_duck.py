@@ -443,6 +443,10 @@ class ScaledWheeledDuckController:
         self.commanded_leg_fold = hip_pitch_cmd + knee_cmd
 
         # 4. Horizon-Stabilized Stereo Camera Gimbal (Looks into turns + manual pan)
+        # TODO: the head hits the trunk at same-direction pitch extremes (cad/freecad/neck_envelope.md). Clip to the
+        # coupled CAD envelope, which the MJCF joint ranges can't express:
+        #   neck_pitch + head_pitch >= -30 deg,  head_pitch <= +30 deg,  neck_pitch + head_pitch <= +60 deg
+        # and enable head/trunk contact in the sim so violations show up.
         neck_pitch_cmd = np.clip(0.15 - 0.5 * pitch, -0.30, 0.90)
         head_pitch_cmd = np.clip(-0.15 - 0.5 * pitch, -0.70, 0.70)
         head_yaw_cmd = np.clip(-0.6 * yaw_err + self.head_yaw_offset, -1.5, 1.5)

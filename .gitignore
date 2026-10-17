@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 cad/vendor/
+cad/freecad/*.FCStd
+cad/freecad/*.FCBak
+cad/freecad/printed/
