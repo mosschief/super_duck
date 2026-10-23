@@ -61,7 +61,7 @@ This project models and controls a **1.35x scaled, wheeled bipedal version** of 
 
 * **Balance trim**: Balance lean = learned trim (slow integrator, starts at `-0.0758 rad`, frozen while settling) + posture feedforward `posture_trim(fold)`, fitted against the *measured* leg fold (legs sag ~0.02–0.05 rad under load). Each 1° of trim error parks the robot ~25 cm off its hold point.
 
-* **Posture & Turn Coordination**: Nominal crouch `hip_pitch = -0.50 rad`, `knee = +1.00 rad` (`base z = 0.3561 m`). Crouch range `-0.25 … +0.24` (`MAX_CROUCH`: keeps the sagging knee ~0.09 rad clear of its 90° joint limit). Includes active hip-roll leveling, centrifugal turn banking (`turn_bank`) and horizon-stabilized stereo head camera tracking. (The old hip-pitch balance assist was removed: it caused a saturated 2.5 Hz limit cycle.)
+* **Posture & Turn Coordination**: Nominal crouch `hip_pitch = +0.50 rad`, `knee = -1.00 rad` (knees bend backward) (`base z = 0.3561 m`). Crouch range `-0.25 … +0.24` (`MAX_CROUCH`: keeps the sagging knee ~0.09 rad clear of its 90° joint limit). Includes active hip-roll leveling, centrifugal turn banking (`turn_bank`) and horizon-stabilized stereo head camera tracking. (The old hip-pitch balance assist was removed: it caused a saturated 2.5 Hz limit cycle.)
 
 * **Live Keyboard Controls**:
 

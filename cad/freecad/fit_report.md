@@ -22,20 +22,24 @@ Exported to `printed/<name>.step` in the part's body frame. Mass at 100% infill,
 
 | Part | Body | Volume (cm³) | Mass @100% (g) |
 | :--- | :--- | ---: | ---: |
-| `trunk_tub` | `trunk_assembly` | 285.5 | 363 |
-| `trunk_lid` | `trunk_assembly` | 61.0 | 77 |
-| `breast_cover` | `trunk_assembly` | 31.4 | 40 |
+| `trunk_tub` | `trunk_assembly` | 419.5 | 533 |
+| `trunk_cover` | `trunk_assembly` | 148.4 | 188 |
+| `trunk_lid` | `trunk_assembly` | 52.7 | 67 |
 | `pi_deck_frame` | `trunk_assembly` | 7.8 | 10 |
-| `electronics_shelf` | `trunk_assembly` | 8.9 | 11 |
-| `L_hip_mount` | `hip_roll_assembly` | 57.8 | 73 |
-| `L_hip_roll_yoke` | `left_roll_to_pitch_assembly` | 47.1 | 60 |
-| `L_thigh` | `knee_and_ankle_assembly` | 108.5 | 138 |
-| `L_shin` | `knee_and_ankle_assembly_2` | 43.4 | 55 |
+| `electronics_shelf` | `trunk_assembly` | 11.4 | 14 |
+| `L_hip_mount` | `hip_roll_assembly` | 96.4 | 122 |
+| `L_hip_roll_end_cap` | `hip_roll_assembly` | 5.0 | 6 |
+| `L_hip_roll_yoke` | `left_roll_to_pitch_assembly` | 75.6 | 96 |
+| `L_thigh` | `knee_and_ankle_assembly` | 187.8 | 239 |
+| `L_shin` | `knee_and_ankle_assembly_2` | 69.1 | 88 |
+| `L_wheel_end_cap` | `knee_and_ankle_assembly_2` | 3.1 | 4 |
 | `L_wheel_hub` | `foot_assembly` | 118.2 | 150 |
-| `R_hip_mount` | `hip_roll_assembly_2` | 57.8 | 73 |
-| `R_hip_roll_yoke` | `right_roll_to_pitch_assembly` | 47.1 | 60 |
-| `R_thigh` | `knee_and_ankle_assembly_3` | 108.5 | 138 |
-| `R_shin` | `knee_and_ankle_assembly_4` | 43.4 | 55 |
+| `R_hip_mount` | `hip_roll_assembly_2` | 96.4 | 122 |
+| `R_hip_roll_end_cap` | `hip_roll_assembly_2` | 5.0 | 6 |
+| `R_hip_roll_yoke` | `right_roll_to_pitch_assembly` | 75.6 | 96 |
+| `R_thigh` | `knee_and_ankle_assembly_3` | 187.8 | 239 |
+| `R_shin` | `knee_and_ankle_assembly_4` | 69.1 | 88 |
+| `R_wheel_end_cap` | `knee_and_ankle_assembly_4` | 3.1 | 4 |
 | `R_wheel_hub` | `foot_assembly_2` | 118.2 | 150 |
 | `neck_servo_pocket` | `trunk_assembly` | 22.1 | 28 |
 | `neck_left_sheet` | `neck_pitch_assembly` | 8.1 | 10 |

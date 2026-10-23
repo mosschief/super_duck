@@ -289,7 +289,7 @@
 
             <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m) -->
             <body name="knee_and_ankle_assembly" pos="0 0.026 0">
-              <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim4305"/>
+              <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim4305"/>
               <inertial pos="0 0.005 -0.045" mass="0.235" diaginertia="0.00034 0.00035 0.00010"/>
               <geom name="left_hip_pitch_gim4305" class="gim4305_canister" euler="1.5708 0 0"/>
               <geom name="left_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
@@ -335,7 +335,7 @@
 
             <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m) -->
             <body name="knee_and_ankle_assembly_3" pos="0 -0.026 0">
-              <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-1.22173 0.523599" class="gim4305"/>
+              <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim4305"/>
               <inertial pos="0 -0.005 -0.045" mass="0.235" diaginertia="0.00034 0.00035 0.00010"/>
               <geom name="right_hip_pitch_gim4305" class="gim4305_canister" euler="1.5708 0 0"/>
               <geom name="right_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
@@ -431,12 +431,12 @@
   <!-- ==================== KEYFRAMES (1.35x Scaled Balanced Crouch Posture) ==================== -->
   <keyframe>
     <!--
-      With 0.118 m thigh & shin links at hip_pitch = -0.50 rad, knee = +1.00 rad,
+      With 0.118 m thigh & shin links at hip_pitch = +0.50 rad, knee = -1.00 rad (knees bend backward),
       vertical leg drop = 2 * 0.118 * cos(0.50) = 0.2071 m; plus hip offset (0.074 m) and wheel radius (0.075 m)
       -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
     -->
     <key name="home_balanced"
-         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 0 -0.50 1.00 0 0 -0.50 1.00 0"
-         ctrl="0 -0.50 1.00 0 -0.50 1.00 0.15 -0.15 0 0 0 0 0 0"/>
+         qpos="0 0 0.3561 1 0 0 0 0.15 -0.15 0 0 0 0 0 0.50 -1.00 0 0 0.50 -1.00 0"
+         ctrl="0 0.50 -1.00 0 0.50 -1.00 0.15 -0.15 0 0 0 0 0 0"/>
   </keyframe>
 </mujoco>

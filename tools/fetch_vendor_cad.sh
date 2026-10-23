@@ -30,6 +30,10 @@ for f in $R/robot.xml $R/trunk_top.stl $R/head.stl $R/head_bot_sheet.stl $R/head
          $R/sg90.stl $R/antenna.stl $R/left_antenna_holder.stl $R/right_antenna_holder.stl \
          $R/wj-wk00-0122topcabinetcase_95.stl $R/wj-wk00-0123middlecase_56.stl $R/wj-wk00-0124bottomcase_45.stl \
          $R/drive_palonier.stl $R/passive_palonier.stl \
+         $R/trunk_bottom.stl $R/body_front.stl $R/body_back.stl $R/body_middle_bottom.stl $R/body_middle_top.stl \
+         $R/left_roll_to_pitch.stl $R/right_roll_to_pitch.stl $R/roll_motor_top.stl $R/roll_motor_bottom.stl \
+         $R/left_knee_to_ankle_left_sheet.stl $R/left_knee_to_ankle_right_sheet.stl $R/leg_spacer.stl \
+         $R/left_cache.stl $R/right_cache.stl $R/foot_side.stl $R/foot_top.stl \
          print/flash_light_module.stl print/flash_reflector_interface.stl; do
   echo "-> vendor/odm/$(basename "$f")"
   curl -fsSL -o "vendor/odm/$(basename "$f")" "$ODM/$f"

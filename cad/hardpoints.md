@@ -26,10 +26,10 @@ Units: mm, deg, g, N*m. Frame: world at keyframe home_balanced; floor z = 0; x f
 
 | Pose | hip_pitch (deg) | knee (deg) | hip_pitch axis above axle | axle fore/aft of hip_pitch axis |
 | :--- | ---: | ---: | ---: | ---: |
-| jump take-off (delta -0.46) | -2.3 | 4.6 | 235.8 | 0.0 |
-| tallest drive (delta -0.25) | -14.3 | 28.6 | 228.7 | 0.0 |
-| home (delta 0) | -28.6 | 57.3 | 207.1 | 0.0 |
-| deepest crouch / jump wind-up (delta +0.24) | -42.4 | 84.8 | 174.3 | 0.0 |
+| jump take-off (delta -0.46) | 2.3 | -4.6 | 235.8 | 0.0 |
+| tallest drive (delta -0.25) | 14.3 | -28.6 | 228.7 | 0.0 |
+| home (delta 0) | 28.6 | -57.3 | 207.1 | -0.0 |
+| deepest crouch / jump wind-up (delta +0.24) | 42.4 | -84.8 | 174.3 | -0.0 |
 
 ## Joints
 
@@ -42,13 +42,13 @@ Units: mm, deg, g, N*m. Frame: world at keyframe home_balanced; floor z = 0; x f
 | `left_antenna` | `left_antenna` | `head_assembly` | 0, 0, 0 | 0, 1, 0 | 22.7, 46, 585.4 | -45, 45 | left_antenna ±0.18 N·m |
 | `right_antenna` | `right_antenna` | `head_assembly` | 0, 0, 0 | 0, 1, 0 | 22.7, -46, 585.4 | -45, 45 | right_antenna ±0.18 N·m |
 | `left_hip_roll` | `left_roll_to_pitch_assembly` | `hip_roll_assembly` | 0, 0, 0 | 1, 0, 0 | 0, 108, 282.1 | -25, 25 | left_hip_roll ±3.47 N·m |
-| `left_hip_pitch` | `knee_and_ankle_assembly` | `left_roll_to_pitch_assembly` | 0, 0, 0 | 0, 1, 0 | 0, 160, 282.1 | -70, 30 | left_hip_pitch ±11.0 N·m |
-| `left_knee` | `knee_and_ankle_assembly_2` | `knee_and_ankle_assembly` | 0, 0, 0 | 0, 1, 0 | 56.6, 160, 178.5 | -90, 90 | left_knee ±11.0 N·m |
-| `left_wheel` | `foot_assembly` | `knee_and_ankle_assembly_2` | 0, 0, 0 | 0, 1, 0 | 0, 112, 75 | continuous | left_wheel_motor ±3.47 N·m |
+| `left_hip_pitch` | `knee_and_ankle_assembly` | `left_roll_to_pitch_assembly` | 0, 0, 0 | 0, 1, 0 | 0, 160, 282.1 | -30, 70 | left_hip_pitch ±11.0 N·m |
+| `left_knee` | `knee_and_ankle_assembly_2` | `knee_and_ankle_assembly` | 0, 0, 0 | 0, 1, 0 | -56.6, 160, 178.5 | -90, 90 | left_knee ±11.0 N·m |
+| `left_wheel` | `foot_assembly` | `knee_and_ankle_assembly_2` | 0, 0, 0 | 0, 1, 0 | -0, 112, 75 | continuous | left_wheel_motor ±3.47 N·m |
 | `right_hip_roll` | `right_roll_to_pitch_assembly` | `hip_roll_assembly_2` | 0, 0, 0 | 1, 0, 0 | 0, -108, 282.1 | -25, 25 | right_hip_roll ±3.47 N·m |
-| `right_hip_pitch` | `knee_and_ankle_assembly_3` | `right_roll_to_pitch_assembly` | 0, 0, 0 | 0, 1, 0 | 0, -160, 282.1 | -70, 30 | right_hip_pitch ±11.0 N·m |
-| `right_knee` | `knee_and_ankle_assembly_4` | `knee_and_ankle_assembly_3` | 0, 0, 0 | 0, 1, 0 | 56.6, -160, 178.5 | -90, 90 | right_knee ±11.0 N·m |
-| `right_wheel` | `foot_assembly_2` | `knee_and_ankle_assembly_4` | 0, 0, 0 | 0, 1, 0 | 0, -112, 75 | continuous | right_wheel_motor ±3.47 N·m |
+| `right_hip_pitch` | `knee_and_ankle_assembly_3` | `right_roll_to_pitch_assembly` | 0, 0, 0 | 0, 1, 0 | 0, -160, 282.1 | -30, 70 | right_hip_pitch ±11.0 N·m |
+| `right_knee` | `knee_and_ankle_assembly_4` | `knee_and_ankle_assembly_3` | 0, 0, 0 | 0, 1, 0 | -56.6, -160, 178.5 | -90, 90 | right_knee ±11.0 N·m |
+| `right_wheel` | `foot_assembly_2` | `knee_and_ankle_assembly_4` | 0, 0, 0 | 0, 1, 0 | -0, -112, 75 | continuous | right_wheel_motor ±3.47 N·m |
 
 ## Body frames
 
@@ -65,13 +65,13 @@ Units: mm, deg, g, N*m. Frame: world at keyframe home_balanced; floor z = 0; x f
 | `hip_roll_assembly` | `trunk_assembly` | 0, 84, -44 | 1, 0, 0, 0 | 0, 84, 326.1 | 60.0 |
 | `left_roll_to_pitch_assembly` | `hip_roll_assembly` | 0, 24, -44 | 1, 0, 0, 0 | 0, 108, 282.1 | 185.0 |
 | `knee_and_ankle_assembly` | `left_roll_to_pitch_assembly` | 0, 52, 0 | 1, 0, 0, 0 | 0, 160, 282.1 | 473.0 |
-| `knee_and_ankle_assembly_2` | `knee_and_ankle_assembly` | 0, 0, -118 | 1, 0, 0, 0 | 56.6, 160, 178.5 | 453.0 |
-| `foot_assembly` | `knee_and_ankle_assembly_2` | 0, -48, -118 | 1, 0, 0, 0 | 0, 112, 75 | 255.0 |
+| `knee_and_ankle_assembly_2` | `knee_and_ankle_assembly` | 0, 0, -118 | 1, 0, 0, 0 | -56.6, 160, 178.5 | 453.0 |
+| `foot_assembly` | `knee_and_ankle_assembly_2` | 0, -48, -118 | 1, 0, 0, 0 | -0, 112, 75 | 255.0 |
 | `hip_roll_assembly_2` | `trunk_assembly` | 0, -84, -44 | 1, 0, 0, 0 | 0, -84, 326.1 | 60.0 |
 | `right_roll_to_pitch_assembly` | `hip_roll_assembly_2` | 0, -24, -44 | 1, 0, 0, 0 | 0, -108, 282.1 | 185.0 |
 | `knee_and_ankle_assembly_3` | `right_roll_to_pitch_assembly` | 0, -52, 0 | 1, 0, 0, 0 | 0, -160, 282.1 | 473.0 |
-| `knee_and_ankle_assembly_4` | `knee_and_ankle_assembly_3` | 0, 0, -118 | 1, 0, 0, 0 | 56.6, -160, 178.5 | 453.0 |
-| `foot_assembly_2` | `knee_and_ankle_assembly_4` | 0, 48, -118 | 1, 0, 0, 0 | 0, -112, 75 | 255.0 |
+| `knee_and_ankle_assembly_4` | `knee_and_ankle_assembly_3` | 0, 0, -118 | 1, 0, 0, 0 | -56.6, -160, 178.5 | 453.0 |
+| `foot_assembly_2` | `knee_and_ankle_assembly_4` | 0, 48, -118 | 1, 0, 0, 0 | -0, -112, 75 | 255.0 |
 
 ## Cameras, sites and lights
 
@@ -81,10 +81,10 @@ Units: mm, deg, g, N*m. Frame: world at keyframe home_balanced; floor z = 0; x f
 | `left_eye_cam` | camera | `head_assembly` | 58, 35, 2 | 112.7, 35, 549.4 | fovy 41.0° |
 | `right_eye_cam` | camera | `head_assembly` | 58, -35, 2 | 112.7, -35, 549.4 | fovy 41.0° |
 | `imu` | site | `base` | -62, 8, 45 | -62, 8, 415.1 | |
-| `left_foot` | site | `foot_assembly` | 0, 0, 0 | 0, 112, 75 | |
-| `left_wheel_touch` | site | `foot_assembly` | 0, 0, 0 | 0, 112, 75 | |
-| `right_foot` | site | `foot_assembly_2` | 0, 0, 0 | 0, -112, 75 | |
-| `right_wheel_touch` | site | `foot_assembly_2` | 0, 0, 0 | 0, -112, 75 | |
+| `left_foot` | site | `foot_assembly` | 0, 0, 0 | -0, 112, 75 | |
+| `left_wheel_touch` | site | `foot_assembly` | 0, 0, 0 | -0, 112, 75 | |
+| `right_foot` | site | `foot_assembly_2` | 0, 0, 0 | -0, -112, 75 | |
+| `right_wheel_touch` | site | `foot_assembly_2` | 0, 0, 0 | -0, -112, 75 | |
 | `projector` | light | `head_assembly` | 59, 0, -18 | | dir 0.97, 0, -0.243, cutoff 20.0° |
 
 ## Part placement (geoms)

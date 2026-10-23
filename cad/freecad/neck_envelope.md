@@ -5,14 +5,14 @@ projector pod box, antenna parts) touches the trunk for any head yaw in [-94.5, 
 
 | neck_pitch \ head_pitch | -45 | -30 | -15 | +0 | +15 | +30 | +45 |
 | ---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| -20 | x | x | x | ok | ok | ok | ok |
-| -10 | x | x | ok | ok | ok | ok | ok |
-| +0 | x | ok | ok | ok | ok | ok | x |
-| +10 | x | ok | ok | ok | ok | ok | x |
-| +20 | ok | ok | ok | ok | ok | ok | x |
-| +30 | ok | ok | ok | ok | ok | ok | x |
+| -20 | x | x | x | x | ok | ok | x |
+| -10 | x | x | x | ok | ok | ok | x |
+| +0 | x | x | ok | ok | ok | x | x |
+| +10 | x | x | ok | ok | ok | x | x |
+| +20 | x | ok | ok | ok | ok | x | x |
+| +30 | x | ok | ok | ok | ok | x | x |
 | +40 | ok | ok | ok | ok | ok | x | x |
-| +50 | ok | ok | ok | ok | x | x | x |
+| +50 | ok | ok | ok | ok | ok | x | x |
 | +60 | ok | ok | ok | ok | x | x | x |
 | +65 | ok | ok | ok | ok | x | x | x |
 
@@ -20,25 +20,36 @@ projector pod box, antenna parts) touches the trunk for any head yaw in [-94.5, 
 
 | neck_pitch | head_pitch | Contacts (first yaw, roll) |
 | ---: | ---: | :--- |
-| -20 | -45 | L_antenna / trunk_lid (0, -30); L_antenna_sg90 / trunk_lid (0, -30); R_antenna / trunk_lid (0, 30); R_antenna_sg90 / trunk_lid (0, 30); head (ODM outer hull) / can_transceivers (-94.5, 0); head (ODM outer hull) / electronics_shelf (-94.5, 0); head (ODM outer hull) / estop_22mm (0, -30); head (ODM outer hull) / max98357a_i2s_amp (94.5, -30); head (ODM outer hull) / teensy_40 (-94.5, 0); head (ODM outer hull) / teensy_carrier_pcb (-94.5, 0); head (ODM outer hull) / teensy_terminals (0, -30); head (ODM outer hull) / trunk_lid (-94.5, 0); head (ODM outer hull) / trunk_tub (-94.5, 0); left_antenna_holder / estop_22mm (0, -30); left_antenna_holder / trunk_lid (0, -30); left_antenna_holder / trunk_tub (0, -30); projector_pod / estop_22mm (94.5, -30); projector_pod / max98357a_i2s_amp (94.5, -30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30); right_antenna_holder / trunk_lid (0, 0); right_antenna_holder / trunk_tub (0, 0) |
-| -20 | -30 | L_antenna / trunk_lid (0, -30); R_antenna / trunk_lid (0, 30); head (ODM outer hull) / can_transceivers (0, 30); head (ODM outer hull) / estop_22mm (0, -30); head (ODM outer hull) / max98357a_i2s_amp (94.5, -30); head (ODM outer hull) / teensy_40 (0, 30); head (ODM outer hull) / trunk_lid (-94.5, 0); head (ODM outer hull) / trunk_tub (-94.5, 30); left_antenna_holder / trunk_lid (0, -30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30); right_antenna_holder / trunk_lid (0, 30) |
-| -20 | -15 | head (ODM outer hull) / trunk_lid (-94.5, 30); head (ODM outer hull) / trunk_tub (-94.5, 30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30) |
-| -10 | -45 | L_antenna / trunk_lid (0, -30); R_antenna / trunk_lid (0, 30); head (ODM outer hull) / can_transceivers (0, 30); head (ODM outer hull) / estop_22mm (0, -30); head (ODM outer hull) / max98357a_i2s_amp (94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, 0); head (ODM outer hull) / trunk_tub (-94.5, 0); left_antenna_holder / trunk_lid (0, -30); projector_pod / estop_22mm (94.5, -30); projector_pod / max98357a_i2s_amp (94.5, -30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30); right_antenna_holder / trunk_lid (0, 30) |
-| -10 | -30 | head (ODM outer hull) / trunk_lid (-94.5, 30); head (ODM outer hull) / trunk_tub (-94.5, 30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30) |
-| +0 | -45 | head (ODM outer hull) / trunk_lid (-94.5, 30); head (ODM outer hull) / trunk_tub (-94.5, 30); left_antenna_holder / trunk_lid (0, -30); projector_pod / max98357a_i2s_amp (94.5, -30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30); right_antenna_holder / trunk_lid (0, 30) |
-| +0 | +45 | head (ODM outer hull) / trunk_lid (-94.5, -30) |
-| +10 | -45 | head (ODM outer hull) / trunk_lid (-94.5, 30); projector_pod / trunk_lid (94.5, -30); projector_pod / trunk_tub (94.5, -30) |
-| +10 | +45 | head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +20 | +45 | head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +30 | +45 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +40 | +30 | head (ODM outer hull) / breast_cover (-94.5, -30) |
-| +40 | +45 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +50 | +15 | head (ODM outer hull) / breast_cover (-94.5, -30) |
-| +50 | +30 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +50 | +45 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +60 | +15 | head (ODM outer hull) / breast_cover (-94.5, -30) |
-| +60 | +30 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +60 | +45 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30); head (ODM outer hull) / usb_chest_cam (0, -30) |
-| +65 | +15 | head (ODM outer hull) / breast_cover (-94.5, -30) |
-| +65 | +30 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
-| +65 | +45 | head (ODM outer hull) / breast_cover (-94.5, -30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30); head (ODM outer hull) / usb_chest_cam (0, -30) |
+| -20 | -45 | L_antenna / trunk_cover (0, -30); L_antenna / trunk_lid (0, -30); L_antenna_sg90 / trunk_cover (0, -30); L_antenna_sg90 / trunk_lid (0, -30); R_antenna / trunk_cover (0, 30); R_antenna / trunk_lid (0, 30); R_antenna_sg90 / trunk_cover (0, -30); R_antenna_sg90 / trunk_lid (0, 30); head (ODM outer hull) / can_transceivers (-94.5, 0); head (ODM outer hull) / electronics_shelf (-94.5, 0); head (ODM outer hull) / teensy_40 (-94.5, 0); head (ODM outer hull) / teensy_carrier_pcb (-94.5, 0); head (ODM outer hull) / teensy_terminals (0, -30); head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, 0); head (ODM outer hull) / trunk_tub (-94.5, 0); left_antenna_holder / trunk_cover (0, -30); left_antenna_holder / trunk_lid (0, -30); projector_pod / trunk_cover (94.5, -30); projector_pod / trunk_tub (94.5, 0); right_antenna_holder / trunk_cover (0, -30); right_antenna_holder / trunk_lid (0, 0) |
+| -20 | -30 | L_antenna / trunk_cover (0, -30); L_antenna / trunk_lid (0, -30); L_antenna_sg90 / trunk_cover (0, -30); R_antenna / trunk_cover (0, 30); R_antenna / trunk_lid (0, 30); R_antenna_sg90 / trunk_cover (0, 30); head (ODM outer hull) / can_transceivers (0, 30); head (ODM outer hull) / teensy_40 (0, 30); head (ODM outer hull) / trunk_cover (-94.5, 0); head (ODM outer hull) / trunk_lid (-94.5, 0); left_antenna_holder / trunk_cover (0, -30); left_antenna_holder / trunk_lid (0, -30); projector_pod / trunk_cover (94.5, -30); projector_pod / trunk_tub (94.5, -30); right_antenna_holder / trunk_cover (0, 30); right_antenna_holder / trunk_lid (0, 30) |
+| -20 | -15 | head (ODM outer hull) / trunk_cover (-94.5, 30); head (ODM outer hull) / trunk_lid (-94.5, 30); left_antenna_holder / trunk_cover (0, -30); projector_pod / trunk_cover (94.5, -30); right_antenna_holder / trunk_cover (0, 30) |
+| -20 | +0 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| -20 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| -10 | -45 | L_antenna / trunk_cover (0, -30); L_antenna / trunk_lid (0, -30); L_antenna_sg90 / trunk_cover (0, -30); R_antenna / trunk_cover (0, 30); R_antenna / trunk_lid (0, 30); R_antenna_sg90 / trunk_cover (0, 30); head (ODM outer hull) / can_transceivers (0, 30); head (ODM outer hull) / trunk_cover (-94.5, 0); head (ODM outer hull) / trunk_lid (-94.5, 0); left_antenna_holder / trunk_cover (0, -30); left_antenna_holder / trunk_lid (0, -30); projector_pod / trunk_cover (94.5, -30); projector_pod / trunk_tub (94.5, 0); right_antenna_holder / trunk_cover (0, 30); right_antenna_holder / trunk_lid (0, 30) |
+| -10 | -30 | L_antenna_sg90 / trunk_cover (0, -30); R_antenna_sg90 / trunk_cover (0, 30); head (ODM outer hull) / trunk_cover (-94.5, 0); head (ODM outer hull) / trunk_lid (-94.5, 30); left_antenna_holder / trunk_cover (0, -30); projector_pod / trunk_cover (94.5, -30); right_antenna_holder / trunk_cover (0, 30) |
+| -10 | -15 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| -10 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +0 | -45 | L_antenna / trunk_cover (0, -30); L_antenna_sg90 / trunk_cover (0, -30); R_antenna / trunk_cover (0, 30); R_antenna_sg90 / trunk_cover (0, 30); head (ODM outer hull) / trunk_cover (-94.5, 0); head (ODM outer hull) / trunk_lid (-94.5, 30); left_antenna_holder / trunk_cover (0, -30); left_antenna_holder / trunk_lid (0, -30); projector_pod / trunk_cover (94.5, -30); projector_pod / trunk_lid (94.5, -30); right_antenna_holder / trunk_cover (0, 30); right_antenna_holder / trunk_lid (0, 30) |
+| +0 | -30 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| +0 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +0 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +10 | -45 | head (ODM outer hull) / trunk_cover (-94.5, 30); head (ODM outer hull) / trunk_lid (-94.5, 30); left_antenna_holder / trunk_cover (0, -30); projector_pod / trunk_cover (94.5, -30); right_antenna_holder / trunk_cover (0, 30) |
+| +10 | -30 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| +10 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +10 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +20 | -45 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| +20 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +20 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +30 | -45 | head (ODM outer hull) / trunk_cover (-94.5, 30) |
+| +30 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +30 | +45 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +40 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +40 | +45 | L_antenna_sg90 / trunk_cover (-94.5, -30); R_antenna_sg90 / trunk_cover (94.5, 30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +50 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +50 | +45 | L_antenna_sg90 / trunk_cover (-94.5, -30); R_antenna_sg90 / trunk_cover (94.5, 30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +60 | +15 | head (ODM outer hull) / trunk_cover (-94.5, -30) |
+| +60 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +60 | +45 | L_antenna_sg90 / trunk_cover (-94.5, -30); R_antenna_sg90 / trunk_cover (94.5, 30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30); head (ODM outer hull) / usb_nav_cam (0, -30) |
+| +65 | +15 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +65 | +30 | head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30) |
+| +65 | +45 | L_antenna_sg90 / trunk_cover (-94.5, -30); R_antenna_sg90 / trunk_cover (94.5, 30); head (ODM outer hull) / bus_servo_adapter (-94.5, -30); head (ODM outer hull) / trunk_cover (-94.5, -30); head (ODM outer hull) / trunk_lid (-94.5, -30); head (ODM outer hull) / trunk_tub (-94.5, -30); head (ODM outer hull) / usb_nav_cam (0, -30) |

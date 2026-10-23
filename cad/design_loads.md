@@ -8,190 +8,190 @@ Robot weight 51.4 N. Values are the **99.5th percentile** over the scenario (pea
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) | Output bearing (peak / limit) |
 | :--- | ---: | ---: | ---: | ---: | :--- |
-| `neck_pitch` | 1.0 (1.9) | 38.3 (86.2) | 2.46 (5.30) | 0.16 (0.27) | STS3215 servo; **M_axis peak > actuator limit**: hard stop or rotor-inertia shock |
-| `head_pitch` | 1.0 (1.8) | 34.1 (76.5) | 1.27 (2.96) | 0.12 (0.18) | STS3215 servo |
-| `head_yaw` | 26.1 (70.8) | 18.4 (32.8) | 0.11 (0.13) | 0.95 (2.25) | STS3215 servo |
-| `head_roll` | 15.4 (27.3) | 21.7 (58.5) | 0.01 (0.02) | 0.36 (0.74) | STS3215 servo |
-| `left_antenna` | 0.0 (0.0) | 0.1 (0.3) | 0.00 (0.01) | 0.00 (0.00) | micro servo |
-| `right_antenna` | 0.0 (0.0) | 0.1 (0.3) | 0.00 (0.01) | 0.00 (0.00) | micro servo |
-| `left_hip_roll` | 10.9 (13.8) | 51.8 (127.1) | 0.79 (0.85) | 5.87 (5.96) | GIM4305-10: axial 11%, radial 25% |
-| `left_hip_pitch` | 4.8 (16.2) | 61.0 (145.2) | 5.82 (5.91) | 3.18 (7.51) | limits not published |
-| `left_knee` | 5.2 (16.0) | 80.1 (193.4) | 6.62 (7.90) | 3.48 (8.96) | limits not published |
-| `left_wheel` | 5.5 (15.5) | 92.1 (250.6) | 2.19 (6.64) | 0.62 (1.23) | GIM4305-10: axial 12%, radial 50%; **M_axis peak > actuator limit**: rotor-inertia shock |
-| `right_hip_roll` | 10.9 (13.8) | 51.7 (126.3) | 0.76 (0.84) | 5.86 (5.96) | GIM4305-10: axial 11%, radial 25% |
-| `right_hip_pitch` | 4.5 (16.2) | 60.8 (144.3) | 5.81 (5.90) | 3.17 (7.46) | limits not published |
-| `right_knee` | 5.0 (16.0) | 79.9 (192.5) | 6.61 (7.89) | 3.47 (8.93) | limits not published |
-| `right_wheel` | 5.4 (15.5) | 92.0 (249.8) | 2.18 (6.63) | 0.62 (1.22) | GIM4305-10: axial 12%, radial 50%; **M_axis peak > actuator limit**: rotor-inertia shock |
-| `fixed: hip_roll_assembly` | 49.1 (120.2) | 11.8 (21.5) | 1.04 (2.50) | 5.84 (5.94) | fixed mount: bracket + bolts to the parent (axis = mount z) |
-| `fixed: hip_roll_assembly_2` | 49.0 (119.3) | 11.8 (21.6) | 1.04 (2.50) | 5.83 (5.93) | fixed mount: bracket + bolts to the parent (axis = mount z) |
+| `neck_pitch` | 1.3 (36.6) | 32.4 (69.7) | 2.89 (4.54) | 0.13 (4.38) | STS3215 servo; **M_axis peak > actuator limit**: hard stop or rotor-inertia shock |
+| `head_pitch` | 1.1 (34.1) | 29.3 (62.0) | 1.55 (2.32) | 0.10 (2.32) | STS3215 servo |
+| `head_yaw` | 24.1 (56.8) | 19.2 (33.5) | 0.10 (0.49) | 1.10 (1.60) | STS3215 servo |
+| `head_roll` | 15.9 (26.6) | 19.8 (46.7) | 0.01 (0.37) | 0.32 (0.49) | STS3215 servo |
+| `left_antenna` | 0.0 (0.2) | 0.1 (0.3) | 0.00 (0.01) | 0.00 (0.01) | micro servo |
+| `right_antenna` | 0.0 (0.2) | 0.1 (0.3) | 0.00 (0.01) | 0.00 (0.01) | micro servo |
+| `left_hip_roll` | 10.6 (15.6) | 51.1 (127.0) | 1.11 (2.22) | 5.88 (5.98) | GIM4305-10: axial 13%, radial 25% |
+| `left_hip_pitch` | 5.2 (18.9) | 60.2 (145.0) | 5.83 (5.93) | 3.25 (7.51) | limits not published |
+| `left_knee` | 5.8 (21.9) | 79.5 (193.2) | 6.59 (7.87) | 3.53 (8.88) | limits not published |
+| `left_wheel` | 6.5 (24.3) | 91.6 (244.7) | 2.18 (6.75) | 0.62 (1.97) | GIM4305-10: axial 19%, radial 49%; **M_axis peak > actuator limit**: rotor-inertia shock |
+| `right_hip_roll` | 10.6 (14.9) | 50.5 (140.1) | 1.10 (2.59) | 5.87 (5.97) | GIM4305-10: axial 12%, radial 28% |
+| `right_hip_pitch` | 5.1 (15.8) | 58.7 (156.8) | 5.82 (5.92) | 2.97 (10.66) | limits not published |
+| `right_knee` | 5.8 (14.7) | 78.7 (201.7) | 6.58 (7.86) | 3.44 (11.21) | limits not published |
+| `right_wheel` | 6.5 (14.2) | 91.5 (247.7) | 2.18 (6.81) | 0.61 (3.37) | GIM4305-10: axial 11%, radial 50%; **M_axis peak > actuator limit**: rotor-inertia shock |
+| `fixed: hip_roll_assembly` | 48.5 (120.1) | 11.8 (23.6) | 1.04 (2.65) | 5.86 (5.96) | fixed mount: bracket + bolts to the parent (axis = mount z) |
+| `fixed: hip_roll_assembly_2` | 47.4 (134.1) | 12.0 (22.8) | 1.08 (2.66) | 5.84 (5.95) | fixed mount: bracket + bolts to the parent (axis = mount z) |
 
 ## Per scenario (p99.5)
 
 ### stand
 
-Wheel contact peak (touch sensor): 27.4 N
+Wheel contact peak (touch sensor): 27.3 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 7.5 | 0.15 | 0.00 |
-| `head_pitch` | 0.0 | 6.6 | 0.10 | 0.00 |
-| `head_yaw` | 6.3 | 0.9 | 0.00 | 0.10 |
-| `head_roll` | 0.7 | 5.2 | 0.00 | 0.05 |
-| `left_hip_roll` | 0.9 | 12.6 | 0.26 | 0.18 |
-| `left_hip_pitch` | 1.3 | 14.4 | 0.18 | 0.97 |
-| `left_knee` | 1.3 | 19.2 | 1.21 | 0.95 |
-| `left_wheel` | 1.2 | 23.7 | 0.09 | 0.17 |
-| `right_hip_roll` | 0.9 | 12.6 | 0.26 | 0.18 |
-| `right_hip_pitch` | 1.3 | 14.4 | 0.18 | 0.96 |
-| `right_knee` | 1.3 | 19.1 | 1.21 | 0.94 |
-| `right_wheel` | 1.2 | 23.6 | 0.09 | 0.17 |
-| `fixed: hip_roll_assembly` | 12.0 | 1.5 | 0.06 | 0.34 |
-| `fixed: hip_roll_assembly_2` | 11.9 | 1.5 | 0.06 | 0.33 |
+| `neck_pitch` | 0.0 | 7.4 | 0.22 | 0.00 |
+| `head_pitch` | 0.0 | 6.6 | 0.13 | 0.00 |
+| `head_yaw` | 6.3 | 0.9 | 0.00 | 0.12 |
+| `head_roll` | 0.8 | 5.2 | 0.00 | 0.05 |
+| `left_hip_roll` | 0.8 | 12.7 | 0.26 | 0.20 |
+| `left_hip_pitch` | 1.2 | 14.5 | 0.19 | 0.97 |
+| `left_knee` | 1.2 | 19.2 | 1.23 | 0.95 |
+| `left_wheel` | 1.2 | 23.8 | 0.09 | 0.17 |
+| `right_hip_roll` | 0.8 | 12.6 | 0.26 | 0.20 |
+| `right_hip_pitch` | 1.2 | 14.4 | 0.19 | 0.96 |
+| `right_knee` | 1.2 | 19.1 | 1.22 | 0.94 |
+| `right_wheel` | 1.2 | 23.7 | 0.09 | 0.17 |
+| `fixed: hip_roll_assembly` | 12.0 | 1.4 | 0.05 | 0.34 |
+| `fixed: hip_roll_assembly_2` | 11.9 | 1.4 | 0.05 | 0.34 |
 
 ### drive 0.6 m/s weaving
 
-Wheel contact peak (touch sensor): 35.1 N
+Wheel contact peak (touch sensor): 37.3 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 1.0 | 7.5 | 0.18 | 0.16 |
-| `head_pitch` | 1.0 | 6.6 | 0.12 | 0.12 |
-| `head_yaw` | 6.3 | 1.0 | 0.11 | 0.11 |
+| `neck_pitch` | 1.3 | 7.4 | 0.21 | 0.13 |
+| `head_pitch` | 1.1 | 6.6 | 0.12 | 0.10 |
+| `head_yaw` | 6.2 | 1.2 | 0.10 | 0.12 |
 | `head_roll` | 0.3 | 5.2 | 0.01 | 0.10 |
-| `left_hip_roll` | 4.9 | 20.1 | 0.79 | 2.33 |
-| `left_hip_pitch` | 4.8 | 22.0 | 2.30 | 1.68 |
-| `left_knee` | 5.2 | 26.6 | 2.66 | 1.63 |
-| `left_wheel` | 5.5 | 31.1 | 0.69 | 0.35 |
-| `right_hip_roll` | 5.3 | 19.9 | 0.76 | 2.31 |
-| `right_hip_pitch` | 4.5 | 21.9 | 2.28 | 1.68 |
-| `right_knee` | 5.0 | 26.6 | 2.45 | 1.64 |
-| `right_wheel` | 5.4 | 31.2 | 0.69 | 0.36 |
-| `fixed: hip_roll_assembly` | 19.4 | 5.1 | 0.34 | 2.50 |
-| `fixed: hip_roll_assembly_2` | 19.3 | 5.3 | 0.35 | 2.49 |
+| `left_hip_roll` | 5.2 | 23.1 | 1.11 | 2.24 |
+| `left_hip_pitch` | 5.2 | 25.0 | 2.20 | 2.02 |
+| `left_knee` | 5.8 | 29.6 | 2.54 | 1.80 |
+| `left_wheel` | 6.5 | 34.1 | 0.68 | 0.39 |
+| `right_hip_roll` | 4.1 | 23.2 | 1.10 | 2.27 |
+| `right_hip_pitch` | 5.1 | 25.1 | 2.23 | 2.04 |
+| `right_knee` | 5.8 | 29.7 | 2.61 | 1.79 |
+| `right_wheel` | 6.5 | 34.2 | 0.68 | 0.40 |
+| `fixed: hip_roll_assembly` | 22.6 | 5.3 | 0.33 | 2.43 |
+| `fixed: hip_roll_assembly_2` | 22.6 | 4.8 | 0.30 | 2.47 |
 
 ### crouch / stand cycles
 
-Wheel contact peak (touch sensor): 76.8 N
+Wheel contact peak (touch sensor): 76.9 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 8.7 | 0.39 | 0.00 |
-| `head_pitch` | 0.0 | 7.7 | 0.22 | 0.00 |
-| `head_yaw` | 7.2 | 2.5 | 0.00 | 0.18 |
-| `head_roll` | 2.1 | 5.9 | 0.00 | 0.06 |
-| `left_hip_roll` | 2.5 | 15.2 | 0.29 | 0.54 |
-| `left_hip_pitch` | 1.2 | 17.6 | 0.53 | 1.12 |
-| `left_knee` | 1.2 | 23.1 | 2.10 | 1.13 |
-| `left_wheel` | 1.2 | 28.0 | 0.34 | 0.23 |
-| `right_hip_roll` | 2.5 | 15.2 | 0.29 | 0.54 |
-| `right_hip_pitch` | 1.2 | 17.5 | 0.53 | 1.12 |
-| `right_knee` | 1.2 | 23.1 | 2.10 | 1.12 |
-| `right_wheel` | 1.2 | 28.0 | 0.34 | 0.23 |
-| `fixed: hip_roll_assembly` | 14.5 | 2.5 | 0.19 | 0.54 |
-| `fixed: hip_roll_assembly_2` | 14.4 | 2.5 | 0.19 | 0.54 |
+| `neck_pitch` | 0.0 | 10.1 | 0.46 | 0.00 |
+| `head_pitch` | 0.0 | 9.0 | 0.25 | 0.00 |
+| `head_yaw` | 8.3 | 2.6 | 0.00 | 0.20 |
+| `head_roll` | 2.2 | 6.8 | 0.00 | 0.08 |
+| `left_hip_roll` | 2.4 | 15.1 | 0.29 | 0.54 |
+| `left_hip_pitch` | 1.2 | 17.5 | 0.52 | 1.12 |
+| `left_knee` | 1.2 | 23.0 | 2.06 | 1.12 |
+| `left_wheel` | 1.2 | 27.9 | 0.31 | 0.23 |
+| `right_hip_roll` | 2.4 | 15.1 | 0.29 | 0.54 |
+| `right_hip_pitch` | 1.2 | 17.4 | 0.52 | 1.12 |
+| `right_knee` | 1.2 | 22.9 | 2.05 | 1.12 |
+| `right_wheel` | 1.2 | 27.8 | 0.31 | 0.23 |
+| `fixed: hip_roll_assembly` | 14.4 | 2.4 | 0.17 | 0.53 |
+| `fixed: hip_roll_assembly_2` | 14.3 | 2.4 | 0.17 | 0.53 |
 
 ### jump (standing)
 
-Wheel contact peak (touch sensor): 263.7 N
+Wheel contact peak (touch sensor): 257.1 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 38.3 | 2.46 | 0.00 |
-| `head_pitch` | 0.0 | 34.1 | 1.27 | 0.00 |
-| `head_yaw` | 26.1 | 18.4 | 0.00 | 0.95 |
-| `head_roll` | 15.4 | 21.7 | 0.00 | 0.36 |
-| `left_hip_roll` | 10.9 | 51.8 | 0.24 | 3.78 |
-| `left_hip_pitch` | 3.5 | 61.0 | 3.72 | 3.18 |
-| `left_knee` | 3.5 | 80.1 | 6.62 | 3.48 |
-| `left_wheel` | 3.4 | 92.1 | 1.53 | 0.62 |
-| `right_hip_roll` | 10.9 | 51.7 | 0.24 | 3.79 |
-| `right_hip_pitch` | 3.5 | 60.8 | 3.73 | 3.17 |
-| `right_knee` | 3.5 | 79.9 | 6.61 | 3.47 |
-| `right_wheel` | 3.4 | 92.0 | 1.53 | 0.62 |
-| `fixed: hip_roll_assembly` | 49.1 | 11.8 | 1.04 | 3.29 |
-| `fixed: hip_roll_assembly_2` | 49.0 | 11.8 | 1.04 | 3.30 |
+| `neck_pitch` | 0.7 | 32.4 | 2.89 | 0.08 |
+| `head_pitch` | 0.6 | 29.3 | 1.55 | 0.04 |
+| `head_yaw` | 24.1 | 19.2 | 0.01 | 1.10 |
+| `head_roll` | 15.9 | 19.8 | 0.01 | 0.32 |
+| `left_hip_roll` | 10.6 | 51.1 | 0.34 | 3.77 |
+| `left_hip_pitch` | 3.4 | 60.2 | 3.68 | 3.25 |
+| `left_knee` | 3.4 | 79.5 | 6.59 | 3.53 |
+| `left_wheel` | 3.2 | 91.6 | 1.52 | 0.62 |
+| `right_hip_roll` | 10.6 | 50.5 | 0.24 | 3.87 |
+| `right_hip_pitch` | 3.7 | 58.7 | 3.81 | 2.97 |
+| `right_knee` | 3.6 | 78.7 | 6.58 | 3.44 |
+| `right_wheel` | 3.5 | 91.5 | 1.52 | 0.61 |
+| `fixed: hip_roll_assembly` | 48.5 | 11.8 | 1.04 | 3.35 |
+| `fixed: hip_roll_assembly_2` | 47.4 | 12.0 | 1.08 | 3.37 |
 
 ### jump while driving
 
-Wheel contact peak (touch sensor): 241.1 N
+Wheel contact peak (touch sensor): 258.6 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 24.6 | 2.26 | 0.00 |
-| `head_pitch` | 0.0 | 22.1 | 1.19 | 0.00 |
-| `head_yaw` | 19.4 | 17.0 | 0.00 | 0.81 |
-| `head_roll` | 14.3 | 16.0 | 0.00 | 0.22 |
-| `left_hip_roll` | 9.7 | 38.0 | 0.33 | 3.39 |
-| `left_hip_pitch` | 2.6 | 44.3 | 3.27 | 2.40 |
-| `left_knee` | 2.5 | 58.4 | 5.12 | 2.69 |
-| `left_wheel` | 2.4 | 72.0 | 1.46 | 0.62 |
-| `right_hip_roll` | 9.6 | 37.7 | 0.33 | 3.40 |
-| `right_hip_pitch` | 2.6 | 43.9 | 3.29 | 2.38 |
-| `right_knee` | 2.5 | 58.0 | 5.11 | 2.67 |
-| `right_wheel` | 2.5 | 71.7 | 1.46 | 0.62 |
-| `fixed: hip_roll_assembly` | 36.0 | 10.6 | 0.81 | 3.01 |
-| `fixed: hip_roll_assembly_2` | 35.7 | 10.6 | 0.81 | 3.01 |
+| `neck_pitch` | 0.0 | 31.1 | 2.60 | 0.00 |
+| `head_pitch` | 0.0 | 28.3 | 1.38 | 0.00 |
+| `head_yaw` | 22.2 | 17.7 | 0.00 | 1.02 |
+| `head_roll` | 15.1 | 18.4 | 0.00 | 0.25 |
+| `left_hip_roll` | 9.9 | 37.5 | 0.25 | 3.63 |
+| `left_hip_pitch` | 3.1 | 43.8 | 3.54 | 2.34 |
+| `left_knee` | 3.0 | 58.1 | 5.10 | 2.68 |
+| `left_wheel` | 3.0 | 72.3 | 1.09 | 0.58 |
+| `right_hip_roll` | 9.9 | 37.4 | 0.25 | 3.63 |
+| `right_hip_pitch` | 3.1 | 43.7 | 3.52 | 2.35 |
+| `right_knee` | 3.0 | 58.0 | 5.10 | 2.68 |
+| `right_wheel` | 3.0 | 72.2 | 1.09 | 0.57 |
+| `fixed: hip_roll_assembly` | 35.4 | 10.7 | 0.96 | 3.11 |
+| `fixed: hip_roll_assembly_2` | 35.4 | 10.6 | 0.96 | 3.11 |
 
 ### push +40 N
 
-Wheel contact peak (touch sensor): 41.9 N
+Wheel contact peak (touch sensor): 35.6 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 16.1 | 1.43 | 0.00 |
-| `head_pitch` | 0.0 | 14.3 | 0.69 | 0.00 |
-| `head_yaw` | 8.2 | 12.5 | 0.00 | 0.42 |
-| `head_roll` | 10.3 | 6.8 | 0.00 | 0.13 |
-| `left_hip_roll` | 4.5 | 13.1 | 0.45 | 5.79 |
-| `left_hip_pitch` | 1.3 | 15.2 | 5.74 | 1.39 |
-| `left_knee` | 1.3 | 23.5 | 3.36 | 1.37 |
-| `left_wheel` | 1.2 | 32.0 | 2.18 | 0.38 |
-| `right_hip_roll` | 4.5 | 13.0 | 0.45 | 5.78 |
-| `right_hip_pitch` | 1.3 | 15.1 | 5.73 | 1.39 |
-| `right_knee` | 1.3 | 23.5 | 3.35 | 1.37 |
-| `right_wheel` | 1.2 | 32.0 | 2.18 | 0.38 |
-| `fixed: hip_roll_assembly` | 12.5 | 4.7 | 0.75 | 5.83 |
-| `fixed: hip_roll_assembly_2` | 12.3 | 4.7 | 0.76 | 5.82 |
+| `neck_pitch` | 0.0 | 16.0 | 1.38 | 0.00 |
+| `head_pitch` | 0.0 | 14.2 | 0.68 | 0.00 |
+| `head_yaw` | 10.2 | 12.2 | 0.00 | 0.42 |
+| `head_roll` | 10.1 | 8.4 | 0.00 | 0.14 |
+| `left_hip_roll` | 6.1 | 14.7 | 0.34 | 5.88 |
+| `left_hip_pitch` | 1.3 | 17.7 | 5.83 | 1.35 |
+| `left_knee` | 1.3 | 24.0 | 5.66 | 1.42 |
+| `left_wheel` | 1.3 | 32.7 | 2.18 | 0.18 |
+| `right_hip_roll` | 6.1 | 14.8 | 0.34 | 5.87 |
+| `right_hip_pitch` | 1.3 | 17.9 | 5.82 | 1.35 |
+| `right_knee` | 1.3 | 24.0 | 5.65 | 1.42 |
+| `right_wheel` | 1.3 | 32.6 | 2.18 | 0.18 |
+| `fixed: hip_roll_assembly` | 13.9 | 6.2 | 0.77 | 5.86 |
+| `fixed: hip_roll_assembly_2` | 14.1 | 6.2 | 0.78 | 5.84 |
 
 ### push -40 N
 
-Wheel contact peak (touch sensor): 36.7 N
+Wheel contact peak (touch sensor): 40.7 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 0.0 | 16.5 | 1.73 | 0.00 |
-| `head_pitch` | 0.0 | 14.6 | 0.88 | 0.00 |
-| `head_yaw` | 6.8 | 12.7 | 0.00 | 0.59 |
-| `head_roll` | 10.5 | 5.5 | 0.00 | 0.11 |
-| `left_hip_roll` | 6.2 | 14.9 | 0.33 | 5.87 |
-| `left_hip_pitch` | 1.3 | 18.1 | 5.82 | 1.34 |
-| `left_knee` | 1.3 | 24.0 | 5.65 | 1.42 |
-| `left_wheel` | 1.3 | 32.6 | 2.19 | 0.18 |
-| `right_hip_roll` | 6.2 | 15.1 | 0.33 | 5.86 |
-| `right_hip_pitch` | 1.3 | 18.2 | 5.81 | 1.35 |
-| `right_knee` | 1.3 | 23.9 | 5.64 | 1.42 |
-| `right_wheel` | 1.3 | 32.6 | 2.18 | 0.18 |
-| `fixed: hip_roll_assembly` | 14.2 | 6.3 | 0.77 | 5.84 |
-| `fixed: hip_roll_assembly_2` | 14.4 | 6.2 | 0.78 | 5.83 |
+| `neck_pitch` | 0.0 | 16.6 | 1.76 | 0.00 |
+| `head_pitch` | 0.0 | 14.8 | 0.89 | 0.00 |
+| `head_yaw` | 6.8 | 12.8 | 0.00 | 0.60 |
+| `head_roll` | 10.6 | 5.6 | 0.00 | 0.11 |
+| `left_hip_roll` | 4.5 | 13.0 | 0.45 | 5.75 |
+| `left_hip_pitch` | 1.3 | 15.1 | 5.70 | 1.38 |
+| `left_knee` | 1.3 | 23.5 | 3.33 | 1.37 |
+| `left_wheel` | 1.2 | 31.9 | 2.18 | 0.40 |
+| `right_hip_roll` | 4.5 | 13.0 | 0.45 | 5.74 |
+| `right_hip_pitch` | 1.2 | 15.2 | 5.69 | 1.38 |
+| `right_knee` | 1.2 | 23.4 | 3.33 | 1.37 |
+| `right_wheel` | 1.2 | 31.9 | 2.18 | 0.40 |
+| `fixed: hip_roll_assembly` | 12.4 | 4.7 | 0.75 | 5.79 |
+| `fixed: hip_roll_assembly_2` | 12.3 | 4.7 | 0.76 | 5.78 |
 
 ### fall (push +90 N, indicative)
 
-Wheel contact peak (touch sensor): 229.4 N
+Wheel contact peak (touch sensor): 227.7 N
 
 | Joint | F_axial (N) | F_radial (N) | M_axis (N·m) | M_bend (N·m) |
 | :--- | ---: | ---: | ---: | ---: |
-| `neck_pitch` | 25.9 | 135.3 | 15.31 | 4.78 |
-| `head_pitch` | 23.7 | 137.2 | 11.31 | 3.36 |
-| `head_yaw` | 75.0 | 138.6 | 2.45 | 8.84 |
-| `head_roll` | 128.4 | 74.5 | 1.21 | 4.96 |
-| `left_hip_roll` | 37.3 | 94.2 | 4.08 | 11.16 |
-| `left_hip_pitch` | 21.1 | 102.0 | 10.95 | 10.74 |
-| `left_knee` | 20.0 | 132.6 | 10.91 | 10.74 |
-| `left_wheel` | 33.5 | 222.7 | 11.80 | 3.20 |
-| `right_hip_roll` | 36.5 | 95.7 | 3.67 | 9.49 |
-| `right_hip_pitch` | 22.9 | 100.5 | 9.15 | 10.11 |
-| `right_knee` | 19.9 | 130.2 | 6.18 | 10.02 |
-| `right_wheel` | 19.4 | 219.9 | 11.64 | 2.57 |
-| `fixed: hip_roll_assembly` | 92.5 | 43.3 | 6.45 | 13.20 |
-| `fixed: hip_roll_assembly_2` | 92.8 | 43.3 | 6.00 | 11.05 |
+| `neck_pitch` | 55.2 | 142.7 | 14.74 | 6.59 |
+| `head_pitch` | 50.8 | 139.0 | 7.73 | 3.89 |
+| `head_yaw` | 62.4 | 141.2 | 2.51 | 4.33 |
+| `head_roll` | 135.3 | 60.7 | 1.22 | 4.30 |
+| `left_hip_roll` | 34.6 | 113.3 | 4.28 | 8.93 |
+| `left_hip_pitch` | 49.8 | 97.2 | 7.95 | 10.24 |
+| `left_knee` | 22.4 | 80.2 | 6.71 | 2.66 |
+| `left_wheel` | 13.6 | 45.1 | 1.15 | 0.41 |
+| `right_hip_roll` | 46.9 | 99.5 | 3.36 | 8.78 |
+| `right_hip_pitch` | 45.4 | 94.4 | 8.76 | 5.94 |
+| `right_knee` | 20.6 | 74.4 | 5.27 | 2.77 |
+| `right_wheel` | 12.2 | 36.7 | 1.65 | 0.40 |
+| `fixed: hip_roll_assembly` | 101.9 | 70.5 | 2.84 | 9.72 |
+| `fixed: hip_roll_assembly_2` | 97.7 | 68.6 | 2.86 | 10.81 |
 

@@ -57,8 +57,19 @@ def bolt_circle(pcd, n, d, h, base, axis, phase=0.0):
     return holes
 
 
-def rounded_plate_xz(points, y0, y1):
-    """Convex hull of circles [(x, z, r), ...] extruded along y from y0 to y1 (a link plate)."""
+def round_corners(shape, picks):
+    """Fillet straight edges picked by their midpoint: picks = [((x, y, z), r), ...], None = any coordinate."""
+    for r in sorted({r for _, r in picks}, reverse=True):
+        want = [p for p, rr in picks if rr == r]
+        edges = [e for e in shape.Edges if e.Curve.TypeId == "Part::GeomLine" and any(
+            all(c is None or abs(m - c) < 0.01 for m, c in zip(e.CenterOfMass, p)) for p in want)]
+        shape = shape.makeFillet(r, edges)
+    return shape
+
+
+def rounded_plate_xz(points, y0, y1, fillet=0.0):
+    """Convex hull of circles [(x, z, r), ...] extruded along y from y0 to y1 (a link plate). fillet > 0
+    rounds the outline edges of both faces."""
     pts = [(x, z, r) for x, z, r in points]
     solids = [cyl(2 * r, y1 - y0, (x, y0, z), (0, 1, 0)) for x, z, r in pts]
     # bridge consecutive circles with their tangent hull
@@ -70,7 +81,92 @@ def rounded_plate_xz(points, y0, y1):
                 V(xb - nx * rb, y0, zb - nz * rb), V(xa - nx * ra, y0, za - nz * ra)]
         face = Part.Face(Part.makePolygon(poly + [poly[0]]))
         solids.append(face.extrude(V(0, y1 - y0, 0)))
-    return fuse(solids)
+    plate = fuse(solids).removeSplitter()
+    if fillet > 0:
+        plate = plate.makeFillet(fillet, [e for e in plate.Edges if e.BoundBox.YLength < 1e-6])
+    return plate
+
+
+def rounded_plate_yz(points, x0, x1):
+    """Convex hull of circles [(y, z, r), ...] extruded along x from x0 to x1."""
+    solids = [cyl(2 * r, x1 - x0, (x0, y, z), (1, 0, 0)) for y, z, r in points]
+    for (ya, za, ra), (yb, zb, rb) in zip(points, points[1:]):
+        dy, dz = yb - ya, zb - za
+        L = math.hypot(dy, dz)
+        # outer tangents of two circles: normal n with n.(b - a) = ra - rb
+        c = (ra - rb) / L
+        sn = math.sqrt(max(0.0, 1 - c * c))
+        ux, uz = dy / L, dz / L
+        poly = []
+        for sg in (1, -1):
+            ny, nz = c * ux - sg * sn * uz, c * uz + sg * sn * ux
+            poly.append((V(x0, ya + ny * ra, za + nz * ra), V(x0, yb + ny * rb, zb + nz * rb)))
+        pts = [poly[0][0], poly[0][1], poly[1][1], poly[1][0]]
+        solids.append(Part.Face(Part.makePolygon(pts + [pts[0]])).extrude(V(x1 - x0, 0, 0)))
+    return fuse(solids).removeSplitter()
+
+
+def truss_cutouts(a, b, u0, u1, w0, w1, n, web, y0, y1, r=2.5, w_in=None):
+    """Warren-truss triangular windows (the Impulse leg look) along the link a -> b, points (x, z).
+    The band runs from u0 to u1 mm along the link with half-width w0 -> w1 (the plate's edge minus its
+    rim); n triangles alternate apex up / down, struts `web` wide, corners rounded r. With w_in, the nodes
+    alternate between the edge (w0 -> w1, signed) and the line w_in instead: one row of a two-row truss
+    either side of a spine. Returns prisms y0..y1."""
+    ax, az = a
+    L = math.hypot(b[0] - ax, b[1] - az)
+    ux, uz = (b[0] - ax) / L, (b[1] - az) / L
+    nx, nz = -uz, ux
+    d = (u1 - u0) / (n + 1)
+
+    def node(i):
+        u = u0 + i * d
+        w = w0 + (w1 - w0) * (u - u0) / (u1 - u0)
+        if w_in is None:
+            w = w if i % 2 == 0 else -w
+        elif i % 2:
+            w = w_in
+        return V(ax + ux * u + nx * w, y0, az + uz * u + nz * w)
+
+    out = []
+    for i in range(n):
+        face = Part.Face(Part.makePolygon([node(i), node(i + 1), node(i + 2), node(i)]))
+        face = face.makeOffset2D(-(web / 2 + r), 0).makeOffset2D(r, 0)
+        out.append(face.extrude(V(0, y1 - y0, 0)))
+    return out
+
+
+def slotted_can(od, id_, h, n, slot_w, slot_l, phase=0.0, skip=()):
+    """Motor can (the Impulse hip-casing look) along +z from z = 0 to h, with n stadium windows
+    slot_w wide and slot_l long (along z) centred at h / 2; window i sits at phase + 360 i / n deg from +x."""
+    can = tube(od, id_, h)
+    cuts = []
+    for i in range(n):
+        if i in skip:
+            continue
+        x0, x1 = id_ / 2 - 3, od / 2 + 3
+        e = (slot_l - slot_w) / 2
+        s = fuse([box(x0, x1, -slot_w / 2, slot_w / 2, h / 2 - e, h / 2 + e),
+                  cyl(slot_w, x1 - x0, (x0, 0, h / 2 - e), (1, 0, 0)),
+                  cyl(slot_w, x1 - x0, (x0, 0, h / 2 + e), (1, 0, 0))])
+        s.rotate(V(0, 0, 0), V(0, 0, 1), phase + 360.0 * i / n)
+        cuts.append(s)
+    return can.cut(cuts) if cuts else can
+
+
+def along_y(shape, y0=0.0):
+    """Turn a part built along +z (z = 0..h) so it runs along +y from y = y0 (x is kept)."""
+    s = shape.copy()
+    s.rotate(V(0, 0, 0), V(1, 0, 0), -90)
+    s.translate(V(0, y0, 0))
+    return s
+
+
+def along_x(shape, x0=0.0):
+    """Turn a part built along +z (z = 0..h) so it runs along +x from x = x0."""
+    s = shape.copy()
+    s.rotate(V(0, 0, 0), V(0, 1, 0), 90)
+    s.translate(V(x0, 0, 0))
+    return s
 
 
 def _read_step(name):
@@ -343,6 +439,20 @@ def buck(dx, dy, dz, n_caps=2):
     return fuse(parts)
 
 
+def fan_40x10():
+    """40 x 40 x 10 axial fan (e.g. Noctua NF-A4x10 5V PWM), axis z, frame z 0..10, 4x M3 holes on 32 mm."""
+    frame = box(-20, 20, -20, 20, 0, 10).cut([cyl(38, 12, (0, 0, -1))] +
+                                             [cyl(3.4, 12, (x, y, -1)) for x in (-16, 16) for y in (-16, 16)])
+    hub = cyl(15, 9, (0, 0, 0.5))
+    spokes = []
+    for ang, (z0, z1, r1) in [(45 + 51.4 * i, (1.5, 8.5, 18.5)) for i in range(7)] + \
+                             [(45 + 90 * i, (0, 1.5, 19.5)) for i in range(4)]:   # blades, then struts
+        sp = box(7, r1, -1, 1, z0, z1)
+        sp.rotate(V(0, 0, 0), V(0, 0, 1), ang)
+        spokes.append(sp)
+    return fuse([frame, hub] + spokes)
+
+
 def estop_22mm():
     """22 mm latching mushroom e-stop. Panel front face at x = 0, mushroom on +x, body and
     NC contact block behind (to x = -45)."""
@@ -389,3 +499,41 @@ def tire():
     except Exception:
         pass
     return t
+
+
+def radial_windows(c, r0, r1, n, half_deg, web, y0, y1, r=2.0, phase=0.0):
+    """n triangular windows around a hub at c = (x, z) in an x-z plate: apex at radius r0, base at r1
+    spanning +-half_deg, struts `web` wide, corners rounded r. Returns prisms y0..y1."""
+    out = []
+    for i in range(n):
+        a = math.radians(phase + 360.0 * i / n)
+        h = math.radians(half_deg)
+        pts = [V(c[0] + r0 * math.sin(a), y0, c[1] + r0 * math.cos(a)),
+               V(c[0] + r1 * math.sin(a - h), y0, c[1] + r1 * math.cos(a - h)),
+               V(c[0] + r1 * math.sin(a + h), y0, c[1] + r1 * math.cos(a + h))]
+        face = Part.Face(Part.makePolygon(pts + [pts[0]]))
+        face = face.makeOffset2D(-(web / 2 + r), 0).makeOffset2D(r, 0)
+        out.append(face.extrude(V(0, y1 - y0, 0)))
+    return out
+
+
+def end_cap(od, t, rim_h, rim_id, n=6, notch_deg=None, notch_w=10.0):
+    """Slotted motor end cap (the Impulse actuator back plate) along +z: a disc z 0..t with n kidney slots,
+    and a rim ring (od / rim_id) from z t to t + rim_h that seats on the part behind it. notch_deg: angle in
+    the x-y plane (from +x) of a cable notch through the rim and the disc edge."""
+    disc = cyl(od, t)
+    r0, r1 = 0.24 * od, 0.40 * od
+    slots = []
+    for i in range(n):
+        a0 = math.radians(360.0 * i / n + 8)
+        a1 = math.radians(360.0 * (i + 1) / n - 8)
+        pts = [V(r0 * math.cos(a0 + (a1 - a0) * k / 8), r0 * math.sin(a0 + (a1 - a0) * k / 8), -1) for k in range(9)]
+        pts += [V(r1 * math.cos(a1 - (a1 - a0) * k / 8), r1 * math.sin(a1 - (a1 - a0) * k / 8), -1) for k in range(9)]
+        face = Part.Face(Part.makePolygon(pts + [pts[0]])).makeOffset2D(-1.5, 0).makeOffset2D(1.5, 0)
+        slots.append(face.extrude(V(0, 0, t + 2)))
+    cap = fuse([disc.cut(slots), tube(od, rim_id, rim_h, (0, 0, t))])
+    if notch_deg is not None:
+        n_ = box(od / 2 - 6, od / 2 + 2, -notch_w / 2, notch_w / 2, -1, t + rim_h + 1)
+        n_.rotate(V(0, 0, 0), V(0, 0, 1), notch_deg)
+        cap = cap.cut(n_)
+    return cap

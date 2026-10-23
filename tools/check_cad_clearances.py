@@ -48,8 +48,8 @@ REAL_PARTS = ("_gim4305", "_gim6010", "_foot_bottom_tpu", "battery_pack_6s", "ra
 def leg_pose(delta, roll=0.0):
     q = {}
     for side in ("left", "right"):
-        q[f"{side}_hip_pitch"] = -0.50 - delta
-        q[f"{side}_knee"] = 1.00 + 2.0 * delta
+        q[f"{side}_hip_pitch"] = 0.50 + delta
+        q[f"{side}_knee"] = -1.00 - 2.0 * delta
         q[f"{side}_hip_roll"] = roll
     return q
 

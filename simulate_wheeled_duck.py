@@ -101,12 +101,12 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=4.733, wheel_track=0.224, com_height=0.2467, body_pitch_inertia=0.0789),
-        initial_pitch_trim=-0.0631,
-        posture_coeffs=(-0.1305, -0.0263),
+        params=ScaledWheeledDuckParams(body_mass=4.733, wheel_track=0.224, com_height=0.2467, body_pitch_inertia=0.0790),
+        initial_pitch_trim=0.0571,
+        posture_coeffs=(-0.1266, 0.0273),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
-        # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py (standing lean -3.7 deg).
+        # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py for backward knees (standing lean +3.3 deg).
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
@@ -120,8 +120,8 @@ PROFILES = {
         # (body-only: 0.2555 m / 0.0559 kg*m^2), but this robot's trim/posture fit and tuning were validated with
         # them, and the body-only values scored slightly worse on it (randomized crouch 7/12 vs 9/12).
         params=ScaledWheeledDuckParams(body_mass=3.361, com_height=0.222, body_pitch_inertia=0.0310),
-        initial_pitch_trim=-0.0730,
-        posture_coeffs=(-0.1013, -0.0324),
+        initial_pitch_trim=0.0080,
+        posture_coeffs=(-0.0714, -0.0064),
         # On these weaker legs the LQR's wheel kick during thrust is (accidentally) part of the jump: with the
         # wheels limp the jump shrinks to ~7 mm, so this profile keeps "lqr".
         jump_thrust_time=0.12,
@@ -194,7 +194,7 @@ def quat_to_euler_zyx(quat_wxyz: np.ndarray) -> Tuple[float, float, float]:
 class ScaledWheeledDuckController:
     """Full-body balance, 4-DOF leg posture, stereo-camera horizon, and live keyboard driving controller."""
 
-    # Deepest crouch delta: knee = 1.00 + 2*delta must stay clear of the knee's +1.5708 rad (90 deg) joint limit,
+    # Deepest crouch delta: knee = -1.00 - 2*delta must stay clear of the knee's -1.5708 rad (90 deg) joint limit,
     # *including* servo sag under load (~0.01-0.02 rad). On the stop, the hip keeps folding, the knee = -2*hip
     # geometry breaks, and the balance lean jumps (at 0.28 the knee rested on the stop and the robot rolled
     # ~18 cm). 0.24 leaves ~0.09 rad of margin and matches the range `posture_trim` was measured over.
@@ -214,11 +214,11 @@ class ScaledWheeledDuckController:
         self.head_yaw_offset = 0.0    # Manual head pan offset (rad)
         self.antenna_cmd = 0.0        # Antenna servo target (rad, + = tips swung forward/upright), both sides
         self.projector_on = False
-        self.nominal_hip_pitch = -0.50
-        self.nominal_knee_pitch = 1.00
+        self.nominal_hip_pitch = 0.50   # knees bend backward (bird-style)
+        self.nominal_knee_pitch = -1.00
         self.commanded_leg_fold = self.nominal_hip_pitch + self.nominal_knee_pitch
-        # Static CoM forward offset compensation (rad). The measured CoM sits ~14 mm ahead of the axle,
-        # so the trunk must lean back ~4.5 deg to balance. This is the initial guess; it is refined online
+        # Static CoM offset compensation (rad). With the knees bent backward the CoM sits behind the axle,
+        # so the trunk must lean forward ~3.3 deg to balance. This is the initial guess; it is refined online
         # by a slow integrator (see `compute_control`) so crouch changes / payloads are absorbed automatically.
         # Starting value from the profile's fit; each 1 deg of trim error parks the robot ~25 cm off its hold point,
         # so it matters (on hardware, persist the learned trim between runs).
@@ -372,7 +372,7 @@ class ScaledWheeledDuckController:
 
         # 1. Longitudinal LQR Wheel Balancing Torque
         # Balance lean = learned trim (feedback, absorbs payload / build error) + posture feedforward: crouching
-        # swings the trunk mass forward, so the balance lean changes by ~-0.5 deg per 0.1 rad of crouch. Leaving
+        # moves the trunk mass fore/aft, so the balance lean changes by ~+0.7 deg per 0.1 rad of crouch. Leaving
         # that to the slow trim learner made each 'Z'/'X' press roll the robot ~20 cm while it re-learned.
         balance_pitch = self.pitch_trim + self.posture_trim(fold)
         pitch_err = pitch - balance_pitch
@@ -438,14 +438,14 @@ class ScaledWheeledDuckController:
         # compliant kp=32 GIM4305 position loops it coupled into the LQR and produced a saturated ~2.5 Hz
         # bang-bang limit cycle (wheel torque pinned at +/-3.47 N*m and the robot drifting away at 1.6 m/s).
         # Keep knee = -2 * hip_pitch so the wheel axle stays vertically aligned under the hip at any crouch height
-        hip_pitch_cmd = self.nominal_hip_pitch - leg_delta
-        knee_cmd = self.nominal_knee_pitch + 2.0 * leg_delta
+        hip_pitch_cmd = self.nominal_hip_pitch + leg_delta
+        knee_cmd = self.nominal_knee_pitch - 2.0 * leg_delta
         self.commanded_leg_fold = hip_pitch_cmd + knee_cmd
 
         # 4. Horizon-Stabilized Stereo Camera Gimbal (Looks into turns + manual pan)
         # TODO: the head hits the trunk at same-direction pitch extremes (cad/freecad/neck_envelope.md). Clip to the
         # coupled CAD envelope, which the MJCF joint ranges can't express:
-        #   neck_pitch + head_pitch >= -30 deg,  head_pitch <= +30 deg,  neck_pitch + head_pitch <= +60 deg
+        #   neck_pitch + head_pitch >= -15 deg,  head_pitch <= +15 deg,  neck_pitch + head_pitch <= +65 deg
         # and enable head/trunk contact in the sim so violations show up.
         neck_pitch_cmd = np.clip(0.15 - 0.5 * pitch, -0.30, 0.90)
         head_pitch_cmd = np.clip(-0.15 - 0.5 * pitch, -0.70, 0.70)
@@ -492,8 +492,8 @@ class ScaledWheeledDuckController:
     def posture_trim(self, fold: float) -> float:
         """Change in balance lean (rad) vs. zero leg fold, from the profile's fit (see `RobotProfile`).
 
-        Crouching swings the trunk mass forward, so the balance lean changes (~-0.5 deg per 0.1 rad of fold on the
-        stock robot). A static CoM-over-axle calculation gives the same shape but ~25% less slope, because it
+        Crouching moves the trunk mass fore/aft, so the balance lean changes (~-0.7 deg per 0.1 rad of fold on the
+        gim6010 build; with backward knees, crouching makes the fold more negative). A static CoM-over-axle calculation gives the same shape but ~25% less slope, because it
         ignores the legs sagging under load on their kp=32 servos.
         """
         a, b = self.profile.posture_coeffs
@@ -509,9 +509,9 @@ class ScaledWheeledDuckController:
         """Damping gain the leg servos should run with right now (applied by the sim loop each step)."""
         return self.LEG_KD_JUMP if self.jump_phase in ("crouch", "thrust") else self.LEG_KD_NOMINAL
 
-    # Jump trajectory tuning (leg_delta is the symmetric crouch offset: hip = -0.50 - d, knee = 1.00 + 2d)
-    JUMP_CROUCH_DELTA = MAX_CROUCH  # Deep wind-up crouch (hip -0.74, knee 1.48)
-    JUMP_EXTEND_DELTA = -0.46   # Near-straight legs at take-off (hip -0.04, knee 0.08)
+    # Jump trajectory tuning (leg_delta is the symmetric crouch offset: hip = 0.50 + d, knee = -1.00 - 2d)
+    JUMP_CROUCH_DELTA = MAX_CROUCH  # Deep wind-up crouch (hip 0.74, knee -1.48)
+    JUMP_EXTEND_DELTA = -0.46   # Near-straight legs at take-off (hip 0.04, knee -0.08)
     JUMP_LAND_DELTA = -0.15     # Slightly bent, compliant legs for touchdown
     JUMP_CROUCH_TIME = 0.40     # s
     JUMP_FLIGHT_TIME = 0.20     # s (wheels unloaded; tucks legs toward landing pose)

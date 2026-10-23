@@ -215,93 +215,177 @@ HEAD = "head_assembly"
 
 tick("trunk structure")
 # ================================================================ TRUNK: printed structure
-# Interior envelope: x -71..71, y -60..60, floor top z -78, wall top z 54, lid 54..58.
-# The floor is 20 mm lower than the sim's trunk box (-58) and the battery and Pi stack sit 18 mm lower
-# than the model (battery centre z -44, not -26): that closes the 2 mm battery/Pi clash flagged in
-# clearance_report and puts the Pi under the ODM neck-pitch servo pocket.
-# DROP: a further 12 mm so the Pi stack fits under the ODM neck-pitch servo pocket (which reaches z 14.8).
+# Outside: the Open Duck Mini v2 body (its body_front / body_back / body_middle_* shells) scaled x1.15 about the
+# neck-pitch axis and 3 mm lower, so the battery clears its steep bottom chamfers. The ODM shell is a convex
+# polytope: an octagonal prism (126 wide, 45 deg top chamfers, steep bottom chamfers), flat underside to
+# x -63.5 then sloping up 23.6 deg (the ODM's 16.6 deg slope starts at x -27, but our battery
+# runs back to x -62.5) to the ODM's tail end face, a 45 deg tapered tail to x -142, flat front cap at x 88, and an opening in
+# the top round the neck. The ODM's side windows, where its legs come out, are left closed. The planes below are measured from the
+# ODM meshes (see README). Inside is ours: a solid floor, the old front and rear walls kept as bulkheads,
+# the lid as a deck carrying the neck. Split like the ODM at z 12.3 into a lower tub and a top cover.
 DROP = 12.0
 FLOOR_TOP, FLOOR_BOT, WALL_TOP = -66.0 - DROP, -70.0 - DROP, 54.0
 BATT_Z = -32.0 - DROP
+ODM_K, ODM_DZ = 1.15, -3.0
+SPLIT_Z = 12.3
+LID_SCREWS = ((67.5, 40), (67.5, -40), (-67.5, 40), (-67.5, -52))   # lid + cover screws, into the bulkheads
+BODY_BOT = -83.88 + ODM_DZ                         # underside of the body
 
-ESTOP_YZ = (44.0, 30.0)
-CHARGE_YZ = (-44.0, 20.0)
-SPEAKER_YZ = (0.0, 12.0)
+# (point on the plane, outward normal), body frame before the -3 mm shift
+_BODY_PLANES = [((87.75, 0, 0), (1, 0, 0)), ((-142.25, 0, 0), (-1, 0, 0)),
+                ((0, 63.25, 0), (0, 1, 0)), ((0, -63.25, 0), (0, -1, 0)),
+                ((0, 0, 80.57), (0, 0, 1)), ((0, 0, -83.88), (0, 0, -1)),
+                ((0, 63.25, 55.9), (0, 1, 1)), ((0, -63.25, 55.9), (0, -1, 1)),                  # top chamfers
+                ((0, 63.2, -42.8), (0, 41.1, -19.1)), ((0, -63.2, -42.8), (0, -41.1, -19.1)),    # bottom chamfers
+                ((-63.5, 0, -83.88), (-34.48, 0, -78.75)),                                       # underside slope
+                ((-96.2, 63.2, 0), (-45.9, 46, 0)), ((-96.2, -63.2, 0), (-45.9, -46, 0)),         # tail sides
+                ((-96.2, 0, 80.57), (-57.5, 0, 46))]                                             # tail top
 
-outer = box(-74, 74, -63, 63, FLOOR_BOT, WALL_TOP)
-outer = outer.makeFillet(6, [e for e in outer.Edges if abs(e.Vertexes[0].Point.z - e.Vertexes[1].Point.z) > 1])
-inner = box(-71, 71, -60, 60, FLOOR_TOP, WALL_TOP + 10)
-inner = inner.makeFillet(4, [e for e in inner.Edges if abs(e.Vertexes[0].Point.z - e.Vertexes[1].Point.z) > 1])
-tub = outer.cut(inner)
-adds = []
-# lid screw bosses in the corners
-for x in (-66, 66):
-    for y in (-55, 55):
-        adds.append(cyl(8, 8, (x, y, WALL_TOP - 8)))
+
+def odm_body(inset=0.0):
+    """The scaled ODM body as a solid, every face moved inward by `inset` (mm)."""
+    s = box(-400, 400, -400, 400, -400, 400)
+    cuts = []
+    for p, n in _BODY_PLANES:
+        n = V(*n).normalize()
+        h = Part.makeBox(2000, 2000, 1000, V(-1000, -1000, 0))
+        h.Placement = App.Placement(V(*p) - n * inset + V(0, 0, ODM_DZ), App.Rotation(V(0, 0, 1), n))
+        cuts.append(h)
+    return s.cut(cuts)
+
+
+body_out = odm_body()
+front = [e for e in body_out.Edges if abs(e.BoundBox.XMin - 87.75) < 0.01 and abs(e.BoundBox.XMax - 87.75) < 0.01]
+body_out = body_out.makeChamfer(3.4, front)                       # the ODM front cap's bevelled edge
+body_in = odm_body(3.0)                                           # 3 mm walls
+fill_in = odm_body(2.0)                                           # internal parts: 1 mm into the walls, so they fuse
+shell = body_out.cut(body_in)
+top_open = box(-49.1, 65.9, -28.75, 28.75, 60, 100)               # opening round the neck
+top_open = dp.round_corners(top_open, [((x, y, None), 6) for x in (-49.1, 65.9) for y in (-28.75, 28.75)])
+shell = shell.cut(top_open)       # closed sides: the ODM's leg openings aren't needed, our hip motors are outside
+
+
+def vent_slot(w, z0, z1, depth=12):
+    """Rounded vertical slot w wide from z0 to z1, centred on the origin in x, through y -depth/2..depth/2."""
+    return fuse([box(-w / 2, w / 2, -depth / 2, depth / 2, z0 + w / 2, z1 - w / 2)] +
+                [cyl(w, depth, (0, -depth / 2, z), (0, 1, 0)) for z in (z0 + w / 2, z1 - w / 2)])
+
+
+# Ventilation, ~10 W typical / 20 W peak inside (Pi 5, AI HAT+, bucks): a low inlet through the floor (4 slots,
+# 7.5 cm2) and slots high on both side walls beside the Pi, under the lid (9 each, 8.4 cm2), so it breathes by
+# convection; the 40 mm fan on the rear bulkhead pulls through the bay and blows out of the tail's tapered
+# sides (6 slots each, 6.0 cm2).
+VENTS = []
+for s_ in (1, -1):
+    for x in range(-40, 9, 6):                                   # side slots, in the top cover
+        v_ = vent_slot(4, 22, 46)
+        v_.translate(V(x, s_ * 63.25, 0))
+        VENTS.append(v_)
+for y in (-9.75, -3.25, 3.25, 9.75):                             # low inlet: floor slots between the hip-mount
+    VENTS.append(fuse([box(22, 66, y - 2, y + 2, -100, FLOOR_TOP + 1)] +    # shelves, under the servo buck
+                      [cyl(4, 100 + FLOOR_TOP + 1, (x, y, -100)) for x in (22, 66)]))
+_tt = V(-46, -45.9, 0).normalize()                               # along the left tail side, toward the end
+for u in range(14, 47, 6):                                       # fan exhaust in the tail sides
+    v_ = vent_slot(4, -22, 6)
+    v_.rotate(V(0, 0, 0), V(0, 0, 1), math.degrees(math.atan2(_tt.y, _tt.x)))
+    v_.translate(V(-96.2, 63.2, 0) + _tt * u)
+    VENTS += [v_, mirror_y(v_)]
+FAN_Y, FAN_Z = -38.0, 6.0                                          # clear of the cable hole and the cover lip
+FAN_PL = pl(-74, FAN_Y, FAN_Z, (0, 1, 0), -90)                   # on the bulkhead's tail face, blowing into the tail
+
+ESTOP_PL = pl(-142.25, 0, -8, (0, 0, 1), 180)                      # tail end face, under the split
+CHARGE_PL = pl(-142.25, 0, -38, (0, 0, 1), 180)
+_tn = V(-57.5, 0, 46).normalize()                                  # tail top face normal
+SPK_C = V(-120, 0, 77.57 + ODM_DZ - 1.25 * 23.8) - _tn * 3.0        # speaker flange on its inner face
+SPK_PL = App.Placement(SPK_C, App.Rotation(V(1, 0, 0), _tn))
+
+below = box(-200, 200, -100, 100, -200, SPLIT_Z)
+tub = shell.common(below)
+adds = [fill_in.common(box(-200, 200, -100, 100, -200, FLOOR_TOP)),                     # solid floor
+        fuse([fill_in.common(box(71, 74, -100, 100, -200, SPLIT_Z)),                     # front bulkhead
+              odm_body(3.2).common(box(71, 74, -100, 100, SPLIT_Z - 1, WALL_TOP))]),     # (clear of the cover)
+        fuse([fill_in.common(box(-74, -71, -100, 100, -200, SPLIT_Z)),                   # rear bulkhead
+              odm_body(3.2).common(box(-74, -71, -100, 100, SPLIT_Z - 1, WALL_TOP))])]
+lip = fuse([odm_body(2.0).cut(odm_body(5.0)).common(box(-200, 200, -100, 100, SPLIT_Z - 3, SPLIT_Z)),
+            odm_body(3.2).cut(odm_body(5.0)).common(box(-200, 200, -100, 100, SPLIT_Z, SPLIT_Z + 4))])
+adds.append(lip.cut([box(-27, 55, -100, 100, 0, 30)]))                                  # cover locating lip
+# lid bosses on the bulkheads
+adds += [cyl(8, 8, (x, y, WALL_TOP - 8)) for x, y in LID_SCREWS]
 # battery tray rails (pack 73 x 89 at x -62.5..10.5, 1 mm clearance)
 adds += [box(-65.5, -63.5, -30, 30, FLOOR_TOP, FLOOR_TOP + 8), box(11.5, 13.5, -30, 30, FLOOR_TOP, FLOOR_TOP + 8)]
 adds += [box(-55, 3, s * 45.5, s * 47.5, FLOOR_TOP, FLOOR_TOP + 8) if s > 0 else
          box(-55, 3, -47.5, -45.5, FLOOR_TOP, FLOOR_TOP + 8) for s in (1, -1)]
-# ledges carrying the Pi deck frame (rests on the pack through 0.5 mm foam)
-for x0, x1 in ((-49, -41), (9, 17)):
-    adds += [box(x0, x1, 55, 60, BATT_Z + 30.5, BATT_Z + 34.5), box(x0, x1, -60, -55, BATT_Z + 30.5, BATT_Z + 34.5)]
-# servo-buck standoffs, Pi-buck and bus-adapter wall bosses
+# ledges and posts carrying the Pi deck frame (rests on the pack through 0.5 mm foam)
+adds += [box(-49, -41, 55, 61, BATT_Z + 30.5, BATT_Z + 34.5), box(-49, -41, -61, -55, BATT_Z + 30.5, BATT_Z + 34.5)]
+adds += [cyl(8, BATT_Z + 34.5 - FLOOR_TOP, (13, y, FLOOR_TOP)) for y in (-50, 50)]
+# servo-buck standoffs, Pi-buck and bus-adapter bulkhead bosses
 adds += [tube(6, 2.5, 5, (37 + dx, dy, FLOOR_TOP)) for dx in (-13, 13) for dy in (-26, 26)]
-adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (14, 52) for z in (-36, -17)]
+adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (20, 52) for z in (-36, -17)]   # clear of the nav-cam window
 adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (-13, 13) for z in (8.5, 43.5)]
-# chest camera posts (outside the front wall, inside the breast cover)
-adds += [tube(6, 2, 9, (74, y, -14 + z), (1, 0, 0)) for y in (-14, 14) for z in (-14, 14)]
-# speaker clamp bosses
-adds += [tube(6, 2.5, 4, (-71, SPEAKER_YZ[0] + y, SPEAKER_YZ[1]), (1, 0, 0)) for y in (-26, 26)]
-tub = fuse([tub] + adds)
-cuts = []
-cuts.append(cyl(22.5, 10, (-78, ESTOP_YZ[0], ESTOP_YZ[1]), (1, 0, 0)))
-cuts.append(cyl(16.2, 10, (-78, CHARGE_YZ[0], CHARGE_YZ[1]), (1, 0, 0)))
-for gy in range(-4, 5):                       # speaker grille, hex pattern inside r15
-    for gz in range(-4, 5):
-        y = gy * 3.6 + (1.8 if gz % 2 else 0)
-        z = gz * 3.1
-        if math.hypot(y, z) < 15:
-            cuts.append(cyl(2.6, 10, (-78, SPEAKER_YZ[0] + y, SPEAKER_YZ[1] + z), (1, 0, 0)))
-cuts.append(box(70, 76, -22, -2, -28, -14))   # chest-cam USB cable pass
-for y in (-38, 38):                           # breast-cover screws
-    for z in (-28, 36):
-        cuts.append(cyl(3.4, 10, (68, y, z), (1, 0, 0)))
-for s in (1, -1):                             # hip-mount flange bolts + leg cable grommets + Pi vents
-    for x in (-28, 28):
-        for z in (-60, -35):
-            cuts.append(cyl(4.5, 10, (x, s * 58, z), (0, 1, 0)))
-    cuts.append(cyl(12, 10, (45, s * 58, -45), (0, 1, 0)))
-    for i in range(8):
-        cuts.append(box(-40 + i * 9, -37 + i * 9, s * 58 - 5, s * 58 + 5, 12, 26))
-for x in (-50, 0, 58):                        # hip-mount shelf bolts through the floor
+# tail shelf for the fuse, anti-spark switch and peripheral buck (on the sloping underside)
+TAIL_SHELF_Z = -60.0
+adds += [fill_in.common(box(-125, -72.5, -100, 100, TAIL_SHELF_Z - 4, TAIL_SHELF_Z))] + \
+        [fill_in.common(box(-125, -72.5, y - 1.5, y + 1.5, -200, TAIL_SHELF_Z)) for y in (-20, 20)]   # + 2 ribs
+tub = fuse([tub] + [a.common(fill_in) if i > 2 else a for i, a in enumerate(adds)])
+cuts = [cyl(22.5, 10, (-146, 0, -8), (1, 0, 0)), cyl(16.2, 10, (-146, 0, -38), (1, 0, 0)),   # e-stop, charge port
+        cyl(40, 10, (-78, 0, -25), (1, 0, 0))]                                              # rear bulkhead cable hole
+for x in (-50, 0, 58):                        # hip-mount shelf: M4 heat inserts, blind, from below
     for s in (1, -1):
-        cuts.append(cyl(4.5, 10, (x, s * 54, FLOOR_BOT - 3)))
-for x in (-66, 66):
-    for y in (-55, 55):
-        cuts.append(cyl(2.8, 9, (x, y, WALL_TOP - 8.5)))
+        cuts.append(cyl(5.6, 6.5, (x, s * 30, BODY_BOT - 0.1)))
+for x, y in LID_SCREWS:                       # lid screws into the bulkhead bosses
+    cuts.append(cyl(2.8, 9, (x, y, WALL_TOP - 8.5)))
 for y in (-26, 26):                           # servo-buck standoff holes through the floor
     for dx in (-13, 13):
-        cuts.append(cyl(2.5, 10, (37 + dx, y, FLOOR_BOT - 1)))
-tub = tub.cut(cuts)
+        cuts.append(cyl(2.5, 30, (37 + dx, y, -100)))
+cuts += [cyl(38, 10, (-78, FAN_Y, FAN_Z), (1, 0, 0))]                                # fan bore
+cuts += [cyl(3.4, 10, (-78, FAN_Y + dy, FAN_Z + dz), (1, 0, 0)) for dy in (-16, 16) for dz in (-16, 16)]
+# Nav camera (the sim's trunk_nav_cam): behind the front cap, its axis 20 deg below horizontal like the sim's,
+# lens 1 mm inside the cap's outer face. Tilted, the 32 mm board needs 12.4 mm of the 10.75 mm gap in front of
+# the front bulkhead, so its lower edge and USB plug pass through a window in the bulkhead (also the screw
+# access). It sits on 4 posts off the cap: M2 self-tapping at the bottom two, locating pins at the top two.
+# Camera-local frame: lens on +x, PCB back at x -12.
+_na = V(math.cos(math.radians(20)), 0, -math.sin(math.radians(20)))
+NAVCAM_PL = App.Placement(V(87.75, 0, -14) - _na * 1.0, App.Rotation(V(0, 1, 0), 20))
+
+
+def _navcam(shapes):
+    out = []
+    for sh in shapes:
+        sh = sh.copy()
+        sh.Placement = NAVCAM_PL.multiply(sh.Placement)
+        out.append(sh)
+    return out
+
+
+cuts += _navcam([box(-12.5, -9.9, -16.5, 16.5, -16.5, 16.5),               # board
+                 box(-10.9, -3.5, -7.5, 7.5, -7.5, 7.5),                    # lens holder
+                 cyl(13, 7, (-4.5, 0, 0), (1, 0, 0)),                       # lens, through the cap
+                 Part.makeCone(6.5, 15, 6, V(0, 0, 0), V(1, 0, 0))])        # field of view (>= 100 deg)
+cuts.append(box(68.5, 75, -16.5, 16.5, -29, -14))                           # front bulkhead window
+tub = tub.cut(cuts + VENTS)
+navcam_posts = _navcam([cyl(5, 20, (-10.4, y, z), (1, 0, 0)) for y in (-14, 14) for z in (-14, 14)])
+navcam_pins = _navcam([cyl(1.9, 2.2, (-12.6, y, 14), (1, 0, 0)) for y in (-14, 14)])
+tub = fuse([tub] + [p_.common(fill_in) for p_ in navcam_posts] + navcam_pins)
+tub = tub.cut(_navcam([cyl(1.8, 7, (-10.5, y, -14), (1, 0, 0)) for y in (-14, 14)]))   # M2 pilot holes
 B.add(T, "trunk_tub", tub, C_SHELL, "printed", transparency=65)
 
-lid = box(-74, 74, -63, 63, WALL_TOP, WALL_TOP + 4)
-lid = lid.makeFillet(6, [e for e in lid.Edges if abs(e.Vertexes[0].Point.z - e.Vertexes[1].Point.z) > 1])
+# top cover: the ODM shell above the split, screwed down through four posts into the lid
+cover = shell.cut(below)
+cover = fuse([cover] + [cyl(8, 30, (x, y, WALL_TOP + 4)).common(fill_in) for x, y in LID_SCREWS])
+grille = []
+for gy in range(-4, 5):                       # speaker grille on the tail's top face, hex pattern inside r15
+    for gz in range(-4, 5):
+        y, w = gy * 3.6 + (1.8 if gz % 2 else 0), gz * 3.1
+        if math.hypot(y, w) < 15:
+            grille.append(Part.makeCylinder(1.3, 12, SPK_PL.multVec(V(-4, y, w)), _tn))
+cover = cover.cut(grille + VENTS + [cyl(3.4, 40, (x, y, WALL_TOP)) for x, y in LID_SCREWS])
+B.add(T, "trunk_cover", cover, C_SHELL, "printed", transparency=65)
+
+lid = body_in.common(box(-74, 74, -100, 100, WALL_TOP, WALL_TOP + 4))
 lid = lid.cut([box(4, 68, -26, 26, WALL_TOP - 1, WALL_TOP + 20)] +   # ODM neck-pitch servo + swept neck sheets
-              [cyl(3.4, 10, (x, y, WALL_TOP - 1)) for x in (-66, 66) for y in (-55, 55)] +
+              [cyl(3.4, 10, (x, y, WALL_TOP - 1)) for x, y in LID_SCREWS] +
               [cyl(3.4, 10, (x, -24, WALL_TOP - 1)) for x in (4, 44)])
 B.add(T, "trunk_lid", lid, C_SHELL, "printed", transparency=65)
-
-# Front breast cover (the BDX chest bulge): R58 cylinder ahead of the front wall, carries the chest cam
-bo = cyl(116, 76, (40, 0, -34)).common(box(74, 100, -63, 63, -34, 42))
-bi = cyl(110, 70, (40, 0, -31)).common(box(70, 96, -63, 63, -31, 39))
-breast = bo.cut(bi)
-lugs = [box(74, 80, y - 4, y + 4, z - 3, z + 3) for y in (-38, 38) for z in (-28, 36)]
-breast = fuse([breast] + [lg.common(bo) for lg in lugs])
-breast = breast.cut([cyl(16, 20, (85, 0, -14), (1, 0, 0))] +
-                    [cyl(3.4, 12, (72, y, z), (1, 0, 0)) for y in (-38, 38) for z in (-28, 36)])
-B.add(T, "breast_cover", breast, C_SHELL, "printed", transparency=50)
 
 # Pi deck frame: clamps the battery (0.5 mm foam) and carries the Pi directly (it sits 4.5 mm lower than
 # the sim so it clears the ODM neck-pitch servo, which hangs 35 mm below the neck axis)
@@ -311,14 +395,15 @@ deck = [box(-49, -41, -60, 60, *DECK_Z), box(9, 17, -60, 60, *DECK_Z),
         box(-49, 17, 33, 39, *DECK_Z), box(-49, 17, -39, -33, *DECK_Z)]
 deck += [cyl(6, 2, (x - 6, y, DECK_Z[1])) for x in (-39, 19) for y in (-24.5, 24.5)]
 deck = fuse(deck).cut([cyl(2.5, 12, (x - 6, y, 0)) for x in (-39, 19) for y in (-24.5, 24.5)] +
-                      [cyl(3.4, 12, (x, y, 0)) for x in (-45, 13) for y in (-57.5, 57.5)])
+                      [cyl(3.4, 12, (x, y, 0)) for x in (-45,) for y in (-57.5, 57.5)] +
+                      [cyl(3.4, 12, (13, y, 0)) for y in (-50, 50)])
+deck = deck.common(body_in)
 B.add(T, "pi_deck_frame", deck, C_PRINT, "printed")
 
-# Teensy / IMU shelf on the upper rear wall, tied to the right side wall
-shelf = fuse([box(-71, -38, -60, 20, 34, 37), box(-66, -38, -60, -56, 24, 34)])
+# Teensy / IMU shelf, cantilevered off the rear bulkhead
+shelf = fuse([box(-71, -38, -57, 20, 34, 37), box(-71, -66, -57, 20, 24, 34)])
 shelf = shelf.cut([cyl(2.5, 6, (x, y, 33)) for x, y in ((-67, -44), (-43, -44), (-67, -8), (-43, -8),
                                                         (-64.5, 8), (-51.5, 8))])
-shelf = shelf.common(inner)
 B.add(T, "electronics_shelf", shelf, C_PRINT, "printed")
 
 tick("trunk electronics")
@@ -326,14 +411,16 @@ tick("trunk electronics")
 cells, wrap = dp.battery_6s2p()
 B.add(T, "battery_6s2p_cells", cells, C_CELL, "power", pl(-26, 0, BATT_Z))
 B.add(T, "battery_6s2p_wrap", wrap, (0.15, 0.15, 0.6), "power", pl(-26, 0, BATT_Z), transparency=70)
-B.add(T, "bms_6s_100a", dp.bms_6s(), C_POWER, "power", pl(-26, 53, -26 - DROP))
-B.add(T, "main_fuse_40a", dp.blade_fuse_holder(), C_POWER, "power", pl(-26, -52.5, FLOOR_TOP + 8))
-B.add(T, "antispark_switch_120a", dp.antispark_switch(), C_POWER, "power", pl(37, -47, FLOOR_TOP + 8))
+B.add(T, "bms_6s_100a", dp.bms_6s(), C_POWER, "power", pl(-26, 50, -33))
+# fuse, anti-spark switch and peripheral buck on the shelf in the tail
+B.add(T, "main_fuse_40a", dp.blade_fuse_holder(), C_POWER, "power", pl(-90, 32, TAIL_SHELF_Z + 8))
+B.add(T, "antispark_switch_120a", dp.antispark_switch(), C_POWER, "power", pl(-90, 0, TAIL_SHELF_Z + 8, (0, 0, 1), 90))
 B.add(T, "buck_7v4_10a_servos", dp.buck(34, 60, 18), C_POWER, "power", pl(37, 0, FLOOR_TOP + 5))
-B.add(T, "buck_5v1_5a_pi", dp.buck(27, 46, 14), C_POWER, "power", pl(69, 33, -26.5, (0, 1, 0), -90))
-B.add(T, "buck_5v_3a_peripherals", dp.buck(22, 16, 12), C_POWER, "power", pl(30, 48, FLOOR_TOP + 3))
-B.add(T, "estop_22mm", dp.estop_22mm(), C_POWER, "power", pl(-74, ESTOP_YZ[0], ESTOP_YZ[1], (0, 0, 1), 180))
-B.add(T, "charge_port_gx16", dp.gx16_charge_port(), C_METAL, "power", pl(-74, CHARGE_YZ[0], CHARGE_YZ[1], (0, 0, 1), 180))
+B.add(T, "buck_5v1_5a_pi", dp.buck(27, 46, 14), C_POWER, "power", pl(69, 36, -26.5, (0, 1, 0), -90))
+B.add(T, "buck_5v_3a_peripherals", dp.buck(22, 16, 12), C_POWER, "power", pl(-90, -35, TAIL_SHELF_Z))
+B.add(T, "estop_22mm", dp.estop_22mm(), C_POWER, "power", ESTOP_PL)
+B.add(T, "charge_port_gx16", dp.gx16_charge_port(), C_METAL, "power", CHARGE_PL)
+B.add(T, "fan_40x10_5v", dp.fan_40x10(), C_CHIP, "electronics", FAN_PL)
 
 PI_PL = pl(-6, 0, PI_Z)
 pi = dp.raspberry_pi_5()
@@ -352,9 +439,9 @@ for k, s in tc.items():
     B.add(T, k, s, C_CHIP if k == "teensy_40" else C_PCB, "electronics", pl(-55, -26, 39))
 B.add(T, "imu_icm42688p", dp.imu_breakout(), (0.5, 0.1, 0.5), "electronics", pl(-58, 8, 39))
 B.add(T, "bus_servo_adapter", dp.bus_servo_adapter(), (0.1, 0.25, 0.55), "electronics", pl(69, 0, 26, (0, 1, 0), -90))
-B.add(T, "max98357a_i2s_amp", dp.max98357a(), (0.2, 0.2, 0.5), "electronics", pl(-10, 59, 39, (1, 0, 0), 90))
-B.add(T, "speaker_40mm_3w", dp.speaker_40mm(), C_CHIP, "electronics", pl(-71, *SPEAKER_YZ, axis=(0, 0, 1), deg=180))
-B.add(T, "usb_chest_cam", dp.usb_cam_module(), C_PCB, "electronics", pl(95, 0, -14))
+B.add(T, "max98357a_i2s_amp", dp.max98357a(), (0.2, 0.2, 0.5), "electronics", pl(-69, 40, 0, (0, 1, 0), 90))
+B.add(T, "speaker_40mm_3w", dp.speaker_40mm(), C_CHIP, "electronics", SPK_PL)
+B.add(T, "usb_nav_cam", dp.usb_cam_module(), C_PCB, "electronics", NAVCAM_PL)
 tick("legs")
 # ================================================================ LEGS
 for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assembly", "knee_and_ankle_assembly",
@@ -362,53 +449,98 @@ for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assem
                               (-1, "hip_roll_assembly_2", "right_roll_to_pitch_assembly", "knee_and_ankle_assembly_3",
                                "knee_and_ankle_assembly_4", "foot_assembly_2")):
     P = "L" if s > 0 else "R"
-    side = (lambda shape: shape) if s > 0 else mirror_y
+    side = (lambda shape: shape) if s > 0 else mirror_y       # trunk-side parts: built for the left leg
 
-    # --- fixed hip mount (built in trunk-local, then placed in the hip body)
-    hm = fuse([box(-15.5, -10.5, 63, 136, -120, -70),                 # motor plate (GIM4305 rear face)
-               box(-35, 35, 63, 69, FLOOR_BOT, -25),                   # flange on the trunk side wall
-               box(-58, 62, 44, 69, FLOOR_BOT - 6, FLOOR_BOT),         # shelf under the floor
-               box(-35, -17, 69, 125, FLOOR_BOT - 6, FLOOR_BOT)])      # top rib, clear of the motor boss
-    hm = hm.cut([cyl(41, 20, (-20, 108, -88), (1, 0, 0))] +
-                bolt_circle(47.5, 6, 2.7, 20, (-20, 108, -88), "x", 30) +
-                [cyl(4.5, 10, (x, 60, z), (0, 1, 0)) for x in (-28, 28) for z in (-60, -35)] +
-                [cyl(4.5, 10, (x, 54, FLOOR_BOT - 8)) for x in (-50, 0, 58)])
-    to_hip = pl(0, -s * 84, 44)
+    # --- fixed hip mount (built in trunk-local, then placed in the hip body). Hangs under the body like the
+    # ODM's leg arm: a shelf screwed into the floor from below, a web hugging the bottom chamfer, a rib out to
+    # the GIM4305 rear-face plate. The plate's outboard end is round, R 29.5 about the roll axis, so the
+    # hip-pitch GIM6010 cover (never closer than 30 mm to the roll axis) clears it through the full roll range.
+    hp, rp = BODIES[hb]["pos_local_mm"], BODIES[rb]["pos_local_mm"]
+    AY, AZ = s * (hp[1] + rp[1]), hp[2] + rp[2]                    # roll axis in the trunk frame (left leg)
+    PZ = AZ - 29.5                                                  # plate bottom, flush with the rounded end
+    MB = BODY_BOT - 6                                               # underside of the shelf
+    hm = fuse([box(-58, 62, 14, 63.25, MB, -40),                             # shelf + web under the chamfer
+               box(-15.5, -10.5, 44, AY - 22, PZ, -50), box(-15.5, -10.5, 44, AY, PZ, AZ),   # GIM4305 plate
+               dp.rounded_plate_yz([(AY - 22, -60, 10), (AY, AZ, 29.5)], -15.5, -10.5),     # top rounds into the end
+               box(-35, -10.5, 44, 125, MB, BODY_BOT)]).removeSplitter()    # rib
+    hm = dp.round_corners(hm, [((x, y, None), 12) for x in (-58, 62) for y in (14, 63.25)] +
+                          [((None, 44, PZ), 10), ((-35, 125, None), 8)])
+    hm = hm.cut(odm_body(-0.5))                                     # hugs the body: 0.5 mm off its skin
+    hm = hm.cut([cyl(41, 20, (-20, AY, AZ), (1, 0, 0)), cyl(56, 9.6, (-25, AY, AZ), (1, 0, 0))] +   # + end-cap seat
+                bolt_circle(47.5, 6, 2.7, 20, (-20, AY, AZ), "x", 30) +
+                [cyl(4.5, 20, (x, 30, MB - 5)) for x in (-50, 0, 58)] +
+                [cyl(8, 3, (x, 30, MB - 0.01)) for x in (-50, 0, 58)])      # counterbores
+    hm = hm.common(box(-100, 100, 0, 200, -200, 200))
+    to_hip = pl(-hp[0], -hp[1], -hp[2])
     B.add(hb, f"{P}_hip_mount", side(hm), C_PRINT, "printed", to_hip)
-    B.add(hb, f"{P}_hip_roll_gim4305", dp.gim4305(), C_MOTOR, "motor", pl(0, s * 24, -44))
+    B.add(hb, f"{P}_hip_roll_gim4305", dp.gim4305(), C_MOTOR, "motor", pl(*rp))
+    # end cap over the hip-roll motor's rear boss (Impulse actuator back plate), cable notch on top
+    cap = dp.along_x(dp.end_cap(52, 3, 1.5, 46, notch_deg=180), -20)
+    cap.translate(V(0, AY, AZ))
+    B.add(hb, f"{P}_hip_roll_end_cap", side(cap), C_PRINT, "printed", to_hip)
 
-    # --- hip-roll yoke (roll body frame, origin on the roll axis): GIM4305 output -> GIM6010 housing
-    yk = fuse([box(16.5, 22.5, -22, 41, -33, 33),
+    # Leg styling follows the Impulse robot: slotted motor cans, twin side plates on the thigh. Built for the
+    # left leg, mirrored for the right.
+
+    # --- hip-roll yoke = hip casing (roll body frame, origin on the roll axis): GIM4305 output -> GIM6010 housing.
+    # A slotted can around the GIM6010 hip-pitch housing (bolted to its inboard face, Ø74) and a slotted wrap
+    # around the GIM4305 hip-roll motor (it turns with the roll output, 2.5 mm radial clearance).
+    yk = fuse([cyl(66, 6, (16.5, 0, 0), (1, 0, 0)), box(16.5, 22.5, 0, 41, -33, 33),  # GIM4305 output plate
                cyl(88, 5, (0, 36, 0), (0, 1, 0)), box(-10, 22.5, 36, 41, -33, 33),
-               box(-8, 22.5, -22, 41, 29, 33), box(-8, 22.5, -22, 41, -33, -29)])
+               box(-8, 22.5, 0, 41, 29, 33), box(-8, 22.5, 0, 41, -33, -29),
+               dp.along_y(dp.slotted_can(88, 81.5, 25, 8, 9, 15, phase=22.5), 41),   # GIM6010 can, y 41..66
+               dp.along_x(dp.slotted_can(66, 58, 24.5, 6, 8, 12, phase=30), -8)])    # GIM4305 wrap, x -8..16.5
     yk = yk.cut([cyl(60, 15, (0, 28, 0), (0, 1, 0)), cyl(12, 10, (14, 0, 0), (1, 0, 0))] +
                 bolt_circle(27, 3, 3.4, 10, (14, 0, 0), "x", 90) +
                 bolt_circle(74, 8, 3.4, 10, (0, 33, 0), "y", 22.5))
     B.add(rb, f"{P}_hip_roll_yoke", side(yk), C_PRINT, "printed")
     B.add(rb, f"{P}_hip_pitch_gim6010", dp.gim6010(), C_MOTOR, "motor", pl(0, s * 52, 0, (0, 0, 1), 90 * s))
 
-    # --- thigh (thigh body frame, origin on the hip-pitch axis): hip output (y=22) -> knee housing (y=11)
-    th = fuse([rounded_plate_xz([(0, 0, 24), (0, -118, 44)], 22, 30),
-               tube(84, 60, 11, (0, 11, -118), (0, 1, 0))])
-    slot = rounded_plate_xz([(0, -32, 8), (0, -78, 10)], 20, 32)
-    th = th.cut([slot, cyl(8, 12, (0, 20, 0), (0, 1, 0)), cyl(20, 12, (0, 20, -118), (0, 1, 0)),
-                 box(22, 46, 10, 23, -128, -108)] +
-                bolt_circle(25, 6, 3.4, 12, (0, 20, 0), "y") +
-                bolt_circle(20.4, 3, 4, 12, (0, 20, 0), "y", 30) +
-                bolt_circle(74, 8, 3.4, 22, (0, 10, -118), "y", 22.5))
-    B.add(tb, f"{P}_thigh", side(th), C_PRINT, "printed")
-    B.add(tb, f"{P}_knee_gim6010", dp.gim6010(), C_MOTOR, "motor", pl(0, 0, -118, (0, 0, 1), -90 * s))
+    # --- thigh (thigh body frame, origin on the hip-pitch axis, knee at z -118). Twin side sheets like the ODM's
+    # leg links, the same outline on both sides: the outer one (y 22..29) on the hip output, the inner one
+    # (y -20..-15) on the knee housing's output face, scalloped R 47 round the hip so it clears the roll yoke.
+    # Front and back walls join them between the motors, so the thigh reads as one closed piece from the hip
+    # to the knee (the ODM's thigh cover). The knee GIM6010 sits in a slotted can (8x M3 on Ø74 through both).
+    KZ = -118
+    TH = [(0, 0, 32), (0, KZ, 46)]                                 # thigh outline: hull of these circles
 
-    # --- shin (shin body frame, origin on the knee axis): knee output (y=-22) -> wheel motor rear (y=-18.5)
-    sh = fuse([rounded_plate_xz([(0, 0, 24), (0, -62, 16)], -28, -22),
-               rounded_plate_xz([(0, -66, 16), (0, -118, 32)], -18.5, -12.5),
-               box(-16, 16, -28, -12.5, -74, -56)])
-    sh = sh.cut([cyl(8, 12, (0, -30, 0), (0, 1, 0)), cyl(41, 12, (0, -20, -118), (0, 1, 0))] +
+    outer = rounded_plate_xz(TH, 22, 29, fillet=2)
+    hub_win = dp.radial_windows((0, KZ), 11, 28, 6, 22, 3.5, 21, 30, phase=30)   # show the knee motor cover
+    outer = outer.cut(hub_win +
+                      [cyl(8, 12, (0, 20, 0), (0, 1, 0)), cyl(20, 12, (0, 20, KZ), (0, 1, 0))] +
+                      bolt_circle(25, 6, 3.4, 12, (0, 20, 0), "y") +
+                      bolt_circle(20.4, 3, 4, 12, (0, 20, 0), "y", 30))
+    inner = rounded_plate_xz(TH, -20, -15, fillet=2).cut([cyl(94, 10, (0, -21, 0), (0, 1, 0)),
+                                                cyl(50, 8, (0, -21, KZ), (0, 1, 0))])
+    walls = rounded_plate_xz(TH, -15, 22).cut(rounded_plate_xz([(0, 0, 29), (0, KZ, 43)], -16, 23))
+    walls = walls.common(box(-60, 60, -16, 23, -80, -50))
+    can = dp.along_y(dp.slotted_can(88, 81.5, 26, 8, 9, 14, phase=22.5), -15)
+    can.translate(V(0, 0, KZ))
+    ring = tube(88, 60, 11, (0, 11, KZ), (0, 1, 0)).cut(box(24, 50, 10, 23, KZ - 9, KZ + 9))   # cable exit
+    th = fuse([outer, inner, walls, can, ring])
+    th = th.cut(bolt_circle(74, 8, 3.4, 52, (0, -21, KZ), "y", 22.5))    # through both sheets
+    B.add(tb, f"{P}_thigh", side(th), C_PRINT, "printed")
+    B.add(tb, f"{P}_knee_gim6010", dp.gim6010(), C_MOTOR, "motor", pl(0, 0, KZ, (0, 0, 1), -90 * s))
+
+    # --- shin (shin body frame, origin on the knee axis): twin sheets of one outline, like the ODM's shin. The
+    # outer one (y -28..-22) on the knee output, scalloped R 28 round the wheel motor; the inner one
+    # (y -18.5..-12.5) on the wheel motor's rear face, scalloped R 54 so it clears the thigh at full knee bend. Walls join them.
+    SH = [(0, 0, 28), (0, KZ, 32)]
+    a = rounded_plate_xz(SH, -28, -22, fillet=2).cut([cyl(57, 10, (0, -29, KZ), (0, 1, 0))])
+    b = rounded_plate_xz(SH, -18.5, -12.5, fillet=2).cut([cyl(108, 10, (0, -20, 0), (0, 1, 0))])
+    web = rounded_plate_xz(SH, -22, -18.5).cut(rounded_plate_xz([(0, 0, 25), (0, KZ, 29)], -23, -18))
+    web = web.common(box(-60, 60, -23, -18, -88, -58))
+    sh = fuse([a, b, web])
+    sh = sh.cut([cyl(8, 12, (0, -30, 0), (0, 1, 0)), cyl(41, 12, (0, -20, KZ), (0, 1, 0))] +
                 bolt_circle(25, 6, 3.4, 12, (0, -30, 0), "y") +
                 bolt_circle(20.4, 3, 4, 12, (0, -30, 0), "y", 30) +
-                bolt_circle(47.5, 6, 2.7, 12, (0, -20, -118), "y", 30))
+                bolt_circle(47.5, 6, 2.7, 12, (0, -20, KZ), "y", 30))
     B.add(sb, f"{P}_shin", side(sh), C_PRINT, "printed")
-    B.add(sb, f"{P}_wheel_gim4305", dp.gim4305(), C_MOTOR, "motor", pl(0, -29 * s, -118, (0, 0, 1), -90 * s))
+    B.add(sb, f"{P}_wheel_gim4305", dp.gim4305(), C_MOTOR, "motor", pl(0, -29 * s, KZ, (0, 0, 1), -90 * s))
+    # end cap over the wheel motor's rear boss, inside the shin lip, cable notch toward the knee
+    wcap = mirror_y(dp.along_y(dp.end_cap(50, 2, 1, 44, notch_deg=-90)))
+    wcap.translate(V(0, -9.5, KZ))
+    B.add(sb, f"{P}_wheel_end_cap", side(wcap), C_PRINT, "printed")
 
     # --- wheel
     B.add(fb, f"{P}_wheel_hub", side(dp.wheel_hub()), C_PRINT, "printed")

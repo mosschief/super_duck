@@ -21,30 +21,30 @@
    8.0,
    45.0
   ],
-  "leg poses (hip = -0.50 - delta, knee = 1.00 + 2*delta)": {
+  "leg poses (hip = 0.50 + delta, knee = -1.00 - 2*delta)": {
    "jump take-off (delta -0.46)": {
-    "hip_pitch_deg": -2.3,
-    "knee_deg": 4.6,
+    "hip_pitch_deg": 2.3,
+    "knee_deg": -4.6,
     "hip_pitch axis above wheel axle": 235.8,
     "wheel axle fore/aft of hip_pitch axis": 0.0
    },
    "tallest drive (delta -0.25)": {
-    "hip_pitch_deg": -14.3,
-    "knee_deg": 28.6,
+    "hip_pitch_deg": 14.3,
+    "knee_deg": -28.6,
     "hip_pitch axis above wheel axle": 228.7,
     "wheel axle fore/aft of hip_pitch axis": 0.0
    },
    "home (delta 0)": {
-    "hip_pitch_deg": -28.6,
-    "knee_deg": 57.3,
+    "hip_pitch_deg": 28.6,
+    "knee_deg": -57.3,
     "hip_pitch axis above wheel axle": 207.1,
-    "wheel axle fore/aft of hip_pitch axis": 0.0
+    "wheel axle fore/aft of hip_pitch axis": -0.0
    },
    "deepest crouch / jump wind-up (delta +0.24)": {
-    "hip_pitch_deg": -42.4,
-    "knee_deg": 84.8,
+    "hip_pitch_deg": 42.4,
+    "knee_deg": -84.8,
     "hip_pitch axis above wheel axle": 174.3,
-    "wheel axle fore/aft of hip_pitch axis": 0.0
+    "wheel axle fore/aft of hip_pitch axis": -0.0
    }
   }
  },
@@ -299,8 +299,8 @@
     0.0
    ],
    "range_deg": [
-    -70.0,
-    30.0
+    -30.0,
+    70.0
    ],
    "actuator": "left_hip_pitch",
    "force_limit_Nm": 11.0
@@ -321,7 +321,7 @@
     0.0
    ],
    "anchor_world_mm": [
-    56.6,
+    -56.6,
     160.0,
     178.5
    ],
@@ -353,7 +353,7 @@
     0.0
    ],
    "anchor_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -424,8 +424,8 @@
     0.0
    ],
    "range_deg": [
-    -70.0,
-    30.0
+    -30.0,
+    70.0
    ],
    "actuator": "right_hip_pitch",
    "force_limit_Nm": 11.0
@@ -446,7 +446,7 @@
     0.0
    ],
    "anchor_world_mm": [
-    56.6,
+    -56.6,
     -160.0,
     178.5
    ],
@@ -478,7 +478,7 @@
     0.0
    ],
    "anchor_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -794,7 +794,7 @@
     0.0
    ],
    "origin_world_mm": [
-    56.6,
+    -56.6,
     160.0,
     178.5
    ],
@@ -820,7 +820,7 @@
     0.0
    ],
    "origin_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -924,7 +924,7 @@
     0.0
    ],
    "origin_world_mm": [
-    56.6,
+    -56.6,
     -160.0,
     178.5
    ],
@@ -950,7 +950,7 @@
     0.0
    ],
    "origin_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -2340,7 +2340,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     160.0,
     230.3
    ],
@@ -2366,7 +2366,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     160.0,
     230.3
    ],
@@ -2392,7 +2392,7 @@
     0.0
    ],
    "centre_world_mm": [
-    56.6,
+    -56.6,
     160.0,
     178.5
    ],
@@ -2419,7 +2419,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     136.0,
     126.8
    ],
@@ -2445,7 +2445,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     136.0,
     126.8
    ],
@@ -2471,7 +2471,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     131.0,
     75.0
    ],
@@ -2497,7 +2497,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -2523,7 +2523,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -2549,7 +2549,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -2576,7 +2576,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ],
@@ -2709,7 +2709,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     -160.0,
     230.3
    ],
@@ -2735,7 +2735,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     -160.0,
     230.3
    ],
@@ -2761,7 +2761,7 @@
     0.0
    ],
    "centre_world_mm": [
-    56.6,
+    -56.6,
     -160.0,
     178.5
    ],
@@ -2788,7 +2788,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     -136.0,
     126.8
    ],
@@ -2814,7 +2814,7 @@
     0.0
    ],
    "centre_world_mm": [
-    28.3,
+    -28.3,
     -136.0,
     126.8
    ],
@@ -2840,7 +2840,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     -131.0,
     75.0
    ],
@@ -2866,7 +2866,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -2892,7 +2892,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -2918,7 +2918,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -2945,7 +2945,7 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ],
@@ -3041,7 +3041,7 @@
     0.0
    ],
    "pos_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ]
@@ -3055,7 +3055,7 @@
     0.0
    ],
    "pos_world_mm": [
-    0.0,
+    -0.0,
     112.0,
     75.0
    ]
@@ -3069,7 +3069,7 @@
     0.0
    ],
    "pos_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ]
@@ -3083,7 +3083,7 @@
     0.0
    ],
    "pos_world_mm": [
-    0.0,
+    -0.0,
     -112.0,
     75.0
    ]

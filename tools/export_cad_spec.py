@@ -52,8 +52,8 @@ def pose_legs(m, d, delta, key=0):
     """Sets the keyframe with both legs at crouch `delta` (controller kinematics) and runs kinematics."""
     mujoco.mj_resetDataKeyframe(m, d, key)
     for side in ("left", "right"):
-        d.joint(f"{side}_hip_pitch").qpos[0] = -0.50 - delta
-        d.joint(f"{side}_knee").qpos[0] = 1.00 + 2.0 * delta
+        d.joint(f"{side}_hip_pitch").qpos[0] = 0.50 + delta
+        d.joint(f"{side}_knee").qpos[0] = -1.00 - 2.0 * delta
     mujoco.mj_forward(m, d)  # kinematics + camera/light poses
 
 
@@ -94,11 +94,11 @@ def key_dimensions(m, d):
     for label, delta in (("jump take-off (delta -0.46)", -0.46), ("tallest drive (delta -0.25)", -0.25),
                          ("home (delta 0)", 0.0), ("deepest crouch / jump wind-up (delta +0.24)", 0.24)):
         pose_legs(m, d, delta)
-        crouch[label] = {"hip_pitch_deg": round(math.degrees(-0.50 - delta), 1),
-                         "knee_deg": round(math.degrees(1.00 + 2 * delta), 1),
+        crouch[label] = {"hip_pitch_deg": round(math.degrees(0.50 + delta), 1),
+                         "knee_deg": round(math.degrees(-1.00 - 2 * delta), 1),
                          "hip_pitch axis above wheel axle": mm(jt("left_hip_pitch")[2] - body("foot_assembly")[2])[0],
                          "wheel axle fore/aft of hip_pitch axis": mm(body("foot_assembly")[0] - jt("left_hip_pitch")[0])[0]}
-    out["leg poses (hip = -0.50 - delta, knee = 1.00 + 2*delta)"] = crouch
+    out["leg poses (hip = 0.50 + delta, knee = -1.00 - 2*delta)"] = crouch
     return out
 
 
@@ -165,7 +165,7 @@ def hardpoints_md(spec):
     L += ["", "### Leg poses the structure must clear", "",
           "| Pose | hip_pitch (deg) | knee (deg) | hip_pitch axis above axle | axle fore/aft of hip_pitch axis |",
           "| :--- | ---: | ---: | ---: | ---: |"]
-    for k, v in spec["key_dimensions"]["leg poses (hip = -0.50 - delta, knee = 1.00 + 2*delta)"].items():
+    for k, v in spec["key_dimensions"]["leg poses (hip = 0.50 + delta, knee = -1.00 - 2*delta)"].items():
         L.append(f"| {k} | {v['hip_pitch_deg']} | {v['knee_deg']} | {v['hip_pitch axis above wheel axle']} | "
                  f"{v['wheel axle fore/aft of hip_pitch axis']} |")
     L += ["", "## Joints", "",
