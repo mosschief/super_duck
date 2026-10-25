@@ -13,9 +13,9 @@
         shell proportions and aesthetic fit:
           1. Raspberry Pi 5 (86 x 56 x 16 mm) + Active Cooler + 6S 24V Li-Ion pack inside `trunk_assembly`
           2. Upper leg joints: 4x SteadyWin GIM6010-8 (Ø80 x 44 mm incl. driver, 388 g, 11 N*m stall / 5 N*m rated) on
-             hip-pitch + knee, and 4x GIM4305-10 (Ø53 x 33 mm, 150 g, ±3.47 N*m) on hip-yaw + hip-roll.
+             hip-pitch + knee, and 2x GIM4305-10 (Ø53 x 33 mm, 150 g, ±3.47 N*m) on hip-roll (hip yaw removed 2026-10-16).
              (Variant of open_duck_wheeled_v2.xml: GIM6010-8 masses added at the hip-pitch / knee joint centres.)
-          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius TPU wheels at `foot_assembly` & `foot_assembly_2`
+          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius wheels (cast VytaFlex 40 urethane treads, cad/tires.md) at `foot_assembly` & `foot_assembly_2`
           4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
              inside the iconic BDX binocular head bezel + 1 downward-angled chest camera (`trunk_nav_cam`)
           5. Open Duck Mini expression package: hinged antennas on 9 g servos (`left/right_antenna`), WS2812B eye
@@ -155,18 +155,20 @@
 
       <body name="trunk_assembly" pos="0 0 0" quat="1 0 0 0" childclass="open_duck_mini_v2">
         <!--
-          Scaled trunk mass = 1.050 kg (1.35x PLA shell `body_front` + `body_back` +
-          Raspberry Pi 5 [86x56x16 mm] + Active Cooler + 6S 24V Li-Ion pack + ICM-42688-P IMU)
+          Trunk and leg inertials are computed from the FreeCAD assembly (cad/freecad/mass_properties.py, 2026-10-25): printed PETG at its
+          walls + infill (structural 6 walls / 45 %, shells 3 walls / 18 %), purchased parts at their real masses
+          (cad/purchased_parts.json), each motor in the body that holds its stator, + screws and a 120 g trunk wiring
+          allowance. The per-part comments below are the older stand-in values.
         -->
-        <inertial pos="-0.0244 0.0004 -0.0115" mass="1.649" diaginertia="0.00401 0.00486 0.00460"/>
-        <!-- speaker_40mm_3w: 18 g (folded into the trunk_assembly inertial above) -->
+        <inertial pos="-0.0220 -0.0000 -0.0225" mass="2.132" fullinertia="0.005432 0.009045 0.007245 -5.64e-05 -0.000338 3.4e-05"/>
+        <!-- speaker_40mm_3w: 27 g (folded into the trunk_assembly inertial above) -->
         <!-- max98357a_i2s_amp: 2 g (folded into the trunk_assembly inertial above) -->
         <geom name="max98357a_i2s_amp" class="visual" type="box" size="0.009 0.0095 0.0015" pos="-0.06 0.035 0.035" material="rpi_green"/>
-        <!-- bms_6s_100a: 40 g (folded into the trunk_assembly inertial above) -->
+        <!-- bms_6s_100a: 60 g (folded into the trunk_assembly inertial above) -->
         <geom name="bms_6s_100a" class="visual" type="box" size="0.03 0.004 0.02" pos="-0.026 0.053 -0.026" material="gim4305_housing"/>
         <!-- main_fuse_40a: 10 g (folded into the trunk_assembly inertial above) -->
         <geom name="main_fuse_40a" class="visual" type="box" size="0.012 0.005 0.01" pos="-0.026 -0.053 -0.04" material="foot_bottom_tpu_material"/>
-        <!-- antispark_switch_120a: 25 g (folded into the trunk_assembly inertial above) -->
+        <!-- antispark_switch_120a: 60 g (folded into the trunk_assembly inertial above) -->
         <geom name="antispark_switch_120a" class="visual" type="box" size="0.02 0.01 0.008" pos="0.033 -0.048 -0.03" material="gim4305_housing"/>
         <!-- peripheral_5v_buck: 10 g (folded into the trunk_assembly inertial above) -->
         <geom name="peripheral_5v_buck" class="visual" type="box" size="0.011 0.008 0.006" pos="0.03 0.048 -0.03" material="rpi_green"/>
@@ -293,21 +295,21 @@
 
         <!-- ==================== LEFT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
         <body name="hip_roll_assembly" pos="0 0.084 -0.044">
-          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Aluminium / PA-CF bracket from the
-               trunk floor to the hip-roll motor, ~60 g; carries the leg loads (cad/design_loads.md). -->
-          <inertial pos="0 0 -0.026" mass="0.060" diaginertia="0.0000164 0.0000186 0.0000292"/>
+          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Printed bracket from the
+               trunk floor to the hip-roll motor; this body carries the hip-roll GIM4305 (cad/design_loads.md). -->
+          <inertial pos="-0.0015 0.0014 -0.0409" mass="0.300" fullinertia="0.0003551 0.0002172 0.000396 -1.78e-06 -1.11e-05 2.38e-05"/>
           <geom name="left_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
 
           <body name="left_roll_to_pitch_assembly" pos="0 0.024 -0.044">
             <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
-            <inertial pos="0 0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <inertial pos="0.0006 0.0475 0.0009" mass="0.508" fullinertia="0.0004081 0.0004255 0.0003916 2.34e-05 6.73e-06 6.85e-07"/>
             <geom name="left_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
             <geom name="left_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 0.018 0" material="foot_bottom_tpu_material"/>
 
             <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m, +52 mm Y offset clears hip_roll) -->
             <body name="knee_and_ankle_assembly" pos="0 0.052 0">
               <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim6010"/>
-              <inertial pos="0.0000 0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
+              <inertial pos="-0.0001 0.0045 -0.0999" mass="0.683" fullinertia="0.001291 0.00146 0.0004718 1.98e-06 -7.07e-07 -0.000184"/>
               <geom name="left_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
               <geom name="left_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
               <geom name="left_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
@@ -315,7 +317,7 @@
               <!-- Shin Link (`knee_and_ankle_assembly_2`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
               <body name="knee_and_ankle_assembly_2" pos="0 0 -0.118">
                 <joint name="left_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="0.0000 -0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <inertial pos="-0.0001 -0.0269 -0.0890" mass="0.281" fullinertia="0.0005718 0.0006063 9.238e-05 1.01e-07 -4.15e-07 -1.8e-05"/>
                 <geom name="left_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
                 <geom name="left_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 -0.024 -0.059" material="foot_bottom_tpu_material"/>
                 <geom name="left_shin_collision" class="collision" type="capsule" fromto="0 -0.024 0 0 -0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
@@ -324,7 +326,7 @@
                 <!-- Distal Wheel Assembly (`foot_assembly`, aligned at y = +112 mm directly under hip_roll y = +108 mm) -->
                 <body name="foot_assembly" pos="0 -0.048 -0.118">
                   <joint name="left_wheel" class="gim4305_wheel" axis="0 1 0"/>
-                  <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
+                  <inertial pos="0.0000 0.0000 0.0000" mass="0.252" fullinertia="0.000502 0.0009744 0.000502 0 0 0"/>
                   <geom name="left_foot_bottom_tpu" class="wheel_tire"/>
                   <geom name="left_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
                   <geom name="left_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
@@ -339,21 +341,21 @@
 
         <!-- ==================== RIGHT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
         <body name="hip_roll_assembly_2" pos="0 -0.084 -0.044">
-          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Aluminium / PA-CF bracket from the
-               trunk floor to the hip-roll motor, ~60 g; carries the leg loads (cad/design_loads.md). -->
-          <inertial pos="0 0 -0.026" mass="0.060" diaginertia="0.0000164 0.0000186 0.0000292"/>
+          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Printed bracket from the
+               trunk floor to the hip-roll motor; this body carries the hip-roll GIM4305 (cad/design_loads.md). -->
+          <inertial pos="-0.0015 -0.0015 -0.0409" mass="0.300" fullinertia="0.0003564 0.0002172 0.0003973 1.56e-06 -1.11e-05 -2.39e-05"/>
           <geom name="right_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
 
           <body name="right_roll_to_pitch_assembly" pos="0 -0.024 -0.044">
             <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
-            <inertial pos="0 -0.014 0" mass="0.185" diaginertia="0.00009 0.00010 0.00009"/>
+            <inertial pos="0.0009 -0.0475 0.0009" mass="0.508" fullinertia="0.0004081 0.0004252 0.0003914 -2.26e-05 7.13e-06 -6.85e-07"/>
             <geom name="right_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
             <geom name="right_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 -0.018 0" material="foot_bottom_tpu_material"/>
 
             <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m, -52 mm Y offset clears hip_roll) -->
             <body name="knee_and_ankle_assembly_3" pos="0 -0.052 0">
               <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim6010"/>
-              <inertial pos="0.0000 -0.0025 -0.0224" mass="0.473" diaginertia="0.000716 0.000780 0.000237"/>
+              <inertial pos="-0.0003 -0.0045 -0.0999" mass="0.683" fullinertia="0.001291 0.00146 0.0004718 -1.19e-06 -4.05e-06 0.000184"/>
               <geom name="right_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
               <geom name="right_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
               <geom name="right_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
@@ -361,7 +363,7 @@
               <!-- Shin Link (`knee_and_ankle_assembly_4`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
               <body name="knee_and_ankle_assembly_4" pos="0 0 -0.118">
                 <joint name="right_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="0.0000 0.0024 -0.0214" mass="0.453" diaginertia="0.000665 0.000729 0.000226"/>
+                <inertial pos="0.0001 0.0269 -0.0890" mass="0.281" fullinertia="0.0005718 0.0006063 9.238e-05 1.01e-07 4.15e-07 1.8e-05"/>
                 <geom name="right_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
                 <geom name="right_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0.024 -0.059" material="foot_bottom_tpu_material"/>
                 <geom name="right_shin_collision" class="collision" type="capsule" fromto="0 0.024 0 0 0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
@@ -370,7 +372,7 @@
                 <!-- Distal Wheel Assembly (`foot_assembly_2`, aligned at y = -112 mm directly under hip_roll y = -108 mm) -->
                 <body name="foot_assembly_2" pos="0 0.048 -0.118">
                   <joint name="right_wheel" class="gim4305_wheel" axis="0 1 0"/>
-                  <inertial pos="0 0 0" mass="0.255" diaginertia="0.00038 0.00072 0.00038"/>
+                  <inertial pos="0.0000 0.0000 0.0000" mass="0.252" fullinertia="0.000502 0.0009744 0.000502 0 0 0"/>
                   <geom name="right_foot_bottom_tpu" class="wheel_tire"/>
                   <geom name="right_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
                   <geom name="right_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>

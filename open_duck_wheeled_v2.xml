@@ -12,8 +12,9 @@
       - Uniform 1.35x linear scale factor (42 cm -> 56.7 cm tall) so the original Open Duck Mini v2
         shell proportions and aesthetic fit:
           1. Raspberry Pi 5 (86 x 56 x 16 mm) + Active Cooler + 6S 24V Li-Ion pack inside `trunk_assembly`
-          2. 8x SteadyWin GIM4305-10 QDD planetary motors (Ø53 x 33 mm, 150 g, ±3.47 N*m) in the 4 upper leg joints per leg
-          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius TPU wheels at `foot_assembly` & `foot_assembly_2`
+          2. 6x SteadyWin GIM4305-10 QDD planetary motors (Ø53 x 33 mm, 150 g, ±3.47 N*m) in the 3 upper leg joints per leg
+             (hip roll, hip pitch, knee; hip yaw removed 2026-10-16)
+          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius wheels (cast VytaFlex 40 urethane treads, cad/tires.md) at `foot_assembly` & `foot_assembly_2`
           4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
              inside the iconic BDX binocular head bezel + 1 downward-angled chest camera (`trunk_nav_cam`)
           5. Open Duck Mini expression package: hinged antennas on 9 g servos (`left/right_antenna`), WS2812B eye

@@ -41,6 +41,22 @@ def fuse(shapes):
     return out.removeSplitter()
 
 
+def cable(points, d=6.0, balls=()):
+    """A cable of diameter d along the polyline `points`: a cylinder per segment, a ball at each inner corner
+    and at the ends listed in `balls` (0 and/or -1)."""
+    pts = [V(*p) for p in points]
+    parts = [Part.makeCylinder(d / 2, (b - a).Length, a, b - a) for a, b in zip(pts, pts[1:]) if (b - a).Length > 1e-6]
+    parts += [Part.makeSphere(d / 2, pts[i]) for i in list(range(1, len(pts) - 1)) + [i % len(pts) for i in balls]]
+    return fuse(parts)
+
+
+def grommet(hole_d, wall, id_, flange_d, flange_t=1.5):
+    """Rubber grommet along +y for a hole_d hole in a wall y 0..wall: core plus a flange each side."""
+    return fuse([tube(hole_d, id_, wall, (0, 0, 0), (0, 1, 0)),
+                 tube(flange_d, id_, flange_t, (0, -flange_t, 0), (0, 1, 0)),
+                 tube(flange_d, id_, flange_t, (0, wall, 0), (0, 1, 0))])
+
+
 def bolt_circle(pcd, n, d, h, base, axis, phase=0.0):
     """n holes of diameter d on a pitch circle, normal to a principal axis ('x', 'y' or 'z')."""
     holes = []
@@ -57,14 +73,39 @@ def bolt_circle(pcd, n, d, h, base, axis, phase=0.0):
     return holes
 
 
-def round_corners(shape, picks):
-    """Fillet straight edges picked by their midpoint: picks = [((x, y, z), r), ...], None = any coordinate."""
+def round_corners(shape, picks, strict=True):
+    """Fillet straight edges picked by their midpoint: picks = [((x, y, z), r), ...], None = any coordinate.
+    strict=False: a pick whose fillet fails (or matches no edge) is skipped and reported instead of raising."""
     for r in sorted({r for _, r in picks}, reverse=True):
         want = [p for p, rr in picks if rr == r]
-        edges = [e for e in shape.Edges if e.Curve.TypeId == "Part::GeomLine" and any(
-            all(c is None or abs(m - c) < 0.01 for m, c in zip(e.CenterOfMass, p)) for p in want)]
-        shape = shape.makeFillet(r, edges)
+        groups = [want] if strict else [[p] for p in want]
+        for g in groups:
+            edges = [e for e in shape.Edges if e.Curve.TypeId == "Part::GeomLine" and any(
+                all(c is None or abs(m - c) < 0.01 for m, c in zip(e.CenterOfMass, p)) for p in g)]
+            if strict:
+                shape = shape.makeFillet(r, edges)
+                continue
+            try:
+                if not edges:
+                    raise ValueError("no edge")
+                shape = shape.makeFillet(r, edges)
+            except Exception as ex:
+                print(f"round_corners: skipped R{r} at {g[0]}: {ex}")
     return shape
+
+
+def teardrop(d, h, base, axis, flat=1.15):
+    """Horizontal hole of diameter d, length h from base along axis ((1, 0, 0) or (0, 1, 0)), with a 45 deg
+    roof toward +z truncated at flat * r above the centre, so it prints without support."""
+    r = d / 2.0
+    k, t = r / math.sqrt(2), (math.sqrt(2) - flat) * r
+    pts2 = [(-k, k), (-t, flat * r), (t, flat * r), (k, k), (0, 0)]
+    if abs(axis[0]) > 0.5:
+        pts = [V(base[0], base[1] + u, base[2] + w) for u, w in pts2]
+    else:
+        pts = [V(base[0] + u, base[1], base[2] + w) for u, w in pts2]
+    roof = Part.Face(Part.makePolygon(pts + [pts[0]])).extrude(V(*axis) * h)
+    return fuse([cyl(d, h, base, axis), roof])
 
 
 def rounded_plate_xz(points, y0, y1, fillet=0.0):
@@ -356,12 +397,12 @@ def max98357a():
 
 
 def speaker_40mm():
-    """40 mm thin-profile speaker, cone facing +x, flange at x = 0, 6 mm deep."""
-    frame = tube(40, 34, 1.5, (-1.5, 0, 0), (1, 0, 0))
-    cone = Part.makeCone(17, 9, 4, V(-1.5, 0, 0), V(-1, 0, 0))
-    magnet = cyl(18, 1.5, (-5.5, 0, 0), (-1, 0, 0))
-    tabs = fuse([cbox(-0.75, y, 0, 1.5, 4, 8) for y in (-21, 21)])
-    return fuse([frame, cone, magnet, tabs])
+    """Adafruit 3968 40 mm 4 ohm speaker (Ø40 x 20 overall, no mounting tabs: clamped by its rim), cone facing
+    +x, rim front at x = 0. Rim 2 mm, basket tapering to a Ø22 magnet cup at the back."""
+    rim = tube(40, 34, 2, (-2, 0, 0), (1, 0, 0))
+    basket = Part.makeCone(20, 13, 9, V(-2, 0, 0), V(-1, 0, 0))
+    magnet = cyl(22, 9, (-20, 0, 0), (1, 0, 0))
+    return fuse([rim, basket, magnet])
 
 
 def projector_led():
@@ -409,10 +450,11 @@ def battery_6s2p():
 
 
 def bms_6s():
-    """6S BMS, modeled 60 x 40 board on edge (normal +y), 8 thick incl. FETs and heatsink."""
-    pcb = box(-30, 30, -4, -2.4, -20, 20)
-    sink = box(-26, 26, -2.4, 4, -16, 8)
-    pads = box(-30, -22, -2.4, 0, -20, 20)
+    """Heltec 6S 80 A split-port BMS, 83 x 55 x 8 board on edge (normal +y): PCB at y -4..-2.4, FETs and
+    their sink to y +4; B- / P- / C- pads at the -x end."""
+    pcb = box(-41.5, 41.5, -4, -2.4, -27.5, 27.5)
+    sink = box(-30, 38, -2.4, 4, -24, 20)
+    pads = box(-41.5, -32, -2.4, 0, -27.5, 27.5)
     return fuse([pcb, sink, pads])
 
 
@@ -423,9 +465,20 @@ def blade_fuse_holder():
 
 
 def antispark_switch():
-    """Anti-spark switch body 40 x 20 x 16 (estimate) with the remote-switch lead exit."""
-    return fuse([cbox(0, 0, 0, 40, 20, 16), cyl(6, 6, (20, 0, 0), (1, 0, 0)),
-                 cyl(6, 6, (-20, 0, 0), (-1, 0, 0))])
+    """Flipsky Antispark Switch Pro V3.0, heatsink version: 42.2 x 33 x 26.6 with heat shrink, 12 AWG leads
+    out of both ends along x (lead stubs Ø6). Bottom at z -8 (placed as the old 16 mm box was)."""
+    return fuse([box(-21.1, 21.1, -16.5, 16.5, -8, 18.6), cyl(6, 6, (21.1, 0, 0), (1, 0, 0)),
+                 cyl(6, 6, (-21.1, 0, 0), (-1, 0, 0))])
+
+
+def pololu_d36v50():
+    """Pololu D36V50Fx step-down regulator (F5 = 5 V, F7 = 7.5 V): 25.4 x 25.4 x 9.5, PCB bottom z = 0,
+    3x M2 holes (Ø2.18) in three corners, terminals along the -x edge."""
+    pcb = box(-12.7, 12.7, -12.7, 12.7, 0, 1.6).cut(
+        [cyl(2.18, 3, (x, y, -0.5)) for x, y in ((-10.2, 10.2), (-10.2, -10.2), (10.2, -10.2))])
+    ind = box(-6, 7, -1, 12, 1.6, 9.5)                                   # 4.7 uH inductor
+    caps = [cyl(8, 8, (8, -3, 1.6)), cyl(8, 8, (3, -9, 1.6))]
+    return fuse([pcb, ind] + caps)
 
 
 def buck(dx, dy, dz, n_caps=2):
@@ -454,13 +507,12 @@ def fan_40x10():
 
 
 def estop_22mm():
-    """22 mm latching mushroom e-stop. Panel front face at x = 0, mushroom on +x, body and
-    NC contact block behind (to x = -45)."""
+    """RAFI LUMOTAST 22 latching e-stop (Ø22.3 cutout, 17.9 mm behind the panel, 0.8 mm tab terminals).
+    Panel front face at x = 0, mushroom on +x. Head size not published: modelled Ø32 x 20 proud (verify)."""
     mush = fuse([cyl(32, 8, (12, 0, 0), (1, 0, 0)), cyl(24, 12, (0, 0, 0), (1, 0, 0))])
     nut = cyl(26, 4, (-7, 0, 0), (1, 0, 0))
-    body = cyl(22, 18, (-25, 0, 0), (1, 0, 0))
-    block = cbox(-35, 0, 0, 20, 28, 28)
-    return fuse([mush, nut, body, block])
+    body = cyl(22, 10.9, (-17.9, 0, 0), (1, 0, 0))
+    return fuse([mush, nut, body])
 
 
 def gx16_charge_port():
@@ -484,7 +536,7 @@ def wheel_hub():
     cuts = bolt_circle(27, 3, 3.4, 10, (0, -5, 0), "y", 90)
     cuts += [cyl(10, 10, (0, -5, 0), (0, 1, 0))]
     cuts += bolt_circle(92, 6, 24, 10, (0, -5, 0), "y", 30)        # lightening
-    cuts += bolt_circle(133, 12, 5, 40, (0, -20, 0), "y", 15)       # tread key holes
+    cuts += bolt_circle(133, 12, 3, 40, (0, -20, 0), "y", 15)       # tread key holes (1 mm wall each side)
     for y in (-8, 0, 8):                                             # key grooves
         cuts.append(tube(140, 136, 1.2, (0, y - 0.6, 0), (0, 1, 0)))
     return hub.cut(cuts)

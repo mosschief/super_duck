@@ -20,7 +20,7 @@ tools/fetch_vendor_cad.sh               # vendor drawings + STEP into cad/vendor
 
 Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
 
-## Key numbers (gim6010 build, 5.24 kg)
+## Key numbers (gim6010 build, 6.92 kg)
 
 | | |
 | :--- | :--- |
@@ -65,7 +65,7 @@ Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
    at their controller clips. The shell stand-ins clash by up to 13 mm (`clearance_report.md`, CAD constraints).
 6. **Closed (2026-10-16)**: the hip-yaw bracket no longer turns, so it needs no swept clearance under the trunk.
 7. **Space still to reserve**: the e-stop needs ~45 mm behind the rear panel; the speaker depth depends on the part
-   (the model assumes 6 mm, with 0.5 mm to the battery); two buck converters and the bus servo adapter aren't in
-   the model yet.
+   (the model assumes 6 mm, with 0.5 mm to the battery). The bucks and the bus servo adapter are now placed in the
+   FreeCAD model (`freecad/README.md`).
 8. **Measure on arrival**: GIM6010-8 radial protrusion (its STEP is Ø86.6 across, likely the connector), micro servo
    tab holes, the speaker, BMS, anti-spark switch and e-stop.
