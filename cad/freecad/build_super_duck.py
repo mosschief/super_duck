@@ -130,6 +130,7 @@ class Builder:
         self.world = {}      # body name -> world Placement
         self.sim_world = {}  # same, at the MJCF body positions (for the sim stand-ins)
         self.items = []      # (label, body, tag, local Placement, shape)
+        self.meta = {}       # label -> (tag, colour, transparency), for the sim export (parts_manifest.json)
         self.objs = {}
 
     def body(self, name, parent=None):
@@ -168,6 +169,7 @@ class Builder:
             if hasattr(vo, "LineColor"):
                 vo.LineColor = tuple(c * 0.6 for c in color)
         self.items.append((label, body, tag, placement, shape))
+        self.meta[label] = (tag, tuple(color), transparency)
         self.objs[label] = obj
         return obj
 
@@ -826,9 +828,12 @@ def geom_shape(g):
 
 
 tick("sim stand-ins")
-# Sim stand-ins (hidden): every visual/collision geom of the MJCF, for comparison
+# Sim stand-ins (hidden): the MJCF's primitive geoms, for comparison (its mesh geoms are exported from this
+# document by export_sim.py, so they match by construction)
 sim = doc.addObject("App::Part", "Sim_Standins")
 for g in HP["geoms"]:
+    if g["type"] not in ("box", "cylinder", "capsule", "sphere"):
+        continue
     s = geom_shape(g)
     wp = B.sim_world[g["body"]].multiply(s.Placement)
     s.Placement = App.Placement()
@@ -907,6 +912,11 @@ for label, body, tag, plc, shape in B.items:
     s.exportStep(os.path.join(out_dir, label + ".step"))
     REPORT.append(f"| `{label}` | `{body}` | {shape.Volume / 1000:.1f} | {shape.Volume / 1000 * 1.27:.0f} |")
 
+# part list for the sim export (export_sim.py): body, tag, colour of every part
+with open(os.path.join(HERE, "parts_manifest.json"), "w") as f:
+    json.dump({B.objs[label].Label: {"body": body, "part": B.parts[body].Label, "tag": B.meta[label][0],
+                       "rgb": [round(c, 3) for c in B.meta[label][1]], "transparency": B.meta[label][2]}
+               for label, body, tag, plc, shape in B.items}, f, indent=1)
 with open(os.path.join(HERE, "fit_report.md"), "w") as f:
     f.write("\n".join(REPORT) + "\n")
 doc.saveAs(os.path.join(HERE, "super_duck.FCStd"))

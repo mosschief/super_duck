@@ -2,7 +2,7 @@
  "model": "open_duck_wheeled_v2_gim6010.xml",
  "units": "mm, deg, g, N*m",
  "frame": "world at keyframe home_balanced; floor z = 0; x forward, y left, z up",
- "total_mass_g": 6922.0,
+ "total_mass_g": 6877.2,
  "key_dimensions": {
   "wheel_radius": 75.0,
   "tire_width": 32.0,
@@ -14,12 +14,12 @@
   "hip_roll axis to wheel centre, lateral (scrub offset)": 4.0,
   "hip_roll axis height": 282.1,
   "base origin height (home)": 370.1,
-  "overall height (home)": 650.1,
-  "eye camera baseline": 70.0,
+  "overall height (home)": 662.6,
+  "eye camera baseline": 80.0,
   "IMU site (base frame)": [
-   -62.0,
+   -58.0,
    8.0,
-   45.0
+   41.1
   ],
   "leg poses (hip = 0.50 + delta, knee = -1.00 - 2*delta)": {
    "jump take-off (delta -0.46)": {
@@ -97,9 +97,9 @@
     0.0
    ],
    "anchor_world_mm": [
-    44.7,
+    45.9,
     0.0,
-    487.4
+    495.4
    ],
    "axis_world": [
     0.0,
@@ -129,9 +129,9 @@
     1.0
    ],
    "anchor_world_mm": [
-    44.7,
+    45.9,
     0.0,
-    509.4
+    552.4
    ],
    "axis_world": [
     0.0,
@@ -161,9 +161,9 @@
     0.0
    ],
    "anchor_world_mm": [
-    54.7,
+    86.8,
     0.0,
-    547.4
+    533.2
    ],
    "axis_world": [
     1.0,
@@ -188,19 +188,19 @@
     0.0
    ],
    "axis_local": [
-    0.0,
-    1.0,
-    0.0
+    -0.2631,
+    0.9354,
+    0.2362
    ],
    "anchor_world_mm": [
-    22.7,
-    46.0,
-    585.4
+    -29.6,
+    60.7,
+    533.9
    ],
    "axis_world": [
-    0.0,
-    1.0,
-    0.0
+    -0.2631,
+    0.9354,
+    0.2362
    ],
    "range_deg": [
     -45.0,
@@ -220,19 +220,19 @@
     0.0
    ],
    "axis_local": [
-    0.0,
-    1.0,
-    0.0
+    0.2631,
+    0.9354,
+    -0.2362
    ],
    "anchor_world_mm": [
-    22.7,
-    -46.0,
-    585.4
+    -29.6,
+    -60.7,
+    533.9
    ],
    "axis_world": [
-    0.0,
-    1.0,
-    0.0
+    0.2631,
+    0.9354,
+    -0.2362
    ],
    "range_deg": [
     -45.0,
@@ -538,7 +538,7 @@
     0.0,
     370.1
    ],
-   "mass_g": 2132.0,
+   "mass_g": 2131.9,
    "com_local_mm": [
     -22.0,
     -0.0,
@@ -564,11 +564,11 @@
     0.0,
     430.1
    ],
-   "mass_g": 85.0,
+   "mass_g": 76.3,
    "com_local_mm": [
     0.0,
-    0.0,
-    28.0
+    1.3,
+    47.3
    ]
   },
   {
@@ -577,7 +577,7 @@
    "pos_local_mm": [
     0.0,
     0.0,
-    58.0
+    66.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -586,15 +586,15 @@
     0.0
    ],
    "origin_world_mm": [
-    44.7,
+    45.9,
     0.0,
-    487.4
+    495.4
    ],
-   "mass_g": 30.0,
+   "mass_g": 20.2,
    "com_local_mm": [
-    0.0,
-    0.0,
-    12.0
+    -7.7,
+    0.4,
+    26.0
    ]
   },
   {
@@ -603,7 +603,7 @@
    "pos_local_mm": [
     0.0,
     0.0,
-    22.0
+    57.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -612,24 +612,24 @@
     0.0
    ],
    "origin_world_mm": [
-    44.7,
+    45.9,
     0.0,
-    509.4
+    552.4
    ],
-   "mass_g": 110.0,
+   "mass_g": 89.3,
    "com_local_mm": [
-    0.0,
-    0.0,
-    15.0
+    4.9,
+    -0.0,
+    -21.8
    ]
   },
   {
    "name": "head_assembly",
    "parent": "neck_yaw_assembly",
    "pos_local_mm": [
-    10.0,
+    41.0,
     0.0,
-    38.0
+    -19.1
    ],
    "quat_local_wxyz": [
     1.0,
@@ -638,24 +638,24 @@
     0.0
    ],
    "origin_world_mm": [
-    54.7,
+    86.8,
     0.0,
-    547.4
+    533.2
    ],
-   "mass_g": 511.0,
+   "mass_g": 503.5,
    "com_local_mm": [
-    9.5,
-    0.0,
-    5.3
+    -17.7,
+    3.8,
+    8.6
    ]
   },
   {
    "name": "left_antenna",
    "parent": "head_assembly",
    "pos_local_mm": [
-    -32.0,
-    46.0,
-    38.0
+    -116.4,
+    60.7,
+    0.7
    ],
    "quat_local_wxyz": [
     1.0,
@@ -664,24 +664,24 @@
     0.0
    ],
    "origin_world_mm": [
-    22.7,
-    46.0,
-    585.4
+    -29.6,
+    60.7,
+    533.9
    ],
-   "mass_g": 3.0,
+   "mass_g": 4.8,
    "com_local_mm": [
-    -7.0,
-    4.0,
-    32.0
+    -5.4,
+    -1.1,
+    8.1
    ]
   },
   {
    "name": "right_antenna",
    "parent": "head_assembly",
    "pos_local_mm": [
-    -32.0,
-    -46.0,
-    38.0
+    -116.4,
+    -60.7,
+    0.7
    ],
    "quat_local_wxyz": [
     1.0,
@@ -690,15 +690,15 @@
     0.0
    ],
    "origin_world_mm": [
-    22.7,
-    -46.0,
-    585.4
+    -29.6,
+    -60.7,
+    533.9
    ],
-   "mass_g": 3.0,
+   "mass_g": 4.8,
    "com_local_mm": [
-    -7.0,
-    -4.0,
-    32.0
+    -5.4,
+    1.1,
+    8.2
    ]
   },
   {
@@ -720,7 +720,7 @@
     84.0,
     326.1
    ],
-   "mass_g": 300.0,
+   "mass_g": 299.9,
    "com_local_mm": [
     -1.5,
     1.4,
@@ -746,7 +746,7 @@
     108.0,
     282.1
    ],
-   "mass_g": 508.0,
+   "mass_g": 507.7,
    "com_local_mm": [
     0.6,
     47.5,
@@ -772,7 +772,7 @@
     160.0,
     282.1
    ],
-   "mass_g": 683.0,
+   "mass_g": 682.8,
    "com_local_mm": [
     -0.1,
     4.5,
@@ -798,7 +798,7 @@
     160.0,
     178.5
    ],
-   "mass_g": 281.0,
+   "mass_g": 280.7,
    "com_local_mm": [
     -0.1,
     -26.9,
@@ -824,10 +824,10 @@
     112.0,
     75.0
    ],
-   "mass_g": 252.0,
+   "mass_g": 252.1,
    "com_local_mm": [
     0.0,
-    0.0,
+    -0.2,
     0.0
    ]
   },
@@ -850,7 +850,7 @@
     -84.0,
     326.1
    ],
-   "mass_g": 300.0,
+   "mass_g": 299.9,
    "com_local_mm": [
     -1.5,
     -1.5,
@@ -876,7 +876,7 @@
     -108.0,
     282.1
    ],
-   "mass_g": 508.0,
+   "mass_g": 507.7,
    "com_local_mm": [
     0.9,
     -47.5,
@@ -902,7 +902,7 @@
     -160.0,
     282.1
    ],
-   "mass_g": 683.0,
+   "mass_g": 682.8,
    "com_local_mm": [
     -0.3,
     -4.5,
@@ -928,7 +928,7 @@
     -160.0,
     178.5
    ],
-   "mass_g": 281.0,
+   "mass_g": 280.7,
    "com_local_mm": [
     0.1,
     26.9,
@@ -954,1226 +954,812 @@
     -112.0,
     75.0
    ],
-   "mass_g": 252.0,
+   "mass_g": 252.1,
    "com_local_mm": [
     0.0,
-    0.0,
+    0.2,
     0.0
    ]
   }
  ],
  "geoms": [
   {
-   "name": "max98357a_i2s_amp",
+   "name": "trunk_assembly__cad_amp",
    "body": "trunk_assembly",
-   "type": "box",
+   "type": "mesh",
    "dims_mm": [
+    9.9,
     18.0,
-    19.0,
-    3.0
+    20.6
    ],
    "pos_local_mm": [
-    -60.0,
-    35.0,
-    35.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -60.0,
-    35.0,
-    405.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "bms_6s_100a",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    60.0,
-    8.0,
-    40.0
-   ],
-   "pos_local_mm": [
-    -26.0,
-    53.0,
-    -26.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -26.0,
-    53.0,
-    344.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "main_fuse_40a",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    24.0,
-    10.0,
-    20.0
-   ],
-   "pos_local_mm": [
-    -26.0,
-    -53.0,
-    -40.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -26.0,
-    -53.0,
-    330.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "antispark_switch_120a",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    40.0,
-    20.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    33.0,
-    -48.0,
-    -30.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    33.0,
-    -48.0,
-    340.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "peripheral_5v_buck",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    22.0,
-    16.0,
-    12.0
-   ],
-   "pos_local_mm": [
-    30.0,
-    48.0,
-    -30.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    30.0,
-    48.0,
-    340.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "ai_hat_plus_26tops",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    65.0,
-    56.6,
-    5.6
-   ],
-   "pos_local_mm": [
-    -6.0,
-    0.0,
-    42.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -6.0,
-    0.0,
-    412.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "teensy_40_dual_can",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    22.0,
-    42.0,
-    7.0
-   ],
-   "pos_local_mm": [
-    -62.0,
-    -30.0,
-    45.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -62.0,
-    -30.0,
-    415.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "trunk_collision",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    148.0,
-    126.0,
-    116.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
+    -66.3,
+    38.2,
     0.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.69975,
+    0.69975,
+    0.10171,
+    0.10171
    ],
    "centre_world_mm": [
-    0.0,
-    0.0,
+    -66.3,
+    38.2,
     370.1
    ],
-   "role": "collision"
+   "role": "visual"
   },
   {
-   "name": "body_front_shell",
+   "name": "trunk_assembly__cad_cell",
    "body": "trunk_assembly",
-   "type": "box",
+   "type": "mesh",
    "dims_mm": [
-    84.0,
-    124.0,
-    112.0
+    64.6,
+    70.2,
+    86.1
    ],
    "pos_local_mm": [
-    32.0,
-    0.0,
-    2.0
+    -26.0,
+    -0.0,
+    -44.0
    ],
    "quat_local_wxyz": [
-    0.99755,
-    0.0,
-    0.06994,
-    0.0
+    0.5,
+    0.5,
+    -0.5,
+    0.5
    ],
    "centre_world_mm": [
-    32.0,
-    0.0,
-    372.1
+    -26.0,
+    -0.0,
+    326.1
    ],
    "role": "visual"
   },
   {
-   "name": "body_front_curved_breast",
+   "name": "trunk_assembly__cad_cell_wrap",
    "body": "trunk_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    116.0,
-    76.0
-   ],
-   "pos_local_mm": [
-    40.0,
-    0.0,
-    4.0
-   ],
-   "quat_local_wxyz": [
-    0.99755,
-    0.0,
-    0.06994,
-    0.0
-   ],
-   "centre_world_mm": [
-    40.0,
-    0.0,
-    374.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "body_back_shell",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    88.0,
-    120.0,
-    104.0
-   ],
-   "pos_local_mm": [
-    -34.0,
-    0.0,
-    -2.0
-   ],
-   "quat_local_wxyz": [
-    0.99875,
-    0.0,
-    -0.04998,
-    0.0
-   ],
-   "centre_world_mm": [
-    -34.0,
-    0.0,
-    368.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "body_bottom_trim",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    132.0,
-    112.0,
-    24.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    -52.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    0.0,
-    0.0,
-    318.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "body_neck_socket",
-   "body": "trunk_assembly",
-   "type": "cylinder",
+   "type": "mesh",
    "dims_mm": [
     68.0,
-    20.0
-   ],
-   "pos_local_mm": [
-    36.0,
-    0.0,
-    56.0
-   ],
-   "quat_local_wxyz": [
-    0.99719,
-    0.0,
-    0.07493,
-    0.0
-   ],
-   "centre_world_mm": [
-    36.0,
-    0.0,
-    426.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "raspberry_pi_5",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
-    86.0,
-    56.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    -6.0,
-    0.0,
-    18.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -6.0,
-    0.0,
-    388.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "battery_pack_6s",
-   "body": "trunk_assembly",
-   "type": "box",
-   "dims_mm": [
     73.0,
-    89.0,
-    68.0
+    89.0
    ],
    "pos_local_mm": [
     -26.0,
     0.0,
-    -26.0
+    -44.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.5,
+    0.5,
+    -0.5,
+    0.5
    ],
    "centre_world_mm": [
     -26.0,
     0.0,
-    344.1
+    326.1
    ],
    "role": "visual"
   },
   {
-   "name": "speaker_40mm_3w",
+   "name": "trunk_assembly__cad_chip",
    "body": "trunk_assembly",
-   "type": "cylinder",
+   "type": "mesh",
    "dims_mm": [
-    40.0,
-    6.0
+    53.0,
+    74.4,
+    104.4
    ],
    "pos_local_mm": [
-    -66.0,
-    0.0,
-    12.0
+    -83.6,
+    -23.9,
+    24.6
    ],
    "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
+    0.50889,
+    0.69657,
+    0.50449,
+    0.03611
    ],
    "centre_world_mm": [
-    -66.0,
-    0.0,
-    382.1
+    -83.6,
+    -23.9,
+    394.7
    ],
    "role": "visual"
   },
   {
-   "name": "estop_bezel",
+   "name": "trunk_assembly__cad_imu",
    "body": "trunk_assembly",
-   "type": "cylinder",
+   "type": "mesh",
    "dims_mm": [
-    24.0,
-    8.0
-   ],
-   "pos_local_mm": [
-    -80.0,
-    0.0,
-    15.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    -80.0,
-    0.0,
-    385.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "estop_mushroom",
-   "body": "trunk_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    32.0,
-    8.0
-   ],
-   "pos_local_mm": [
-    -87.0,
-    0.0,
-    15.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    -87.0,
-    0.0,
-    385.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "chest_cam_bezel",
-   "body": "trunk_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    28.0,
-    10.0
-   ],
-   "pos_local_mm": [
-    88.0,
-    0.0,
-    -14.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    88.0,
-    0.0,
-    356.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "chest_cam_lens",
-   "body": "trunk_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    18.0,
-    12.0
-   ],
-   "pos_local_mm": [
-    90.0,
-    0.0,
-    -14.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    90.0,
-    0.0,
-    356.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "neck_pitch_link",
-   "body": "neck_pitch_assembly",
-   "type": "box",
-   "dims_mm": [
-    36.0,
-    44.0,
-    60.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    28.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    40.2,
-    0.0,
-    457.8
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_pitch_bracket",
-   "body": "head_pitch_to_yaw",
-   "type": "box",
-   "dims_mm": [
-    44.0,
-    48.0,
-    28.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    44.7,
-    0.0,
-    487.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "neck_yaw_housing",
-   "body": "neck_yaw_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    48.0,
-    32.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    44.7,
-    0.0,
-    509.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_antenna_servo_9g",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    23.0,
-    12.0,
-    29.0
-   ],
-   "pos_local_mm": [
-    -32.0,
-    46.0,
-    20.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    22.7,
-    46.0,
-    567.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_antenna_servo_9g",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    23.0,
-    12.0,
-    29.0
-   ],
-   "pos_local_mm": [
-    -32.0,
-    -46.0,
-    20.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    22.7,
-    -46.0,
-    567.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "microphone_inmp441",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
+    3.7,
     14.0,
-    14.0,
-    2.0
+    18.7
    ],
    "pos_local_mm": [
-    30.0,
-    0.0,
-    32.0
+    -57.9,
+    8.3,
+    40.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    -0.03649,
+    0.70259,
+    0.00053,
+    0.71066
    ],
    "centre_world_mm": [
+    -57.9,
+    8.3,
+    410.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_metal",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    35.2,
+    54.9,
+    181.1
+   ],
+   "pos_local_mm": [
+    -52.1,
+    -1.1,
+    -9.1
+   ],
+   "quat_local_wxyz": [
+    0.00856,
+    0.59146,
+    8e-05,
+    0.80629
+   ],
+   "centre_world_mm": [
+    -52.1,
+    -1.1,
+    361.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_pcb",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    57.3,
     84.7,
-    0.0,
-    579.4
+    174.2
+   ],
+   "pos_local_mm": [
+    -4.6,
+    -3.1,
+    9.0
+   ],
+   "quat_local_wxyz": [
+    0.04448,
+    0.78096,
+    0.19261,
+    0.59248
+   ],
+   "centre_world_mm": [
+    -4.6,
+    -3.1,
+    379.1
    ],
    "role": "visual"
   },
   {
-   "name": "head_collision",
-   "body": "head_assembly",
-   "type": "box",
+   "name": "trunk_assembly__cad_power",
+   "body": "trunk_assembly",
+   "type": "mesh",
    "dims_mm": [
-    104.0,
-    136.0,
-    72.0
+    89.9,
+    108.5,
+    237.3
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
+    -42.5,
+    1.4,
+    -38.1
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    -0.15847,
+    0.72548,
+    -0.12771,
+    0.65747
    ],
    "centre_world_mm": [
-    54.7,
-    0.0,
-    547.4
+    -42.5,
+    1.4,
+    332.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_print",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    78.5,
+    128.7,
+    138.3
+   ],
+   "pos_local_mm": [
+    -9.7,
+    -5.8,
+    19.3
+   ],
+   "quat_local_wxyz": [
+    0.00782,
+    0.69197,
+    0.17853,
+    0.69945
+   ],
+   "centre_world_mm": [
+    -9.7,
+    -5.8,
+    389.4
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_servo",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    26.5,
+    37.7,
+    50.1
+   ],
+   "pos_local_mm": [
+    36.0,
+    1.3,
+    47.6
+   ],
+   "quat_local_wxyz": [
+    0.99681,
+    -0.07861,
+    0.00309,
+    0.01348
+   ],
+   "centre_world_mm": [
+    36.0,
+    1.3,
+    417.7
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_servo_adapter",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    14.0,
+    36.8,
+    45.0
+   ],
+   "pos_local_mm": [
+    66.1,
+    1.2,
+    26.7
+   ],
+   "quat_local_wxyz": [
+    0.99761,
+    0.04807,
+    -0.01604,
+    0.04704
+   ],
+   "centre_world_mm": [
+    66.1,
+    1.2,
+    396.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_assembly__cad_shell",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    128.6,
+    174.5,
+    235.1
+   ],
+   "pos_local_mm": [
+    -9.5,
+    0.2,
+    -1.8
+   ],
+   "quat_local_wxyz": [
+    0.48695,
+    0.51579,
+    0.51728,
+    0.47881
+   ],
+   "centre_world_mm": [
+    -9.5,
+    0.2,
+    368.3
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "trunk_shell_collision",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    126.5,
+    166.3,
+    231.3
+   ],
+   "pos_local_mm": [
+    -15.7,
+    -0.0,
+    -3.8
+   ],
+   "quat_local_wxyz": [
+    0.49685,
+    0.50313,
+    0.50313,
+    0.49685
+   ],
+   "centre_world_mm": [
+    -15.7,
+    -0.0,
+    366.3
    ],
    "role": "collision"
   },
   {
-   "name": "head_core_shell",
-   "body": "head_assembly",
-   "type": "box",
+   "name": "estop_collision",
+   "body": "trunk_assembly",
+   "type": "mesh",
    "dims_mm": [
-    100.0,
-    120.0,
-    68.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    54.7,
-    0.0,
-    547.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_top_brow",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    112.0,
-    156.0,
-    12.0
-   ],
-   "pos_local_mm": [
-    4.0,
-    0.0,
-    35.0
-   ],
-   "quat_local_wxyz": [
-    0.99969,
-    0.0,
-    0.025,
-    0.0
-   ],
-   "centre_world_mm": [
-    58.7,
-    0.0,
-    582.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_bottom_jaw",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    96.0,
-    124.0,
-    12.0
-   ],
-   "pos_local_mm": [
-    2.0,
-    0.0,
-    -35.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    56.7,
-    0.0,
-    512.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_left_trapezoid_cheek",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    104.0,
-    14.0,
-    72.0
-   ],
-   "pos_local_mm": [
-    2.0,
-    68.0,
-    1.0
-   ],
-   "quat_local_wxyz": [
-    0.99236,
-    -0.11966,
-    -0.00359,
-    -0.02978
-   ],
-   "centre_world_mm": [
-    56.7,
-    68.0,
-    548.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_right_trapezoid_cheek",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    104.0,
-    14.0,
-    72.0
-   ],
-   "pos_local_mm": [
-    2.0,
-    -68.0,
-    1.0
-   ],
-   "quat_local_wxyz": [
-    0.99236,
-    0.11966,
-    -0.00359,
-    0.02978
-   ],
-   "centre_world_mm": [
-    56.7,
-    -68.0,
-    548.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_back_plate",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    16.0,
-    124.0,
-    66.0
-   ],
-   "pos_local_mm": [
-    -48.0,
-    0.0,
-    1.0
-   ],
-   "quat_local_wxyz": [
-    0.99595,
-    0.0,
-    -0.08988,
-    0.0
-   ],
-   "centre_world_mm": [
-    6.7,
-    0.0,
-    548.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "head_face_recess",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    12.0,
-    128.0,
-    56.0
-   ],
-   "pos_local_mm": [
-    48.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    102.7,
-    0.0,
-    547.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_eye_housing",
-   "body": "head_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    48.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    52.0,
-    35.0,
-    2.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    106.7,
-    35.0,
-    549.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_eye_led_ring",
-   "body": "head_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    38.0,
-    17.0
-   ],
-   "pos_local_mm": [
-    53.0,
-    35.0,
-    2.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    107.7,
-    35.0,
-    549.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_eye_cam_lens",
-   "body": "head_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    24.0,
-    18.0
-   ],
-   "pos_local_mm": [
-    54.0,
-    35.0,
-    2.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    108.7,
-    35.0,
-    549.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_rpi_cam3_pcb",
-   "body": "head_assembly",
-   "type": "box",
-   "dims_mm": [
-    11.6,
-    25.0,
-    24.0
-   ],
-   "pos_local_mm": [
-    42.0,
-    35.0,
-    2.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    96.7,
-    35.0,
-    549.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_eye_housing",
-   "body": "head_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    42.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    52.0,
-    -35.0,
-    2.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    106.7,
-    -35.0,
-    549.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_eye_led_ring",
-   "body": "head_assembly",
-   "type": "cylinder",
-   "dims_mm": [
+    31.8,
     32.0,
-    17.0
+    38.0
    ],
    "pos_local_mm": [
-    53.0,
-    -35.0,
-    2.0
+    -145.7,
+    0.0,
+    -8.0
    ],
    "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
+    0.12984,
+    0.69578,
+    0.13085,
+    0.6942
    ],
    "centre_world_mm": [
-    107.7,
-    -35.0,
-    549.4
+    -145.7,
+    0.0,
+    362.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "charge_port_collision",
+   "body": "trunk_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    21.9,
+    22.0,
+    43.0
+   ],
+   "pos_local_mm": [
+    -136.2,
+    0.0,
+    -38.0
+   ],
+   "quat_local_wxyz": [
+    0.56411,
+    0.42651,
+    0.56392,
+    0.42645
+   ],
+   "centre_world_mm": [
+    -136.2,
+    0.0,
+    332.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "neck_pitch_assembly__cad_print",
+   "body": "neck_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    30.7,
+    58.1,
+    45.1
+   ],
+   "pos_local_mm": [
+    -0.0,
+    0.5,
+    21.6
+   ],
+   "quat_local_wxyz": [
+    0.7082,
+    0.70601,
+    1e-05,
+    1e-05
+   ],
+   "centre_world_mm": [
+    39.2,
+    0.5,
+    451.5
    ],
    "role": "visual"
   },
   {
-   "name": "right_eye_cam_lens",
+   "name": "neck_pitch_assembly__cad_servo",
+   "body": "neck_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    26.3,
+    38.2,
+    48.6
+   ],
+   "pos_local_mm": [
+    0.0,
+    0.8,
+    54.0
+   ],
+   "quat_local_wxyz": [
+    0.99858,
+    -0.05188,
+    0.00286,
+    0.01173
+   ],
+   "centre_world_mm": [
+    44.1,
+    0.8,
+    483.4
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "neck_left_sheet_collision",
+   "body": "neck_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    7.7,
+    30.7,
+    58.1
+   ],
+   "pos_local_mm": [
+    -0.0,
+    19.7,
+    22.7
+   ],
+   "quat_local_wxyz": [
+    0.70736,
+    0.00638,
+    -0.0068,
+    0.70679
+   ],
+   "centre_world_mm": [
+    39.4,
+    19.7,
+    452.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "neck_right_sheet_collision",
+   "body": "neck_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    6.2,
+    30.7,
+    58.0
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -19.0,
+    22.2
+   ],
+   "quat_local_wxyz": [
+    0.70709,
+    -0.00405,
+    0.00406,
+    0.7071
+   ],
+   "centre_world_mm": [
+    39.3,
+    -19.0,
+    452.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "sts3215_head_pitch_collision",
+   "body": "neck_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    24.8,
+    37.5,
+    46.8
+   ],
+   "pos_local_mm": [
+    0.0,
+    0.2,
+    53.6
+   ],
+   "quat_local_wxyz": [
+    0.99967,
+    -0.02559,
+    9e-05,
+    -0.00079
+   ],
+   "centre_world_mm": [
+    44.0,
+    0.2,
+    483.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "head_pitch_to_yaw__cad_print",
+   "body": "head_pitch_to_yaw",
+   "type": "mesh",
+   "dims_mm": [
+    38.7,
+    45.5,
+    75.1
+   ],
+   "pos_local_mm": [
+    -5.9,
+    0.4,
+    24.6
+   ],
+   "quat_local_wxyz": [
+    0.99508,
+    0.01032,
+    -0.09849,
+    -4e-05
+   ],
+   "centre_world_mm": [
+    40.0,
+    0.4,
+    519.9
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "head_pitch_to_yaw_collision",
+   "body": "head_pitch_to_yaw",
+   "type": "mesh",
+   "dims_mm": [
+    35.6,
+    45.4,
+    74.1
+   ],
+   "pos_local_mm": [
+    -4.0,
+    0.5,
+    23.9
+   ],
+   "quat_local_wxyz": [
+    0.99832,
+    0.00708,
+    -0.05746,
+    0.00174
+   ],
+   "centre_world_mm": [
+    41.9,
+    0.5,
+    519.3
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "neck_yaw_assembly__cad_print",
+   "body": "neck_yaw_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    43.0,
+    80.0,
+    89.3
+   ],
+   "pos_local_mm": [
+    2.2,
+    0.0,
+    -28.6
+   ],
+   "quat_local_wxyz": [
+    6e-05,
+    0.67781,
+    2e-05,
+    0.73524
+   ],
+   "centre_world_mm": [
+    48.1,
+    0.0,
+    523.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "neck_yaw_assembly__cad_servo",
+   "body": "neck_yaw_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    25.3,
+    38.1,
+    48.6
+   ],
+   "pos_local_mm": [
+    12.0,
+    -0.0,
+    -18.2
+   ],
+   "quat_local_wxyz": [
+    0.47776,
+    0.51851,
+    0.53096,
+    0.47008
+   ],
+   "centre_world_mm": [
+    57.9,
+    -0.0,
+    534.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "head_yaw_to_roll_collision",
+   "body": "neck_yaw_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    42.9,
+    80.0,
+    89.2
+   ],
+   "pos_local_mm": [
+    0.8,
+    0.0,
+    -24.7
+   ],
+   "quat_local_wxyz": [
+    0.00015,
+    0.67869,
+    -0.0,
+    0.73443
+   ],
+   "centre_world_mm": [
+    46.7,
+    0.0,
+    527.7
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "sts3215_head_yaw_collision",
+   "body": "neck_yaw_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    24.7,
+    37.8,
+    46.6
+   ],
+   "pos_local_mm": [
+    12.4,
+    0.0,
+    -18.9
+   ],
+   "quat_local_wxyz": [
+    0.48854,
+    0.51118,
+    0.5107,
+    0.48909
+   ],
+   "centre_world_mm": [
+    58.3,
+    0.0,
+    533.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "head_assembly__cad_diffuser",
    "body": "head_assembly",
-   "type": "cylinder",
+   "type": "mesh",
    "dims_mm": [
-    20.0,
-    18.0
+    1.5,
+    38.3,
+    118.4
    ],
    "pos_local_mm": [
-    54.0,
-    -35.0,
-    2.0
+    55.3,
+    0.0,
+    10.3
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.0,
     0.70711,
+    0.0,
     0.0
    ],
    "centre_world_mm": [
-    108.7,
-    -35.0,
-    549.4
+    142.1,
+    0.0,
+    543.5
    ],
    "role": "visual"
   },
   {
-   "name": "right_rpi_cam3_pcb",
+   "name": "head_assembly__cad_led",
    "body": "head_assembly",
-   "type": "box",
+   "type": "mesh",
    "dims_mm": [
-    11.6,
-    25.0,
-    24.0
+    5.2,
+    12.0,
+    15.0
    ],
    "pos_local_mm": [
-    42.0,
-    -35.0,
-    2.0
+    41.4,
+    97.8,
+    19.3
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.5737,
+    0.81907,
+    1e-05,
+    -1e-05
    ],
    "centre_world_mm": [
-    96.7,
-    -35.0,
-    549.4
+    128.2,
+    97.8,
+    552.5
    ],
    "role": "visual"
   },
   {
-   "name": "projector_lens",
+   "name": "head_assembly__cad_led_ring",
    "body": "head_assembly",
-   "type": "cylinder",
+   "type": "mesh",
    "dims_mm": [
-    14.0,
-    6.0
+    3.2,
+    37.0,
+    117.0
    ],
    "pos_local_mm": [
-    55.0,
+    52.4,
     0.0,
-    -18.0
+    10.3
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.0,
     0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    109.7,
-    0.0,
-    529.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_antenna_base",
-   "body": "left_antenna",
-   "type": "cylinder",
-   "dims_mm": [
-    16.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
     0.0,
     0.0
    ],
    "centre_world_mm": [
-    22.7,
-    46.0,
-    585.4
+    139.2,
+    0.0,
+    543.5
    ],
    "role": "visual"
   },
   {
-   "name": "left_antenna_stalk",
-   "body": "left_antenna",
-   "type": "capsule",
+   "name": "head_assembly__cad_metal",
+   "body": "head_assembly",
+   "type": "mesh",
    "dims_mm": [
     7.0,
-    58.3
-   ],
-   "pos_local_mm": [
-    -7.0,
-    4.0,
+    32.0,
     32.0
    ],
-   "quat_local_wxyz": [
-    0.13972,
-    0.49127,
-    0.85973,
+   "pos_local_mm": [
+    -85.5,
+    -0.0,
     -0.0
    ],
-   "centre_world_mm": [
-    15.7,
-    50.0,
-    617.4
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_antenna_base",
-   "body": "right_antenna",
-   "type": "cylinder",
-   "dims_mm": [
-    16.0,
-    16.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
    "quat_local_wxyz": [
     1.0,
     0.0,
@@ -2181,51 +1767,322 @@
     0.0
    ],
    "centre_world_mm": [
-    22.7,
-    -46.0,
-    585.4
+    1.3,
+    -0.0,
+    533.2
    ],
    "role": "visual"
   },
   {
-   "name": "right_antenna_stalk",
-   "body": "right_antenna",
-   "type": "capsule",
+   "name": "head_assembly__cad_pcb",
+   "body": "head_assembly",
+   "type": "mesh",
    "dims_mm": [
-    7.0,
-    58.3
+    22.8,
+    53.3,
+    117.4
    ],
    "pos_local_mm": [
-    -7.0,
-    -4.0,
-    32.0
+    44.9,
+    6.3,
+    7.8
    ],
    "quat_local_wxyz": [
-    0.13972,
-    -0.49127,
-    0.85973,
-    0.0
+    0.7394,
+    0.66274,
+    0.09486,
+    -0.07111
    ],
    "centre_world_mm": [
-    15.7,
-    -50.0,
-    617.4
+    131.7,
+    6.3,
+    541.1
    ],
    "role": "visual"
   },
   {
-   "name": "left_hip_mount",
+   "name": "head_assembly__cad_print",
+   "body": "head_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    72.5,
+    233.3,
+    252.8
+   ],
+   "pos_local_mm": [
+    -13.8,
+    11.0,
+    -7.2
+   ],
+   "quat_local_wxyz": [
+    -0.2297,
+    0.61933,
+    0.20821,
+    0.72133
+   ],
+   "centre_world_mm": [
+    73.0,
+    11.0,
+    526.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "head_assembly__cad_servo",
+   "body": "head_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    49.6,
+    114.8,
+    163.0
+   ],
+   "pos_local_mm": [
+    -4.6,
+    -0.0,
+    9.4
+   ],
+   "quat_local_wxyz": [
+    -0.00064,
+    0.6626,
+    -0.00085,
+    0.74897
+   ],
+   "centre_world_mm": [
+    82.2,
+    -0.0,
+    542.6
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "head_assembly__cad_shell",
+   "body": "head_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    63.4,
+    199.5,
+    210.6
+   ],
+   "pos_local_mm": [
+    -21.4,
+    -0.9,
+    16.5
+   ],
+   "quat_local_wxyz": [
+    0.02408,
+    0.69252,
+    -0.02574,
+    0.72053
+   ],
+   "centre_world_mm": [
+    65.4,
+    -0.9,
+    549.7
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "head_shell_collision",
+   "body": "head_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    64.3,
+    197.3,
+    202.5
+   ],
+   "pos_local_mm": [
+    -24.2,
+    -0.0,
+    7.6
+   ],
+   "quat_local_wxyz": [
+    0.0,
+    0.68906,
+    0.0,
+    0.72471
+   ],
+   "centre_world_mm": [
+    62.6,
+    -0.0,
+    540.8
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "projector_pod_collision",
+   "body": "head_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    25.1,
+    28.1,
+    42.0
+   ],
+   "pos_local_mm": [
+    39.1,
+    96.0,
+    18.6
+   ],
+   "quat_local_wxyz": [
+    0.69486,
+    0.1217,
+    -0.12321,
+    0.69798
+   ],
+   "centre_world_mm": [
+    125.9,
+    96.0,
+    551.8
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "left_antenna__cad_antenna",
+   "body": "left_antenna",
+   "type": "mesh",
+   "dims_mm": [
+    10.3,
+    26.6,
+    149.9
+   ],
+   "pos_local_mm": [
+    -4.9,
+    -1.8,
+    12.9
+   ],
+   "quat_local_wxyz": [
+    0.60119,
+    0.08631,
+    -0.07499,
+    0.79088
+   ],
+   "centre_world_mm": [
+    -34.5,
+    58.8,
+    546.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "L_antenna_collision",
+   "body": "left_antenna",
+   "type": "mesh",
+   "dims_mm": [
+    10.6,
+    26.7,
+    150.0
+   ],
+   "pos_local_mm": [
+    -5.6,
+    -6.2,
+    30.3
+   ],
+   "quat_local_wxyz": [
+    0.62057,
+    0.08725,
+    -0.07784,
+    0.77539
+   ],
+   "centre_world_mm": [
+    -35.2,
+    54.5,
+    564.2
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "right_antenna__cad_antenna",
+   "body": "right_antenna",
+   "type": "mesh",
+   "dims_mm": [
+    10.3,
+    26.6,
+    151.0
+   ],
+   "pos_local_mm": [
+    -4.9,
+    1.9,
+    13.1
+   ],
+   "quat_local_wxyz": [
+    0.79082,
+    -0.07502,
+    0.0863,
+    0.60127
+   ],
+   "centre_world_mm": [
+    -34.5,
+    -58.8,
+    547.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "R_antenna_collision",
+   "body": "right_antenna",
+   "type": "mesh",
+   "dims_mm": [
+    10.7,
+    26.7,
+    151.0
+   ],
+   "pos_local_mm": [
+    -5.6,
+    6.3,
+    30.6
+   ],
+   "quat_local_wxyz": [
+    0.77547,
+    -0.07795,
+    0.08719,
+    0.62046
+   ],
+   "centre_world_mm": [
+    -35.2,
+    -54.4,
+    564.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "hip_roll_assembly__cad_harness",
    "body": "hip_roll_assembly",
-   "type": "box",
+   "type": "mesh",
    "dims_mm": [
-    56.0,
-    52.0,
-    24.0
+    23.5,
+    83.0,
+    112.4
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    -26.0
+    5.2,
+    -26.3,
+    26.7
+   ],
+   "quat_local_wxyz": [
+    0.66222,
+    0.40743,
+    -0.08083,
+    0.62364
+   ],
+   "centre_world_mm": [
+    5.2,
+    57.7,
+    352.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "hip_roll_assembly__cad_motor",
+   "body": "hip_roll_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    33.0,
+    53.0,
+    52.9
+   ],
+   "pos_local_mm": [
+    0.7,
+    24.0,
+    -44.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -2234,162 +2091,328 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
-    84.0,
-    300.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_hip_roll_gim4305",
-   "body": "left_roll_to_pitch_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    53.0,
-    33.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    0.0,
+    0.7,
     108.0,
     282.1
    ],
    "role": "visual"
   },
   {
-   "name": "left_roll_to_pitch_shell",
-   "body": "left_roll_to_pitch_assembly",
-   "type": "box",
+   "name": "hip_roll_assembly__cad_print",
+   "body": "hip_roll_assembly",
+   "type": "mesh",
    "dims_mm": [
-    52.0,
-    44.0,
-    52.0
+    75.9,
+    118.2,
+    141.3
    ],
    "pos_local_mm": [
-    0.0,
-    18.0,
-    0.0
+    -7.7,
+    -16.1,
+    -40.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.27694,
+    0.60497,
+    -0.3354,
+    0.66695
    ],
    "centre_world_mm": [
-    0.0,
-    126.0,
-    282.1
+    -7.7,
+    67.9,
+    286.1
    ],
    "role": "visual"
   },
   {
-   "name": "left_hip_pitch_gim6010",
-   "body": "knee_and_ankle_assembly",
-   "type": "cylinder",
+   "name": "hip_roll_assembly__cad_rubber",
+   "body": "hip_roll_assembly",
+   "type": "mesh",
    "dims_mm": [
-    80.0,
-    44.0
+    6.0,
+    17.9,
+    18.0
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
+    28.0,
+    -22.3,
+    9.0
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.70711,
     0.0,
-    0.0
+    0.0,
+    0.70711
    ],
    "centre_world_mm": [
-    0.0,
-    160.0,
-    282.1
+    28.0,
+    61.7,
+    335.1
    ],
    "role": "visual"
   },
   {
-   "name": "left_thigh_shell",
-   "body": "knee_and_ankle_assembly",
-   "type": "box",
+   "name": "L_hip_mount_collision",
+   "body": "hip_roll_assembly",
+   "type": "mesh",
    "dims_mm": [
-    50.0,
-    36.0,
-    118.0
+    75.4,
+    122.5,
+    136.9
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    -59.0
+    -4.3,
+    -15.3,
+    -39.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.19593,
+    0.64723,
+    -0.2521,
+    0.69221
    ],
    "centre_world_mm": [
-    -28.3,
-    160.0,
-    230.3
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_thigh_collision",
-   "body": "knee_and_ankle_assembly",
-   "type": "capsule",
-   "dims_mm": [
-    40.0,
-    118.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    -59.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -28.3,
-    160.0,
-    230.3
+    -4.3,
+    68.7,
+    287.1
    ],
    "role": "collision"
   },
   {
-   "name": "left_knee_gim6010",
-   "body": "knee_and_ankle_assembly_2",
-   "type": "cylinder",
+   "name": "L_hip_roll_gim4305_collision",
+   "body": "hip_roll_assembly",
+   "type": "mesh",
    "dims_mm": [
+    38.6,
+    52.9,
+    53.1
+   ],
+   "pos_local_mm": [
+    -3.0,
+    24.0,
+    -43.9
+   ],
+   "quat_local_wxyz": [
+    0.4838,
+    0.87515,
+    0.00428,
+    -0.0064
+   ],
+   "centre_world_mm": [
+    -3.0,
+    108.0,
+    282.2
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "left_roll_to_pitch_assembly__cad_harness",
+   "body": "left_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    23.3,
+    64.5,
+    106.9
+   ],
+   "pos_local_mm": [
+    -17.6,
+    50.4,
+    33.0
+   ],
+   "quat_local_wxyz": [
+    0.53312,
+    0.80212,
+    -0.12244,
+    -0.23957
+   ],
+   "centre_world_mm": [
+    -17.6,
+    158.4,
+    315.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "left_roll_to_pitch_assembly__cad_motor",
+   "body": "left_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
     80.0,
-    44.0
+    79.9
    ],
    "pos_local_mm": [
     0.0,
+    52.0,
+    -0.0
+   ],
+   "quat_local_wxyz": [
+    0.70711,
     0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    0.0,
+    160.0,
+    282.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "left_roll_to_pitch_assembly__cad_print",
+   "body": "left_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    98.7,
+    102.0,
+    118.7
+   ],
+   "pos_local_mm": [
+    2.2,
+    26.4,
+    2.1
+   ],
+   "quat_local_wxyz": [
+    0.51117,
+    0.8252,
+    0.11867,
+    0.20897
+   ],
+   "centre_world_mm": [
+    2.2,
+    134.4,
+    284.2
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "L_hip_roll_yoke_collision",
+   "body": "left_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    90.5,
+    102.7,
+    112.7
+   ],
+   "pos_local_mm": [
+    -0.6,
+    27.5,
+    3.0
+   ],
+   "quat_local_wxyz": [
+    0.59844,
+    0.7653,
+    -0.09761,
+    0.21599
+   ],
+   "centre_world_mm": [
+    -0.6,
+    135.5,
+    285.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "L_hip_pitch_gim6010_collision",
+   "body": "left_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    79.9,
+    79.7
+   ],
+   "pos_local_mm": [
+    -0.0,
+    51.8,
+    -0.0
+   ],
+   "quat_local_wxyz": [
+    0.70497,
+    0.05577,
+    0.05567,
+    0.70485
+   ],
+   "centre_world_mm": [
+    -0.0,
+    159.8,
+    282.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "knee_and_ankle_assembly__cad_harness",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    10.6,
+    23.9,
+    125.9
+   ],
+   "pos_local_mm": [
+    1.0,
+    36.3,
+    -63.0
+   ],
+   "quat_local_wxyz": [
+    0.90945,
+    -0.01446,
+    -0.00754,
+    0.41548
+   ],
+   "centre_world_mm": [
+    -29.4,
+    196.3,
+    226.3
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly__cad_metal",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    3.0,
+    55.8,
+    56.0
+   ],
+   "pos_local_mm": [
+    0.0,
+    30.5,
     0.0
    ],
    "quat_local_wxyz": [
     0.70711,
+    0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    0.0,
+    190.5,
+    282.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly__cad_motor",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    80.0,
+    79.9
+   ],
+   "pos_local_mm": [
+    0.0,
+    -0.0,
+    -118.0
+   ],
+   "quat_local_wxyz": [
     0.70711,
     0.0,
-    0.0
+    0.0,
+    0.70711
    ],
    "centre_world_mm": [
     -56.6,
@@ -2399,80 +2422,271 @@
    "role": "visual"
   },
   {
-   "name": "left_shin_shell",
-   "body": "knee_and_ankle_assembly_2",
-   "type": "box",
+   "name": "knee_and_ankle_assembly__cad_print",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
    "dims_mm": [
-    44.0,
-    32.0,
-    118.0
+    65.2,
+    91.8,
+    198.7
    ],
    "pos_local_mm": [
-    0.0,
-    -24.0,
-    -59.0
+    -0.2,
+    8.6,
+    -85.4
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.70665,
+    -0.02982,
+    0.03546,
+    0.70605
    ],
    "centre_world_mm": [
-    -28.3,
-    136.0,
-    126.8
+    -41.1,
+    168.6,
+    207.3
    ],
    "role": "visual"
   },
   {
-   "name": "left_shin_collision",
-   "body": "knee_and_ankle_assembly_2",
-   "type": "capsule",
+   "name": "L_thigh_outer_collision",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
    "dims_mm": [
-    36.0,
-    118.0
+    28.2,
+    92.0,
+    195.8
    ],
    "pos_local_mm": [
-    0.0,
-    -24.0,
-    -59.0
+    -0.0,
+    26.0,
+    -70.1
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.70718,
+    -0.00211,
+    0.00212,
+    0.70702
    ],
    "centre_world_mm": [
-    -28.3,
-    136.0,
-    126.8
+    -33.6,
+    186.0,
+    220.6
    ],
    "role": "collision"
   },
   {
-   "name": "left_wheel_gim4305_stator",
-   "body": "knee_and_ankle_assembly_2",
-   "type": "cylinder",
+   "name": "L_thigh_inner_collision",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
    "dims_mm": [
-    53.0,
-    33.0
+    36.1,
+    91.9,
+    133.1
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -2.1,
+    -95.3
+   ],
+   "quat_local_wxyz": [
+    0.70724,
+    -0.00017,
+    0.00079,
+    0.70698
+   ],
+   "centre_world_mm": [
+    -45.7,
+    157.9,
+    198.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "L_knee_gim6010_collision",
+   "body": "knee_and_ankle_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    79.7,
+    80.0
    ],
    "pos_local_mm": [
     0.0,
-    -29.0,
+    0.2,
+    -118.0
+   ],
+   "quat_local_wxyz": [
+    0.39138,
+    0.58892,
+    0.58911,
+    0.39107
+   ],
+   "centre_world_mm": [
+    -56.6,
+    160.2,
+    178.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "knee_and_ankle_assembly_2__cad_harness",
+   "body": "knee_and_ankle_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    8.0,
+    30.5,
+    98.1
+   ],
+   "pos_local_mm": [
+    0.0,
+    16.6,
+    -53.1
+   ],
+   "quat_local_wxyz": [
+    0.94005,
+    -0.34105,
+    0.0,
+    4e-05
+   ],
+   "centre_world_mm": [
+    -31.1,
+    176.6,
+    131.9
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_2__cad_motor",
+   "body": "knee_and_ankle_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    33.0,
+    53.0,
+    52.9
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -29.7,
     -118.0
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.70711,
     0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    0.0,
+    130.3,
+    75.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_2__cad_print",
+   "body": "knee_and_ankle_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    35.0,
+    64.0,
+    179.3
+   ],
+   "pos_local_mm": [
+    0.0,
+    -21.9,
+    -65.8
+   ],
+   "quat_local_wxyz": [
+    0.70615,
+    0.03611,
+    -0.036,
+    0.70622
+   ],
+   "centre_world_mm": [
+    -25.0,
+    138.1,
+    120.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "L_shin_collision",
+   "body": "knee_and_ankle_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    33.6,
+    64.0,
+    178.7
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -21.7,
+    -63.9
+   ],
+   "quat_local_wxyz": [
+    0.70691,
+    0.02158,
+    -0.0214,
+    0.70665
+   ],
+   "centre_world_mm": [
+    -25.9,
+    138.3,
+    122.4
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "L_wheel_gim4305_collision",
+   "body": "knee_and_ankle_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    36.1,
+    53.0,
+    52.9
+   ],
+   "pos_local_mm": [
+    0.0,
+    -27.5,
+    -118.0
+   ],
+   "quat_local_wxyz": [
+    0.59647,
+    0.37938,
+    0.3783,
+    0.59765
+   ],
+   "centre_world_mm": [
+    0.0,
+    132.5,
+    75.0
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "foot_assembly__cad_print",
+   "body": "foot_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    32.0,
+    138.5,
+    138.4
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -0.2,
     0.0
+   ],
+   "quat_local_wxyz": [
+    0.60446,
+    0.36687,
+    0.36696,
+    0.60446
    ],
    "centre_world_mm": [
     -0.0,
-    131.0,
+    111.8,
     75.0
    ],
    "role": "visual"
@@ -2504,97 +2718,45 @@
    "role": "collision"
   },
   {
-   "name": "left_wheel_dish",
-   "body": "foot_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    96.0,
-    34.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.70711,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    112.0,
-    75.0
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_wheel_hub_cap",
-   "body": "foot_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    40.0,
-    36.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.70711,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    112.0,
-    75.0
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "left_wheel_marker",
-   "body": "foot_assembly",
-   "type": "box",
-   "dims_mm": [
-    88.0,
-    35.0,
-    14.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    112.0,
-    75.0
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_hip_mount",
+   "name": "hip_roll_assembly_2__cad_harness",
    "body": "hip_roll_assembly_2",
-   "type": "box",
+   "type": "mesh",
    "dims_mm": [
-    56.0,
-    52.0,
-    24.0
+    23.5,
+    83.0,
+    112.4
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    -26.0
+    5.2,
+    26.3,
+    26.7
+   ],
+   "quat_local_wxyz": [
+    0.62364,
+    -0.08083,
+    0.40743,
+    0.66222
+   ],
+   "centre_world_mm": [
+    5.2,
+    -57.7,
+    352.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "hip_roll_assembly_2__cad_motor",
+   "body": "hip_roll_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    33.0,
+    53.0,
+    52.9
+   ],
+   "pos_local_mm": [
+    0.7,
+    -24.0,
+    -44.0
    ],
    "quat_local_wxyz": [
     1.0,
@@ -2603,162 +2765,328 @@
     0.0
    ],
    "centre_world_mm": [
-    0.0,
-    -84.0,
-    300.1
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_hip_roll_gim4305",
-   "body": "right_roll_to_pitch_assembly",
-   "type": "cylinder",
-   "dims_mm": [
-    53.0,
-    33.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.0,
-    0.70711,
-    0.0
-   ],
-   "centre_world_mm": [
-    0.0,
+    0.7,
     -108.0,
     282.1
    ],
    "role": "visual"
   },
   {
-   "name": "right_roll_to_pitch_shell",
-   "body": "right_roll_to_pitch_assembly",
-   "type": "box",
+   "name": "hip_roll_assembly_2__cad_print",
+   "body": "hip_roll_assembly_2",
+   "type": "mesh",
    "dims_mm": [
-    52.0,
-    44.0,
-    52.0
+    75.9,
+    118.2,
+    141.3
    ],
    "pos_local_mm": [
-    0.0,
-    -18.0,
-    0.0
+    -7.7,
+    16.1,
+    -40.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.60497,
+    0.27693,
+    -0.66695,
+    0.3354
    ],
    "centre_world_mm": [
-    0.0,
-    -126.0,
-    282.1
+    -7.7,
+    -67.9,
+    286.1
    ],
    "role": "visual"
   },
   {
-   "name": "right_hip_pitch_gim6010",
-   "body": "knee_and_ankle_assembly_3",
-   "type": "cylinder",
+   "name": "hip_roll_assembly_2__cad_rubber",
+   "body": "hip_roll_assembly_2",
+   "type": "mesh",
    "dims_mm": [
-    80.0,
-    44.0
+    6.0,
+    17.9,
+    18.0
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
+    28.0,
+    22.3,
+    9.0
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.70711,
     0.0,
-    0.0
+    0.0,
+    0.70711
    ],
    "centre_world_mm": [
-    0.0,
-    -160.0,
-    282.1
+    28.0,
+    -61.7,
+    335.1
    ],
    "role": "visual"
   },
   {
-   "name": "right_thigh_shell",
-   "body": "knee_and_ankle_assembly_3",
-   "type": "box",
+   "name": "R_hip_mount_collision",
+   "body": "hip_roll_assembly_2",
+   "type": "mesh",
    "dims_mm": [
-    50.0,
-    36.0,
-    118.0
+    75.6,
+    122.5,
+    136.9
    ],
    "pos_local_mm": [
-    0.0,
-    0.0,
-    -59.0
+    -4.3,
+    15.3,
+    -39.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    -0.19654,
+    0.64739,
+    0.25057,
+    0.69244
    ],
    "centre_world_mm": [
-    -28.3,
-    -160.0,
-    230.3
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_thigh_collision",
-   "body": "knee_and_ankle_assembly_3",
-   "type": "capsule",
-   "dims_mm": [
-    40.0,
-    118.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    -59.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -28.3,
-    -160.0,
-    230.3
+    -4.3,
+    -68.7,
+    287.1
    ],
    "role": "collision"
   },
   {
-   "name": "right_knee_gim6010",
-   "body": "knee_and_ankle_assembly_4",
-   "type": "cylinder",
+   "name": "R_hip_roll_gim4305_collision",
+   "body": "hip_roll_assembly_2",
+   "type": "mesh",
    "dims_mm": [
+    38.6,
+    52.9,
+    53.1
+   ],
+   "pos_local_mm": [
+    -3.0,
+    -24.0,
+    -43.9
+   ],
+   "quat_local_wxyz": [
+    0.4838,
+    0.87515,
+    0.00428,
+    -0.0064
+   ],
+   "centre_world_mm": [
+    -3.0,
+    -108.0,
+    282.2
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "right_roll_to_pitch_assembly__cad_harness",
+   "body": "right_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    23.3,
+    64.5,
+    106.9
+   ],
+   "pos_local_mm": [
+    -17.6,
+    -50.4,
+    33.0
+   ],
+   "quat_local_wxyz": [
+    0.80212,
+    0.53312,
+    0.23957,
+    0.12244
+   ],
+   "centre_world_mm": [
+    -17.6,
+    -158.4,
+    315.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "right_roll_to_pitch_assembly__cad_motor",
+   "body": "right_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
     80.0,
-    44.0
+    79.9
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -52.0,
+    -0.0
+   ],
+   "quat_local_wxyz": [
+    0.70711,
+    0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    -0.0,
+    -160.0,
+    282.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "right_roll_to_pitch_assembly__cad_print",
+   "body": "right_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    98.7,
+    102.0,
+    118.7
+   ],
+   "pos_local_mm": [
+    2.2,
+    -26.4,
+    2.1
+   ],
+   "quat_local_wxyz": [
+    0.8252,
+    0.51116,
+    -0.20898,
+    -0.11867
+   ],
+   "centre_world_mm": [
+    2.2,
+    -134.4,
+    284.2
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "R_hip_roll_yoke_collision",
+   "body": "right_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    90.5,
+    102.8,
+    112.9
+   ],
+   "pos_local_mm": [
+    -0.6,
+    -27.5,
+    2.9
+   ],
+   "quat_local_wxyz": [
+    0.76642,
+    0.59654,
+    -0.21731,
+    0.09755
+   ],
+   "centre_world_mm": [
+    -0.6,
+    -135.5,
+    285.0
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "R_hip_pitch_gim6010_collision",
+   "body": "right_roll_to_pitch_assembly",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    79.7,
+    80.0
    ],
    "pos_local_mm": [
     0.0,
+    -51.8,
+    -0.0
+   ],
+   "quat_local_wxyz": [
+    0.3915,
+    0.58884,
+    0.58904,
+    0.39119
+   ],
+   "centre_world_mm": [
     0.0,
+    -159.8,
+    282.1
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "knee_and_ankle_assembly_3__cad_harness",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
+   "dims_mm": [
+    10.6,
+    23.9,
+    125.9
+   ],
+   "pos_local_mm": [
+    1.0,
+    -36.3,
+    -63.0
+   ],
+   "quat_local_wxyz": [
+    0.41548,
+    -0.00754,
+    -0.01446,
+    0.90945
+   ],
+   "centre_world_mm": [
+    -29.4,
+    -196.3,
+    226.3
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_3__cad_metal",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
+   "dims_mm": [
+    3.0,
+    55.8,
+    56.0
+   ],
+   "pos_local_mm": [
+    0.0,
+    -30.5,
     0.0
    ],
    "quat_local_wxyz": [
     0.70711,
+    0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    0.0,
+    -190.5,
+    282.1
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_3__cad_motor",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    80.0,
+    79.9
+   ],
+   "pos_local_mm": [
+    -0.0,
+    0.0,
+    -118.0
+   ],
+   "quat_local_wxyz": [
     0.70711,
     0.0,
-    0.0
+    0.0,
+    0.70711
    ],
    "centre_world_mm": [
     -56.6,
@@ -2768,80 +3096,271 @@
    "role": "visual"
   },
   {
-   "name": "right_shin_shell",
-   "body": "knee_and_ankle_assembly_4",
-   "type": "box",
+   "name": "knee_and_ankle_assembly_3__cad_print",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
    "dims_mm": [
-    44.0,
-    32.0,
-    118.0
+    65.2,
+    91.8,
+    198.7
    ],
    "pos_local_mm": [
-    0.0,
-    24.0,
-    -59.0
+    -0.2,
+    -8.6,
+    -85.4
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.70632,
+    0.03558,
+    -0.02951,
+    0.70639
    ],
    "centre_world_mm": [
-    -28.3,
-    -136.0,
-    126.8
+    -41.1,
+    -168.6,
+    207.3
    ],
    "role": "visual"
   },
   {
-   "name": "right_shin_collision",
-   "body": "knee_and_ankle_assembly_4",
-   "type": "capsule",
+   "name": "R_thigh_outer_collision",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
    "dims_mm": [
-    36.0,
-    118.0
+    28.2,
+    92.0,
+    195.8
    ],
    "pos_local_mm": [
     0.0,
-    24.0,
-    -59.0
+    -26.0,
+    -70.0
    ],
    "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
+    0.70721,
+    0.00213,
+    -0.00217,
+    0.70699
    ],
    "centre_world_mm": [
-    -28.3,
-    -136.0,
-    126.8
+    -33.6,
+    -186.0,
+    220.6
    ],
    "role": "collision"
   },
   {
-   "name": "right_wheel_gim4305_stator",
-   "body": "knee_and_ankle_assembly_4",
-   "type": "cylinder",
+   "name": "R_thigh_inner_collision",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
    "dims_mm": [
-    53.0,
-    33.0
+    36.1,
+    92.0,
+    133.1
    ],
    "pos_local_mm": [
     0.0,
-    29.0,
+    2.1,
+    -95.3
+   ],
+   "quat_local_wxyz": [
+    0.70695,
+    0.00073,
+    -0.0,
+    0.70727
+   ],
+   "centre_world_mm": [
+    -45.7,
+    -157.9,
+    198.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "R_knee_gim6010_collision",
+   "body": "knee_and_ankle_assembly_3",
+   "type": "mesh",
+   "dims_mm": [
+    44.0,
+    79.9,
+    79.7
+   ],
+   "pos_local_mm": [
+    -0.0,
+    -0.2,
+    -118.0
+   ],
+   "quat_local_wxyz": [
+    0.70497,
+    0.05574,
+    0.05564,
+    0.70485
+   ],
+   "centre_world_mm": [
+    -56.6,
+    -160.2,
+    178.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "knee_and_ankle_assembly_4__cad_harness",
+   "body": "knee_and_ankle_assembly_4",
+   "type": "mesh",
+   "dims_mm": [
+    8.0,
+    30.5,
+    98.1
+   ],
+   "pos_local_mm": [
+    0.0,
+    -16.6,
+    -53.1
+   ],
+   "quat_local_wxyz": [
+    0.94005,
+    0.34105,
+    0.0,
+    -4e-05
+   ],
+   "centre_world_mm": [
+    -31.1,
+    -176.6,
+    131.9
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_4__cad_motor",
+   "body": "knee_and_ankle_assembly_4",
+   "type": "mesh",
+   "dims_mm": [
+    33.0,
+    53.0,
+    52.9
+   ],
+   "pos_local_mm": [
+    0.0,
+    29.7,
     -118.0
    ],
    "quat_local_wxyz": [
     0.70711,
-    0.70711,
     0.0,
+    0.0,
+    0.70711
+   ],
+   "centre_world_mm": [
+    0.0,
+    -130.3,
+    75.0
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "knee_and_ankle_assembly_4__cad_print",
+   "body": "knee_and_ankle_assembly_4",
+   "type": "mesh",
+   "dims_mm": [
+    35.0,
+    64.0,
+    179.3
+   ],
+   "pos_local_mm": [
+    0.0,
+    21.9,
+    -65.8
+   ],
+   "quat_local_wxyz": [
+    0.70621,
+    -0.03605,
+    0.03605,
+    0.70616
+   ],
+   "centre_world_mm": [
+    -25.0,
+    -138.1,
+    120.8
+   ],
+   "role": "visual"
+  },
+  {
+   "name": "R_shin_collision",
+   "body": "knee_and_ankle_assembly_4",
+   "type": "mesh",
+   "dims_mm": [
+    33.6,
+    64.0,
+    178.7
+   ],
+   "pos_local_mm": [
+    -0.0,
+    21.7,
+    -63.9
+   ],
+   "quat_local_wxyz": [
+    0.7066,
+    -0.02145,
+    0.02151,
+    0.70696
+   ],
+   "centre_world_mm": [
+    -25.9,
+    -138.3,
+    122.5
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "R_wheel_gim4305_collision",
+   "body": "knee_and_ankle_assembly_4",
+   "type": "mesh",
+   "dims_mm": [
+    36.2,
+    53.2,
+    53.0
+   ],
+   "pos_local_mm": [
+    0.0,
+    27.4,
+    -118.0
+   ],
+   "quat_local_wxyz": [
+    0.70088,
+    0.06405,
+    0.05977,
+    0.70788
+   ],
+   "centre_world_mm": [
+    0.0,
+    -132.6,
+    75.0
+   ],
+   "role": "collision"
+  },
+  {
+   "name": "foot_assembly_2__cad_print",
+   "body": "foot_assembly_2",
+   "type": "mesh",
+   "dims_mm": [
+    32.0,
+    138.5,
+    138.5
+   ],
+   "pos_local_mm": [
+    -0.0,
+    0.2,
     0.0
+   ],
+   "quat_local_wxyz": [
+    0.60911,
+    0.35919,
+    0.35912,
+    0.6091
    ],
    "centre_world_mm": [
     -0.0,
-    -131.0,
+    -111.8,
     75.0
    ],
    "role": "visual"
@@ -2871,85 +3390,6 @@
     75.0
    ],
    "role": "collision"
-  },
-  {
-   "name": "right_wheel_dish",
-   "body": "foot_assembly_2",
-   "type": "cylinder",
-   "dims_mm": [
-    96.0,
-    34.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.70711,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    -112.0,
-    75.0
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_wheel_hub_cap",
-   "body": "foot_assembly_2",
-   "type": "cylinder",
-   "dims_mm": [
-    40.0,
-    36.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    0.70711,
-    0.70711,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    -112.0,
-    75.0
-   ],
-   "role": "visual"
-  },
-  {
-   "name": "right_wheel_marker",
-   "body": "foot_assembly_2",
-   "type": "box",
-   "dims_mm": [
-    88.0,
-    35.0,
-    14.0
-   ],
-   "pos_local_mm": [
-    0.0,
-    0.0,
-    0.0
-   ],
-   "quat_local_wxyz": [
-    1.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "centre_world_mm": [
-    -0.0,
-    -112.0,
-    75.0
-   ],
-   "role": "visual"
   }
  ],
  "cameras": [
@@ -2957,20 +3397,20 @@
    "name": "trunk_nav_cam",
    "body": "trunk_assembly",
    "pos_local_mm": [
-    93.0,
+    86.8,
     0.0,
-    -14.0
+    -13.7
    ],
    "quat_local_wxyz": [
-    0.57958,
-    0.40508,
-    -0.40508,
-    -0.57958
+    0.57922,
+    0.40559,
+    -0.40559,
+    -0.57922
    ],
    "pos_world_mm": [
-    93.0,
+    86.8,
     0.0,
-    356.1
+    356.4
    ],
    "fovy_deg": 75.0
   },
@@ -2978,20 +3418,20 @@
    "name": "left_eye_cam",
    "body": "head_assembly",
    "pos_local_mm": [
-    58.0,
-    35.0,
-    2.0
+    55.1,
+    40.0,
+    10.3
    ],
    "quat_local_wxyz": [
-    0.5,
-    0.5,
     -0.5,
-    -0.5
+    -0.5,
+    0.5,
+    0.5
    ],
    "pos_world_mm": [
-    112.7,
-    35.0,
-    549.4
+    141.9,
+    40.0,
+    543.5
    ],
    "fovy_deg": 41.0
   },
@@ -2999,20 +3439,20 @@
    "name": "right_eye_cam",
    "body": "head_assembly",
    "pos_local_mm": [
-    58.0,
-    -35.0,
-    2.0
+    55.1,
+    -40.0,
+    10.3
    ],
    "quat_local_wxyz": [
-    0.5,
-    0.5,
     -0.5,
-    -0.5
+    -0.5,
+    0.5,
+    0.5
    ],
    "pos_world_mm": [
-    112.7,
-    -35.0,
-    549.4
+    141.9,
+    -40.0,
+    543.5
    ],
    "fovy_deg": 41.0
   }
@@ -3022,14 +3462,14 @@
    "name": "imu",
    "body": "base",
    "pos_local_mm": [
-    -62.0,
+    -58.0,
     8.0,
-    45.0
+    41.1
    ],
    "pos_world_mm": [
-    -62.0,
+    -58.0,
     8.0,
-    415.1
+    411.2
    ]
   },
   {
@@ -3094,14 +3534,14 @@
    "name": "projector",
    "body": "head_assembly",
    "pos_local_mm": [
-    59.0,
-    0.0,
-    -18.0
+    45.5,
+    97.8,
+    19.3
    ],
    "dir_local": [
-    0.97,
+    1.0,
     0.0,
-    -0.243
+    0.0
    ],
    "cutoff_deg": 20.0
   }

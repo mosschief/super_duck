@@ -1,11 +1,13 @@
-# CAD Spec (locked from the sim)
+# CAD Spec
 
-The MuJoCo model is the source of truth for geometry. This folder holds what CAD must match, generated from it, and
-the real dimensions of every purchased part. Regenerate after any model change:
+The MuJoCo model is the source of truth for the leg joints (positions, axes, ranges) and the actuators: this folder
+holds what the CAD is built from, generated from it, and the real dimensions of every purchased part. The shapes,
+masses, neck, cameras and IMU go the other way: `freecad/export_sim.py` exports the FreeCAD assembly into the sim
+(`freecad/README.md`). Regenerate after any model change:
 
 ```bash
 python3 tools/export_cad_spec.py        # hardpoints.json / hardpoints.md / purchased_parts.md
-python3 tools/check_cad_clearances.py   # clearance_report.md (exit 1 on a real-part layout clash)
+python3 tools/check_cad_clearances.py   # clearance_report.md (exit 1 on a self-contact in a leg pose)
 python3 tools/export_design_loads.py    # design_loads.json / design_loads.md (~30 s)
 tools/fetch_vendor_cad.sh               # vendor drawings + STEP into cad/vendor/ (git-ignored)
 ```
@@ -14,13 +16,13 @@ tools/fetch_vendor_cad.sh               # vendor drawings + STEP into cad/vendor
 | :--- | :--- |
 | [`hardpoints.md`](hardpoints.md) / `.json` | Every joint anchor, axis and range, body frame, part placement, camera, site and light, in mm at the `home_balanced` pose, plus key dimensions and the leg poses the structure must clear. Build the CAD skeleton from this. |
 | [`purchased_parts.json`](purchased_parts.json) → [`.md`](purchased_parts.md) | Real envelopes, hole patterns, masses and load limits of purchased parts, each with its source and a confidence level. Edit the JSON. |
-| [`clearance_report.md`](clearance_report.md) | Interference over all operating poses and full joint ranges, packing inside the trunk and head, ground clearance, scrub torque, model-vs-real envelope check. |
+| [`clearance_report.md`](clearance_report.md) | Self-contact of the sim's collision hulls (the CAD parts) over all operating poses and full joint ranges, ground clearance, scrub torque. Exact packing and interference: [`freecad/fit_report.md`](freecad/fit_report.md). |
 | [`tires.md`](tires.md) | Cast urethane tires: tread and hub spec, mold, casting steps, grip test and how to put the result into the sim. |
 | [`design_loads.md`](design_loads.md) / `.json` | Force and moment through every joint (axial, radial, about and across the axis) for standing, driving, crouching, jumps, ±40 N pushes and a fall. Size brackets and bolts from these. |
 
 Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
 
-## Key numbers (gim6010 build, 6.92 kg)
+## Key numbers (gim6010 build, 6.88 kg)
 
 | | |
 | :--- | :--- |
@@ -62,7 +64,7 @@ Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
 4. **Neck pitch reaches 5.4 N·m on landings**, above what the STS3215 can hold, so the neck hits its joint limit.
    Give it a real hard stop that isn't the servo.
 5. **Printed parts must clear the head and neck motion**: head roll ±26°, neck pitch −17°…+52°, head pitch and yaw
-   at their controller clips. The shell stand-ins clash by up to 13 mm (`clearance_report.md`, CAD constraints).
+   at their controller clips. The head hits the trunk outside the neck envelope (`freecad/neck_envelope.md`; the sim sees the same contacts, `clearance_report.md`): clip head commands to it.
 6. **Closed (2026-10-16)**: the hip-yaw bracket no longer turns, so it needs no swept clearance under the trunk.
 7. **Space still to reserve**: the e-stop needs ~45 mm behind the rear panel; the speaker depth depends on the part
    (the model assumes 6 mm, with 0.5 mm to the battery). The bucks and the bus servo adapter are now placed in the

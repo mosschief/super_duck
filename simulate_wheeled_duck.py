@@ -101,13 +101,13 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=6.418, wheel_mass=0.252, wheel_track=0.224, com_height=0.2241,
-                                       body_pitch_inertia=0.1063, wheel_inertia=0.00477),   # CAD masses (2026-10-25)
-        initial_pitch_trim=0.0725,
-        posture_coeffs=(-0.1512, 0.0356),
+        params=ScaledWheeledDuckParams(body_mass=6.373, wheel_mass=0.252, wheel_track=0.224, com_height=0.2222,
+                                       body_pitch_inertia=0.1037, wheel_inertia=0.00477),   # sim = CAD (2026-10-26)
+        initial_pitch_trim=0.0727,
+        posture_coeffs=(-0.1527, 0.0332),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
-        # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py after the CAD mass update (standing lean +4.6 deg).
+        # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py after the sim was exported from the CAD (standing lean +4.6 deg).
         jump_thrust_time=0.05,
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)

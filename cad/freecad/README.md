@@ -19,16 +19,23 @@ ODM meshes are converted to solids once and cached in `cad/vendor/odm/cache/`.
 
 Outputs: `super_duck.FCStd` (git-ignored: it embeds the vendor STEP), `printed/*.step` (git-ignored, ~46 MB; each printed part in its
 body frame), and [`fit_report.md`](fit_report.md) (interferences at home + printed-part volumes). Re-run after any
-model change, the same as the other `cad/` generators. `mass_properties.py` (run with `freecadcmd` after a build) computes each trunk / leg body's mass, CoM and inertia from the assembly into `mass_properties.json`; the gim6010 MJCF's inertials come from it (then re-run `tools/derive_lqr_params.py` and `tools/fit_balance_trim.py gim6010`).
+model change, the same as the other `cad/` generators. Then export the assembly into the sim (`freecadcmd cad/freecad/export_sim.py`, ~1 min): it writes every body's meshes
+(`assets/cad/`, one per colour), the collision hulls, each body's mass / CoM / inertia (`mass_properties.json`, from
+the walls + infill mass model), the neck body positions and antenna axes, the cameras, projector light and IMU site
+into `open_duck_wheeled_v2_gim6010.xml`, so the sim is the CAD. Then re-run `tools/export_cad_spec.py`,
+`tools/check_cad_clearances.py`, `tools/derive_lqr_params.py` and `tools/fit_balance_trim.py gim6010`, and the tests.
+What stays out of the export: the vendor STEP shapes (motors, Pi 5; their meshes use the `duck_parts` envelope models,
+the vendor files are not redistributed; their masses and inertia still come from the real shapes), and the tires (MuJoCo
+cylinders Ø150 × 32, without the CAD's R4 crown, so rolling contact stays analytic).
 
 ## Document structure
 
 One `App::Part` per MJCF body, nested like the MJCF tree (`SuperDuck > Trunk > L_HipMount > L_HipRoll > L_Thigh >
 L_Shin > L_Wheel`, `Trunk > NeckPitch > HeadPitch > HeadYaw > Head > L/R_Antenna`). Each part's placement holds
 the joint angle, so you can pose a leg or the head by editing the rotation angle of that `App::Part`.
-`Sim_Standins` (hidden) holds every MJCF geom, for comparison with the sim's shapes.
+`Sim_Standins` (hidden) holds the MJCF's primitive geoms (the tires); everything else in the sim is exported from this document.
 
-## Layout decisions in this pass (differ from the sim; update the MJCF if you keep them)
+## Layout decisions in this pass (in the sim through `export_sim.py`; "sim" below = the old hand-made stand-ins)
 
 | Change | Why |
 | :--- | :--- |
@@ -39,10 +46,10 @@ the joint angle, so you can pose a leg or the head by editing the rotation angle
 | **Ventilation**: rounded 4 mm slots. Low inlet through the floor down the middle of the underside, between the hip-mount shelves and under the servo buck (4 slots, x 20…68, y ±12, about 7.5 cm²); exhaust high on both side walls beside the Pi, under the lid (x −40…8, z 22…46, 9 a side, about 17 cm²); a 40 × 10 mm fan on the rear bulkhead's tail face (y −38, z 6, Ø38 bore, 4x M3 on 32 mm) blowing out of the tail's tapered sides (6 slots a side, about 12 cm²). The intake slots first put low on the side walls were moved to the underside (user choice) | ~10 W typical / ~20 W peak inside (Pi 5, AI HAT+, bucks); sealed, the air inside would reach ~45–50 °C at peak. It breathes by convection with the fan off |
 | 5.1 V Pi buck and the Waveshare bus servo adapter on the front bulkhead (the old front wall); 7.4 V servo buck on the floor ahead of the pack | Open issue 7 (these weren't in the model) |
 | USB nav camera (the sim's `trunk_nav_cam`) behind the front cap, its axis 20° below horizontal like the sim's, lens at (86.8, 0, −13.7), 1 mm inside the cap (sim: 93, 0, −14). Tilted, the 32 mm board needs 12.4 mm of the 10.75 mm gap in front of the front bulkhead, so its lower edge and USB plug pass through a window in the bulkhead (also the screw access). 4 posts off the cap: M2 self-tapping at the bottom corners, locating pins at the top. The 5.1 V Pi buck moved 3 mm outboard (y 36) so its lower boss clears the window | Sees the floor from ~0.2–0.3 m ahead of the axle to the horizon, about ±0.35 m wide at the near edge, nothing of the robot in view (sim render, ≥ 100° / 75° fov). Covers the ~0.6–0.75 m stopping distance from 1.5 m/s |
-| **Neck and head are the Open Duck Mini v2's, 1:1** (same STS3215 servos): its own STLs and placements from its `robot.xml` (`odm.py`), hung from our neck-pitch joint. Joints in the trunk frame: neck pitch (36, 0, 60) as in the sim, head pitch (36, 0, 126), head yaw (36, 0, 183), head roll (77, 0, 163.9); the sim has 117.3 / 139.3 / (54.7, 177.3) | The sim's neck spacing (22 mm pitch→yaw) can't fit STS3215s. **Update the MJCF**: neck body positions, head mass / inertia, the ODM's tilted antenna axes, camera positions |
+| **Neck and head are the Open Duck Mini v2's, 1:1** (same STS3215 servos): its own STLs and placements from its `robot.xml` (`odm.py`), hung from our neck-pitch joint. Joints in the trunk frame: neck pitch (36, 0, 60) as in the sim, head pitch (36, 0, 126), head yaw (36, 0, 183), head roll (77, 0, 163.9); the sim has 117.3 / 139.3 / (54.7, 177.3) | The sim's neck spacing (22 mm pitch→yaw) can't fit STS3215s. Exported to the MJCF (2026-10-26): neck body positions, head mass / inertia, the ODM's tilted antenna axes, camera positions |
 | Parts used unchanged: `neck_left/right_sheet`, `head_pitch_to_yaw`, `head_yaw_to_roll`, `head_roll_mount`, `head_bot_sheet`, `head` (shell), `roll_bearing`, `left/right_antenna_holder`, `antenna`, `sg90`, the STS3215 case + horn meshes (decimated for speed), and the servo pocket cut from `trunk_top` (`neck_servo_pocket`, bolts into our lid opening) | Closest possible copy of the ODM. Not used: the ODM's head Pi Zero and its board (our compute is in the trunk) |
 | Head shell = ODM `head.stl` (197 W × 200 D × 59 H) with our additions: Ø36 eye windows for the Ø37 WS2812 rings, eye cups for the Camera Module 3s on the ODM's 80 mm baseline (sim: 70), mic port between the eyes, projector holes | Our expression package in the ODM head |
-| **Projector is the ODM flashlight pod**: `flash_light_module.stl` + `flash_reflector_interface.stl` unchanged, at the ODM position on the left cheek, 4 mm higher up the cheek (ODM holes plugged, new ones drilled), shining forward. LED at (40.3, 97.8, 19.3) in the head frame | Move the sim's `projector` light there (dir +x). The LED is a 1 W emitter on a **15 × 12 mm board** (the insert's pocket) |
+| **Projector is the ODM flashlight pod**: `flash_light_module.stl` + `flash_reflector_interface.stl` unchanged, at the ODM position on the left cheek, 4 mm higher up the cheek (ODM holes plugged, new ones drilled), shining forward. LED at (40.3, 97.8, 19.3) in the head frame | The sim's `projector` light is there (dir +x). The LED is a 1 W emitter on a **15 × 12 mm board** (the insert's pocket) |
 | Trunk floor top at z −78, body underside −86.9 (sim trunk box −58); battery centre z −44 (sim −26); BMS, fuse, anti-spark switch and both floor bucks 12 mm lower | Fits the Pi stack under the ODM neck-pitch servo pocket (which reaches z 14.8) and closes the old battery/Pi clash; lowers the CoM |
 | Pi 5 on 2 mm standoffs on the battery-clamp bars, PCB bottom z −4.5; AI HAT+ on its 16 mm header (PCB bottom z 12.9); sim has the Pi at 10 and the HAT at 39 | Under the servo pocket with 1.5 mm to spare; USB / Ethernet still open at the front |
 | Lid opening x 4–68, y ±26 for the neck-pitch servo and the neck sheets through their sweep | |

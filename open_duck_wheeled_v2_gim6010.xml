@@ -1,30 +1,23 @@
 <mujoco model="open_duck_mini_v2_scaled_wheeled">
+
   <!--
-    1.35x Scaled & Wheeled Open Duck Mini v2 (BDX Droid Replica)
-    Directly based on apirrone/Open_Duck_Mini (`open_duck_mini_v2.xml`):
-      - Preserves the exact Open Duck Mini v2 body tree and naming convention:
-        `base` -> `trunk_assembly` ->
-          * Left leg:  `hip_roll_assembly` -> `left_roll_to_pitch_assembly` -> `knee_and_ankle_assembly`
-                       -> `knee_and_ankle_assembly_2` -> `foot_assembly` (driven wheel)
-          * Right leg: `hip_roll_assembly_2` -> `right_roll_to_pitch_assembly` -> `knee_and_ankle_assembly_3`
-                       -> `knee_and_ankle_assembly_4` -> `foot_assembly_2` (driven wheel)
-          * Neck/Head: `neck_pitch_assembly` -> `head_pitch_to_yaw` -> `neck_yaw_assembly` -> `head_assembly`
-      - Uniform 1.35x linear scale factor (42 cm -> 56.7 cm tall) so the original Open Duck Mini v2
-        shell proportions and aesthetic fit:
-          1. Raspberry Pi 5 (86 x 56 x 16 mm) + Active Cooler + 6S 24V Li-Ion pack inside `trunk_assembly`
-          2. Upper leg joints: 4x SteadyWin GIM6010-8 (Ø80 x 44 mm incl. driver, 388 g, 11 N*m stall / 5 N*m rated) on
-             hip-pitch + knee, and 2x GIM4305-10 (Ø53 x 33 mm, 150 g, ±3.47 N*m) on hip-roll (hip yaw removed 2026-10-16).
-             (Variant of open_duck_wheeled_v2.xml: GIM6010-8 masses added at the hip-pitch / knee joint centres.)
-          3. 2x SteadyWin GIM4305-10 QDD hub motors driving 75 mm radius wheels (cast VytaFlex 40 urethane treads, cad/tires.md) at `foot_assembly` & `foot_assembly_2`
-          4. Dual stereo Raspberry Pi Camera Module 3 sensors (`left_eye_cam`, `right_eye_cam`, 70 mm baseline)
-             inside the iconic BDX binocular head bezel + 1 downward-angled chest camera (`trunk_nav_cam`)
-          5. Open Duck Mini expression package: hinged antennas on 9 g servos (`left/right_antenna`), WS2812B eye
-             rings, projector LED (`projector` light), I2S mic + speaker/amp; 6S BMS, fuse, anti-spark switch,
-             e-stop; wheel touch sensors (tools/add_expression_hardware.py)
-      - Uses the authentic Open Duck Mini v2 material palette (`body_front_material` off-white PLA
-        rgba="0.918 0.918 0.918 1" and `foot_bottom_tpu_material` warm charcoal rgba="0.306 0.298 0.278 1").
-      - Includes ready-to-uncomment `<mesh scale="1.35 1.35 1.35" .../>` tags if you drop the original
-        STL files from `apirrone/Open_Duck_Mini` into an `assets/` folder alongside this XML.
+    Super Duck: wheeled Open Duck Mini v2 (BDX droid style), GIM6010-8 hip-pitch / knee variant.
+    Body tree and names follow apirrone/Open_Duck_Mini (`open_duck_mini_v2.xml`):
+      `base` -> `trunk_assembly` ->
+        * Left leg:  `hip_roll_assembly` (fixed hip mount) -> `left_roll_to_pitch_assembly` -> `knee_and_ankle_assembly`
+                     -> `knee_and_ankle_assembly_2` -> `foot_assembly` (driven wheel)
+        * Right leg: `hip_roll_assembly_2` -> `right_roll_to_pitch_assembly` -> `knee_and_ankle_assembly_3`
+                     -> `knee_and_ankle_assembly_4` -> `foot_assembly_2` (driven wheel)
+        * Neck/Head: `neck_pitch_assembly` -> `head_pitch_to_yaw` -> `neck_yaw_assembly` -> `head_assembly`
+                     -> `left/right_antenna` (the Open Duck Mini v2 neck and head at 1:1, same STS3215 servos)
+    Actuators: 4x SteadyWin GIM6010-8 (hip pitch, knee), 4x GIM4305-10 (hip roll, wheel hubs), 4x STS3215 (neck),
+    2x 9 g micro servos (antennas). Sensors: ICM-42688-P IMU (`imu` site), wheel encoders and touch, stereo Camera
+    Module 3 eyes (`left/right_eye_cam`, 80 mm baseline), USB nav camera (`trunk_nav_cam`).
+
+    Geometry and mass are the FreeCAD assembly (cad/freecad/super_duck.FCStd): cad/freecad/export_sim.py writes every
+    body's meshes (assets/cad/), inertial, collision hulls, the neck body positions, cameras, projector light and
+    IMU site. Joint positions, axes and ranges of the legs, actuators, sensors and the keyframe are hand-written here
+    (the CAD is built from them through tools/export_cad_spec.py -> cad/hardpoints.json). Re-export after a CAD change.
   -->
 
   <compiler angle="radian" coordinate="local" meshdir="assets" inertiafromgeom="auto" autolimits="true"/>
@@ -44,34 +37,125 @@
     <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.20 0.24 0.30" rgb2="0.15 0.18 0.23" markrgb="0.32 0.38 0.46" width="300" height="300"/>
     <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.12"/>
 
-    <!-- Authentic Open Duck Mini v2 Materials from open_duck_mini_v2.xml -->
-    <material name="body_front_material" rgba="0.918 0.918 0.918 1" specular="0.25" shininess="0.3"/>
-    <material name="foot_bottom_tpu_material" rgba="0.306 0.298 0.278 1" specular="0.20" shininess="0.25"/>
-    <material name="bdx_visor_dark" rgba="0.14 0.14 0.15 1" specular="0.50" shininess="0.6"/>
-    <material name="gim4305_housing" rgba="0.22 0.24 0.27 1" specular="0.55" shininess="0.65"/>
-    <material name="bdx_eye_led" rgba="0.96 0.92 0.78 1" emission="0.75"/>
-    <material name="camera_lens" rgba="0.05 0.07 0.10 1" specular="0.90" shininess="0.95"/>
-    <material name="estop_red" rgba="0.80 0.08 0.06 1" specular="0.40" shininess="0.5"/>
-    <material name="estop_yellow" rgba="0.95 0.78 0.10 1"/>
-    <material name="rpi_green" rgba="0.12 0.55 0.28 1"/>
+    <!-- Tire (the tire geoms are MuJoCo cylinders, not CAD meshes: see export_sim.py) -->
     <material name="wheel_tpu" rgba="0.18 0.18 0.19 1"/>
 
-    <!--
-      Optional: Uncomment if using the raw STL meshes from apirrone/Open_Duck_Mini in `assets/`
-      <mesh name="body_front" file="body_front.stl" scale="1.35 1.35 1.35"/>
-      <mesh name="body_back" file="body_back.stl" scale="1.35 1.35 1.35"/>
-      <mesh name="head_body" file="head_body.stl" scale="1.35 1.35 1.35"/>
-    -->
+    <!-- CAD meshes and colours: generated by cad/freecad/export_sim.py -->
+    <material name="cad_amp" rgba="0.2 0.2 0.5 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_antenna" rgba="0.95 0.75 0.1 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_cell" rgba="0.2 0.42 0.85 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_cell_wrap" rgba="0.15 0.15 0.6 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_chip" rgba="0.12 0.12 0.12 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_diffuser" rgba="1 1 1 0.5" specular="0.3" shininess="0.4"/>
+    <material name="cad_harness" rgba="0.13 0.13 0.14 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_imu" rgba="0.5 0.1 0.5 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_led" rgba="0.95 0.95 0.7 1" specular="0.3" shininess="0.4" emission="0.8"/>
+    <material name="cad_led_ring" rgba="0.9 0.9 0.9 1" specular="0.3" shininess="0.4" emission="0.6"/>
+    <material name="cad_metal" rgba="0.75 0.75 0.78 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_motor" rgba="0.22 0.23 0.26 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_pcb" rgba="0.05 0.45 0.2 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_power" rgba="0.8 0.15 0.12 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_print" rgba="0.96 0.62 0.16 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_rubber" rgba="0.07 0.07 0.07 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_servo" rgba="0.1 0.12 0.18 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_servo_adapter" rgba="0.1 0.25 0.55 1" specular="0.3" shininess="0.4"/>
+    <material name="cad_shell" rgba="0.98 0.85 0.3 1" specular="0.3" shininess="0.4"/>
+    <mesh name="trunk_assembly__cad_amp" file="cad/trunk_assembly__cad_amp.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_cell" file="cad/trunk_assembly__cad_cell.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_cell_wrap" file="cad/trunk_assembly__cad_cell_wrap.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_chip" file="cad/trunk_assembly__cad_chip.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_imu" file="cad/trunk_assembly__cad_imu.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_metal" file="cad/trunk_assembly__cad_metal.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_pcb" file="cad/trunk_assembly__cad_pcb.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_power" file="cad/trunk_assembly__cad_power.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_print" file="cad/trunk_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_servo" file="cad/trunk_assembly__cad_servo.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_servo_adapter" file="cad/trunk_assembly__cad_servo_adapter.stl" inertia="shell"/>
+    <mesh name="trunk_assembly__cad_shell" file="cad/trunk_assembly__cad_shell.stl" inertia="shell"/>
+    <mesh name="trunk_shell_hull" file="cad/trunk_shell_hull.stl" inertia="convex"/>
+    <mesh name="estop_hull" file="cad/estop_hull.stl" inertia="convex"/>
+    <mesh name="charge_port_hull" file="cad/charge_port_hull.stl" inertia="convex"/>
+    <mesh name="hip_roll_assembly__cad_harness" file="cad/hip_roll_assembly__cad_harness.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly__cad_motor" file="cad/hip_roll_assembly__cad_motor.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly__cad_print" file="cad/hip_roll_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly__cad_rubber" file="cad/hip_roll_assembly__cad_rubber.stl" inertia="shell"/>
+    <mesh name="L_hip_mount_hull" file="cad/L_hip_mount_hull.stl" inertia="convex"/>
+    <mesh name="L_hip_roll_gim4305_hull" file="cad/L_hip_roll_gim4305_hull.stl" inertia="convex"/>
+    <mesh name="hip_roll_assembly_2__cad_harness" file="cad/hip_roll_assembly_2__cad_harness.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly_2__cad_motor" file="cad/hip_roll_assembly_2__cad_motor.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly_2__cad_print" file="cad/hip_roll_assembly_2__cad_print.stl" inertia="shell"/>
+    <mesh name="hip_roll_assembly_2__cad_rubber" file="cad/hip_roll_assembly_2__cad_rubber.stl" inertia="shell"/>
+    <mesh name="R_hip_mount_hull" file="cad/R_hip_mount_hull.stl" inertia="convex"/>
+    <mesh name="R_hip_roll_gim4305_hull" file="cad/R_hip_roll_gim4305_hull.stl" inertia="convex"/>
+    <mesh name="neck_pitch_assembly__cad_print" file="cad/neck_pitch_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="neck_pitch_assembly__cad_servo" file="cad/neck_pitch_assembly__cad_servo.stl" inertia="shell"/>
+    <mesh name="neck_left_sheet_hull" file="cad/neck_left_sheet_hull.stl" inertia="convex"/>
+    <mesh name="neck_right_sheet_hull" file="cad/neck_right_sheet_hull.stl" inertia="convex"/>
+    <mesh name="sts3215_head_pitch_hull" file="cad/sts3215_head_pitch_hull.stl" inertia="convex"/>
+    <mesh name="left_roll_to_pitch_assembly__cad_harness" file="cad/left_roll_to_pitch_assembly__cad_harness.stl" inertia="shell"/>
+    <mesh name="left_roll_to_pitch_assembly__cad_motor" file="cad/left_roll_to_pitch_assembly__cad_motor.stl" inertia="shell"/>
+    <mesh name="left_roll_to_pitch_assembly__cad_print" file="cad/left_roll_to_pitch_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="L_hip_roll_yoke_hull" file="cad/L_hip_roll_yoke_hull.stl" inertia="convex"/>
+    <mesh name="L_hip_pitch_gim6010_hull" file="cad/L_hip_pitch_gim6010_hull.stl" inertia="convex"/>
+    <mesh name="knee_and_ankle_assembly__cad_harness" file="cad/knee_and_ankle_assembly__cad_harness.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly__cad_metal" file="cad/knee_and_ankle_assembly__cad_metal.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly__cad_motor" file="cad/knee_and_ankle_assembly__cad_motor.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly__cad_print" file="cad/knee_and_ankle_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="L_thigh_outer_hull" file="cad/L_thigh_outer_hull.stl" inertia="convex"/>
+    <mesh name="L_thigh_inner_hull" file="cad/L_thigh_inner_hull.stl" inertia="convex"/>
+    <mesh name="L_knee_gim6010_hull" file="cad/L_knee_gim6010_hull.stl" inertia="convex"/>
+    <mesh name="knee_and_ankle_assembly_2__cad_harness" file="cad/knee_and_ankle_assembly_2__cad_harness.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_2__cad_motor" file="cad/knee_and_ankle_assembly_2__cad_motor.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_2__cad_print" file="cad/knee_and_ankle_assembly_2__cad_print.stl" inertia="shell"/>
+    <mesh name="L_shin_hull" file="cad/L_shin_hull.stl" inertia="convex"/>
+    <mesh name="L_wheel_gim4305_hull" file="cad/L_wheel_gim4305_hull.stl" inertia="convex"/>
+    <mesh name="foot_assembly__cad_print" file="cad/foot_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="right_roll_to_pitch_assembly__cad_harness" file="cad/right_roll_to_pitch_assembly__cad_harness.stl" inertia="shell"/>
+    <mesh name="right_roll_to_pitch_assembly__cad_motor" file="cad/right_roll_to_pitch_assembly__cad_motor.stl" inertia="shell"/>
+    <mesh name="right_roll_to_pitch_assembly__cad_print" file="cad/right_roll_to_pitch_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="R_hip_roll_yoke_hull" file="cad/R_hip_roll_yoke_hull.stl" inertia="convex"/>
+    <mesh name="R_hip_pitch_gim6010_hull" file="cad/R_hip_pitch_gim6010_hull.stl" inertia="convex"/>
+    <mesh name="knee_and_ankle_assembly_3__cad_harness" file="cad/knee_and_ankle_assembly_3__cad_harness.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_3__cad_metal" file="cad/knee_and_ankle_assembly_3__cad_metal.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_3__cad_motor" file="cad/knee_and_ankle_assembly_3__cad_motor.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_3__cad_print" file="cad/knee_and_ankle_assembly_3__cad_print.stl" inertia="shell"/>
+    <mesh name="R_thigh_outer_hull" file="cad/R_thigh_outer_hull.stl" inertia="convex"/>
+    <mesh name="R_thigh_inner_hull" file="cad/R_thigh_inner_hull.stl" inertia="convex"/>
+    <mesh name="R_knee_gim6010_hull" file="cad/R_knee_gim6010_hull.stl" inertia="convex"/>
+    <mesh name="knee_and_ankle_assembly_4__cad_harness" file="cad/knee_and_ankle_assembly_4__cad_harness.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_4__cad_motor" file="cad/knee_and_ankle_assembly_4__cad_motor.stl" inertia="shell"/>
+    <mesh name="knee_and_ankle_assembly_4__cad_print" file="cad/knee_and_ankle_assembly_4__cad_print.stl" inertia="shell"/>
+    <mesh name="R_shin_hull" file="cad/R_shin_hull.stl" inertia="convex"/>
+    <mesh name="R_wheel_gim4305_hull" file="cad/R_wheel_gim4305_hull.stl" inertia="convex"/>
+    <mesh name="foot_assembly_2__cad_print" file="cad/foot_assembly_2__cad_print.stl" inertia="shell"/>
+    <mesh name="head_pitch_to_yaw__cad_print" file="cad/head_pitch_to_yaw__cad_print.stl" inertia="shell"/>
+    <mesh name="head_pitch_to_yaw_hull" file="cad/head_pitch_to_yaw_hull.stl" inertia="convex"/>
+    <mesh name="neck_yaw_assembly__cad_print" file="cad/neck_yaw_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="neck_yaw_assembly__cad_servo" file="cad/neck_yaw_assembly__cad_servo.stl" inertia="shell"/>
+    <mesh name="head_yaw_to_roll_hull" file="cad/head_yaw_to_roll_hull.stl" inertia="convex"/>
+    <mesh name="sts3215_head_yaw_hull" file="cad/sts3215_head_yaw_hull.stl" inertia="convex"/>
+    <mesh name="head_assembly__cad_diffuser" file="cad/head_assembly__cad_diffuser.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_led" file="cad/head_assembly__cad_led.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_led_ring" file="cad/head_assembly__cad_led_ring.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_metal" file="cad/head_assembly__cad_metal.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_pcb" file="cad/head_assembly__cad_pcb.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_print" file="cad/head_assembly__cad_print.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_servo" file="cad/head_assembly__cad_servo.stl" inertia="shell"/>
+    <mesh name="head_assembly__cad_shell" file="cad/head_assembly__cad_shell.stl" inertia="shell"/>
+    <mesh name="head_shell_hull" file="cad/head_shell_hull.stl" inertia="convex"/>
+    <mesh name="projector_pod_hull" file="cad/projector_pod_hull.stl" inertia="convex"/>
+    <mesh name="left_antenna__cad_antenna" file="cad/left_antenna__cad_antenna.stl" inertia="shell"/>
+    <mesh name="L_antenna_hull" file="cad/L_antenna_hull.stl" inertia="convex"/>
+    <mesh name="right_antenna__cad_antenna" file="cad/right_antenna__cad_antenna.stl" inertia="shell"/>
+    <mesh name="R_antenna_hull" file="cad/R_antenna_hull.stl" inertia="convex"/>
   </asset>
 
   <default>
     <default class="open_duck_mini_v2">
       <geom condim="3" contype="1" conaffinity="1" friction="0.8 0.005 0.0001" solref="0.015 1" solimp="0.9 0.95 0.001"/>
-
       <default class="visual">
         <geom contype="0" conaffinity="0" group="2"/>
       </default>
-
       <default class="collision">
         <geom group="3"/>
       </default>
@@ -85,6 +169,7 @@
       -->
       <default class="gim4305">
         <joint type="hinge" damping="0.12" frictionloss="0.025" armature="0.0038" limited="true"/>
+
         <!-- kv raised 1.4 -> 4.0: with kv=1.4 the leg servos acted like an underdamped spring, so a hard wheel-torque
              step (push recovery) made the legs pogo and the tires bounce off the floor, losing all traction.
              The controller lowers it back to 1.4 for the jump thrust (MIT-mode kd scheduling, see
@@ -107,18 +192,6 @@
         <position kp="32.0" kv="4.0" forcerange="-11.0 11.0" inheritrange="1"/>
       </default>
 
-      <!-- GIM6010-8 physical envelope (Ø80 x 44 mm incl. driver), visual only -->
-      <default class="gim6010_canister">
-        <geom type="cylinder" size="0.040 0.022" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
-      </default>
-
-      <!-- GIM4305-10SHS physical envelope: Ø53 x 33 overall (Ø37 x 1 output step + Ø53 x 26 housing + Ø40 x 6
-           driver boss; SteadyWin installation drawing / STEP), visual only. Camera Module 3 standard lens:
-           41 deg vertical FOV (the eye cameras' fovy). -->
-      <default class="gim4305_canister">
-        <geom type="cylinder" size="0.0265 0.0165" material="gim4305_housing" contype="0" conaffinity="0" group="2"/>
-      </default>
-
       <!-- Original Open Duck Mini v2 Feetech STS3215 (BAM Identified Parameters) for 4-DOF Neck/Head -->
       <default class="sts3215">
         <joint type="hinge" damping="0.56" frictionloss="0.068" armature="0.027" limited="true"/>
@@ -132,10 +205,9 @@
         <position kp="0.3" kv="0.008" forcerange="-0.18 0.18" inheritrange="1"/>
       </default>
 
-      <!-- 1.35x Scaled High-Grip TPU Wheel Tire (Radius = 0.075 m, Width = 0.032 m) -->
+      <!-- Cast VytaFlex 40 tire, Ø150 x 32 (cad/tires.md; the CAD tire, without its R4 crowned edges) -->
       <default class="wheel_tire">
-        <geom type="cylinder" size="0.075 0.016" euler="1.5707963 0 0" material="wheel_tpu"
-              condim="4" friction="1.25 0.008 0.0002" solref="0.012 1" solimp="0.92 0.97 0.001"/>
+        <geom type="cylinder" size="0.075 0.016" euler="1.5707963 0 0" material="wheel_tpu" condim="4" friction="1.25 0.008 0.0002" solref="0.012 1" solimp="0.92 0.97 0.001"/>
       </default>
     </default>
   </default>
@@ -146,191 +218,172 @@
 
     <!--
       BASE & TRUNK ASSEMBLY (1.35x Scaled from open_duck_mini_v2.xml `base` z=0.22 -> z=0.3395 with 75mm wheels)
-      IMU site: the 1.35x-scaled Open Duck Mini position (-0.108 0 0.0675) was outside the trunk shell; moved inside,
-      beside the Teensy carrier on the upper rear wall (tools/check_cad_clearances.py packing check)
+      IMU site: the ICM-42688-P package on the Teensy carrier shelf (CAD `imu_icm42688p`), axes = trunk axes
     -->
     <body name="base" pos="0 0 0.3395">
       <freejoint name="floating_base"/>
-      <site name="imu" pos="-0.062 0.008 0.045" size="0.008" rgba="1 0.2 0.2 1"/>
-
+      <site name="imu" pos="-0.058 0.008 0.04105" size="0.008" rgba="1 0.2 0.2 1"/>
       <body name="trunk_assembly" pos="0 0 0" quat="1 0 0 0" childclass="open_duck_mini_v2">
         <!--
-          Trunk and leg inertials are computed from the FreeCAD assembly (cad/freecad/mass_properties.py, 2026-10-25): printed PETG at its
-          walls + infill (structural 6 walls / 45 %, shells 3 walls / 18 %), purchased parts at their real masses
-          (cad/purchased_parts.json), each motor in the body that holds its stator, + screws and a 120 g trunk wiring
-          allowance. The per-part comments below are the older stand-in values.
+          Inertials from the CAD (export_sim.py): printed PETG at its walls + infill (structural 6 walls / 45 %, shells
+          3 walls / 18 %, the rest 4 walls / 30 %), purchased parts at their real masses (cad/purchased_parts.json),
+          each motor in the body that holds its stator, + screws and wiring (120 g in the trunk, 15 g in the head).
+          Per-part masses: cad/freecad/mass_properties.json.
         -->
-        <inertial pos="-0.0220 -0.0000 -0.0225" mass="2.132" fullinertia="0.005432 0.009045 0.007245 -5.64e-05 -0.000338 3.4e-05"/>
-        <!-- speaker_40mm_3w: 27 g (folded into the trunk_assembly inertial above) -->
-        <!-- max98357a_i2s_amp: 2 g (folded into the trunk_assembly inertial above) -->
-        <geom name="max98357a_i2s_amp" class="visual" type="box" size="0.009 0.0095 0.0015" pos="-0.06 0.035 0.035" material="rpi_green"/>
-        <!-- bms_6s_100a: 60 g (folded into the trunk_assembly inertial above) -->
-        <geom name="bms_6s_100a" class="visual" type="box" size="0.03 0.004 0.02" pos="-0.026 0.053 -0.026" material="gim4305_housing"/>
-        <!-- main_fuse_40a: 10 g (folded into the trunk_assembly inertial above) -->
-        <geom name="main_fuse_40a" class="visual" type="box" size="0.012 0.005 0.01" pos="-0.026 -0.053 -0.04" material="foot_bottom_tpu_material"/>
-        <!-- antispark_switch_120a: 60 g (folded into the trunk_assembly inertial above) -->
-        <geom name="antispark_switch_120a" class="visual" type="box" size="0.02 0.01 0.008" pos="0.033 -0.048 -0.03" material="gim4305_housing"/>
-        <!-- peripheral_5v_buck: 10 g (folded into the trunk_assembly inertial above) -->
-        <geom name="peripheral_5v_buck" class="visual" type="box" size="0.011 0.008 0.006" pos="0.03 0.048 -0.03" material="rpi_green"/>
-        <!-- estop_22mm: 25 g (folded into the trunk_assembly inertial above) -->
-        <!-- battery pack set by tools/battery_pack.py: 6s2p (+420 g vs. the 6S1P baseline, folded into the inertial above) -->
-        <!-- ai_hat_plus_26tops: 41 g (folded into the trunk inertial above) -->
-        <geom name="ai_hat_plus_26tops" class="visual" type="box" size="0.0325 0.0283 0.0028" pos="-0.006 0.0 0.042" material="rpi_green"/>
-        <!-- teensy_40_dual_can (PJRC Teensy 4.0 + Dual CAN transceiver carrier + ICM-42688-P IMU): 8 g (folded into the trunk inertial above) -->
-        <geom name="teensy_40_dual_can" class="visual" type="box" size="0.0110 0.0210 0.0035" pos="-0.062 -0.03 0.045" material="gim4305_housing"/>
+        <inertial pos="-0.0220 -0.0000 -0.0225" mass="2.1319" fullinertia="0.00543219 0.00904534 0.00724532 -5.63783e-05 -0.000337766 3.39989e-05"/>
 
-        <!-- 1.35x Scaled Open Duck Mini v2 BDX Trunk Shell (`body_front` & `body_back` geometry) -->
-        <geom name="trunk_collision" class="collision" type="box" size="0.074 0.063 0.058" material="body_front_material"/>
-        <geom name="body_front_shell" class="visual" type="box" size="0.042 0.062 0.056" pos="0.032 0 0.002" euler="0 0.14 0" material="body_front_material"/>
-        <geom name="body_front_curved_breast" class="visual" type="cylinder" size="0.058 0.038" pos="0.040 0 0.004" euler="0 0.14 0" material="body_front_material"/>
-        <geom name="body_back_shell" class="visual" type="box" size="0.044 0.060 0.052" pos="-0.034 0 -0.002" euler="0 -0.10 0" material="body_front_material"/>
-        <geom name="body_bottom_trim" class="visual" type="box" size="0.066 0.056 0.012" pos="0 0 -0.052" material="foot_bottom_tpu_material"/>
-        <geom name="body_neck_socket" class="visual" type="cylinder" size="0.034 0.010" pos="0.036 0 0.056" euler="0 0.15 0" material="foot_bottom_tpu_material"/>
+        <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+        <geom name="trunk_assembly__cad_amp" class="visual" type="mesh" mesh="trunk_assembly__cad_amp" material="cad_amp"/>
+        <geom name="trunk_assembly__cad_cell" class="visual" type="mesh" mesh="trunk_assembly__cad_cell" material="cad_cell"/>
+        <geom name="trunk_assembly__cad_cell_wrap" class="visual" type="mesh" mesh="trunk_assembly__cad_cell_wrap" material="cad_cell_wrap"/>
+        <geom name="trunk_assembly__cad_chip" class="visual" type="mesh" mesh="trunk_assembly__cad_chip" material="cad_chip"/>
+        <geom name="trunk_assembly__cad_imu" class="visual" type="mesh" mesh="trunk_assembly__cad_imu" material="cad_imu"/>
+        <geom name="trunk_assembly__cad_metal" class="visual" type="mesh" mesh="trunk_assembly__cad_metal" material="cad_metal"/>
+        <geom name="trunk_assembly__cad_pcb" class="visual" type="mesh" mesh="trunk_assembly__cad_pcb" material="cad_pcb"/>
+        <geom name="trunk_assembly__cad_power" class="visual" type="mesh" mesh="trunk_assembly__cad_power" material="cad_power"/>
+        <geom name="trunk_assembly__cad_print" class="visual" type="mesh" mesh="trunk_assembly__cad_print" material="cad_print"/>
+        <geom name="trunk_assembly__cad_servo" class="visual" type="mesh" mesh="trunk_assembly__cad_servo" material="cad_servo"/>
+        <geom name="trunk_assembly__cad_servo_adapter" class="visual" type="mesh" mesh="trunk_assembly__cad_servo_adapter" material="cad_servo_adapter"/>
+        <geom name="trunk_assembly__cad_shell" class="visual" type="mesh" mesh="trunk_assembly__cad_shell" material="cad_shell"/>
+        <geom name="trunk_shell_collision" class="collision" type="mesh" mesh="trunk_shell_hull"/>
+        <geom name="estop_collision" class="collision" type="mesh" mesh="estop_hull"/>
+        <geom name="charge_port_collision" class="collision" type="mesh" mesh="charge_port_hull"/>
 
-        <!-- Internal Raspberry Pi 5 (86 x 56 x 16 mm) & Low-Slung 6S Battery Pack -->
-        <geom name="raspberry_pi_5" class="visual" type="box" size="0.043 0.028 0.008" pos="-0.006 0 0.018" material="rpi_green"/>
-        <geom name="battery_pack_6s" class="visual" type="box" size="0.0365 0.0445 0.034" pos="-0.026 0.0 -0.026" material="foot_bottom_tpu_material"/>
-        <geom name="speaker_40mm_3w" class="visual" type="cylinder" size="0.020 0.003" pos="-0.066 0 0.012" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
-        <geom name="estop_bezel" class="visual" type="cylinder" size="0.012 0.004" pos="-0.080 0 0.015" euler="0 1.5708 0" material="estop_yellow"/>
-        <geom name="estop_mushroom" class="visual" type="cylinder" size="0.016 0.004" pos="-0.087 0 0.015" euler="0 1.5708 0" material="estop_red"/>
+        <!-- USB nav camera (CAD `usb_nav_cam`), lens behind the front cap, axis 20 deg below horizontal -->
+        <camera name="trunk_nav_cam" pos="0.0868103 0 -0.013658" fovy="75" xyaxes="0.0000 -1.0000 0.0000 0.3420 0.0000 0.9397"/>
 
-        <!-- Chest Forward-Downward Navigation Camera (Raspberry Pi Camera Module 3 Wide, 25 x 24 x 12.4 mm) -->
-        <geom name="chest_cam_bezel" class="visual" type="cylinder" size="0.014 0.005" pos="0.088 0 -0.014" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
-        <geom name="chest_cam_lens" class="visual" type="cylinder" size="0.009 0.006" pos="0.090 0 -0.014" euler="0 1.5708 0" material="camera_lens"/>
-        <camera name="trunk_nav_cam" pos="0.093 0 -0.014" euler="0 -1.22 -1.5708" fovy="75"/>
-
-        <!-- ==================== NECK & HEAD CHAIN (Exact open_duck_mini_v2 Hierarchy, 1.35x Scaled) ==================== -->
+        <!-- ==================== NECK & HEAD (Open Duck Mini v2, 1:1: body positions and antenna axes from the CAD) ==================== -->
         <body name="neck_pitch_assembly" pos="0.036 0 0.060">
           <joint name="neck_pitch" type="hinge" axis="0 1 0" range="-0.349066 1.13446" class="sts3215"/>
-          <inertial pos="0 0 0.028" mass="0.085" diaginertia="0.00006 0.00006 0.00003"/>
-          <geom name="neck_pitch_link" class="visual" type="box" size="0.018 0.022 0.030" pos="0 0 0.028" material="foot_bottom_tpu_material"/>
+          <inertial pos="0.0000 0.0013 0.0473" mass="0.0763" fullinertia="4.28796e-05 3.232e-05 2.08649e-05 5.72515e-09 1.47854e-08 4.52379e-07"/>
 
-          <body name="head_pitch_to_yaw" pos="0 0 0.058">
+          <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+          <geom name="neck_pitch_assembly__cad_print" class="visual" type="mesh" mesh="neck_pitch_assembly__cad_print" material="cad_print"/>
+          <geom name="neck_pitch_assembly__cad_servo" class="visual" type="mesh" mesh="neck_pitch_assembly__cad_servo" material="cad_servo"/>
+          <geom name="neck_left_sheet_collision" class="collision" type="mesh" mesh="neck_left_sheet_hull"/>
+          <geom name="neck_right_sheet_collision" class="collision" type="mesh" mesh="neck_right_sheet_hull"/>
+          <geom name="sts3215_head_pitch_collision" class="collision" type="mesh" mesh="sts3215_head_pitch_hull"/>
+          <body name="head_pitch_to_yaw" pos="0 0 0.066">
             <joint name="head_pitch" type="hinge" axis="0 1 0" range="-0.785398 0.785398" class="sts3215"/>
-            <inertial pos="0 0 0.012" mass="0.030" diaginertia="0.00002 0.00002 0.000015"/>
-            <geom name="head_pitch_bracket" class="visual" type="box" size="0.022 0.024 0.014" material="foot_bottom_tpu_material"/>
+            <inertial pos="-0.0077 0.0004 0.0260" mass="0.0202" fullinertia="9.57868e-06 8.15549e-06 4.72083e-06 -3.10844e-08 1.37355e-06 8.56114e-08"/>
 
-            <body name="neck_yaw_assembly" pos="0 0 0.022">
+            <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+            <geom name="head_pitch_to_yaw__cad_print" class="visual" type="mesh" mesh="head_pitch_to_yaw__cad_print" material="cad_print"/>
+            <geom name="head_pitch_to_yaw_collision" class="collision" type="mesh" mesh="head_pitch_to_yaw_hull"/>
+            <body name="neck_yaw_assembly" pos="0 0 0.057">
               <joint name="head_yaw" type="hinge" axis="0 0 1" range="-1.65 1.65" class="sts3215"/>
-              <inertial pos="0 0 0.015" mass="0.110" diaginertia="0.00007 0.00007 0.00005"/>
-              <geom name="neck_yaw_housing" class="visual" type="cylinder" size="0.024 0.016" material="foot_bottom_tpu_material"/>
+              <inertial pos="0.0049 -0.0000 -0.0218" mass="0.0893" fullinertia="2.90011e-05 6.2099e-05 6.03237e-05 2.37643e-08 -3.849e-06 -3.3784e-09"/>
 
-              <!--
-                1.35x Scaled Open Duck Mini v2 BDX Binocular-Trapezoid Head (`head_assembly`)
-                Matches the signature flat-browed, boxy-trapezoidal BDX head from apirrone/Open_Duck_Mini:
-                  - Off-white PLA trapezoidal outer hood (`body_front_material`)
-                  - Recessed charcoal front visor cavity (`foot_bottom_tpu_material`)
-                  - Iconic BDX binocular camera/LED eye bezels housing stereo Raspberry Pi Camera Module 3 units
-                  - Twin rear antenna stalks driven by micro servos
-              -->
-              <body name="head_assembly" pos="0.010 0 0.038">
+              <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+              <geom name="neck_yaw_assembly__cad_print" class="visual" type="mesh" mesh="neck_yaw_assembly__cad_print" material="cad_print"/>
+              <geom name="neck_yaw_assembly__cad_servo" class="visual" type="mesh" mesh="neck_yaw_assembly__cad_servo" material="cad_servo"/>
+              <geom name="head_yaw_to_roll_collision" class="collision" type="mesh" mesh="head_yaw_to_roll_hull"/>
+              <geom name="sts3215_head_yaw_collision" class="collision" type="mesh" mesh="sts3215_head_yaw_hull"/>
+
+              <!-- Head: the ODM head shell with our stereo Camera Module 3 eyes, WS2812 rings, mic and projector pod -->
+              <body name="head_assembly" pos="0.04095 0 -0.01915">
                 <joint name="head_roll" type="hinge" axis="1 0 0" range="-0.523599 0.523599" class="sts3215"/>
-                <inertial pos="0.0095 0.0000 0.0053" mass="0.511" diaginertia="0.00073 0.00088 0.00098"/>
-                <!-- left_antenna_servo_9g: 9 g (folded into the head_assembly inertial above) -->
-                <geom name="left_antenna_servo_9g" class="visual" type="box" size="0.0115 0.006 0.0145" pos="-0.032 0.046 0.02" material="gim4305_housing"/>
-                <!-- right_antenna_servo_9g: 9 g (folded into the head_assembly inertial above) -->
-                <geom name="right_antenna_servo_9g" class="visual" type="box" size="0.0115 0.006 0.0145" pos="-0.032 -0.046 0.02" material="gim4305_housing"/>
-                <!-- left_eye_ws2812_ring: 2 g (folded into the head_assembly inertial above) -->
-                <!-- right_eye_ws2812_ring: 2 g (folded into the head_assembly inertial above) -->
-                <!-- projector_led_reflector: 6 g (folded into the head_assembly inertial above) -->
-                <!-- microphone_inmp441: 2 g (folded into the head_assembly inertial above) -->
-                <geom name="microphone_inmp441" class="visual" type="box" size="0.007 0.007 0.001" pos="0.03 0.0 0.032" material="rpi_green"/>
+                <inertial pos="-0.0177 0.0038 0.0086" mass="0.5035" fullinertia="0.00142235 0.00203354 0.00307302 -0.000100429 -0.000115597 -1.533e-05"/>
 
-                <!-- Inner Collision Box -->
-                <geom name="head_collision" class="collision" type="box" size="0.052 0.068 0.036" material="body_front_material"/>
+                <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                <geom name="head_assembly__cad_diffuser" class="visual" type="mesh" mesh="head_assembly__cad_diffuser" material="cad_diffuser"/>
+                <geom name="head_assembly__cad_led" class="visual" type="mesh" mesh="head_assembly__cad_led" material="cad_led"/>
+                <geom name="head_assembly__cad_led_ring" class="visual" type="mesh" mesh="head_assembly__cad_led_ring" material="cad_led_ring"/>
+                <geom name="head_assembly__cad_metal" class="visual" type="mesh" mesh="head_assembly__cad_metal" material="cad_metal"/>
+                <geom name="head_assembly__cad_pcb" class="visual" type="mesh" mesh="head_assembly__cad_pcb" material="cad_pcb"/>
+                <geom name="head_assembly__cad_print" class="visual" type="mesh" mesh="head_assembly__cad_print" material="cad_print"/>
+                <geom name="head_assembly__cad_servo" class="visual" type="mesh" mesh="head_assembly__cad_servo" material="cad_servo"/>
+                <geom name="head_assembly__cad_shell" class="visual" type="mesh" mesh="head_assembly__cad_shell" material="cad_shell"/>
+                <geom name="head_shell_collision" class="collision" type="mesh" mesh="head_shell_hull"/>
+                <geom name="projector_pod_collision" class="collision" type="mesh" mesh="projector_pod_hull"/>
 
-                <!-- BDX Trapezoidal Outer Shell (Off-White PLA `body_front_material`) -->
-                <geom name="head_core_shell" class="visual" type="box" size="0.050 0.060 0.034" material="body_front_material"/>
-                <!-- Wide Flat Overhanging Top Brow Plate (156 mm wide x 112 mm deep) -->
-                <geom name="head_top_brow" class="visual" type="box" size="0.056 0.078 0.006" pos="0.004 0 0.035" euler="0 0.05 0" material="body_front_material"/>
-                <!-- Narrower Flat Bottom Jaw Plate (124 mm wide) -->
-                <geom name="head_bottom_jaw" class="visual" type="box" size="0.048 0.062 0.006" pos="0.002 0 -0.035" material="body_front_material"/>
-                <!-- Inward-Slanted Trapezoidal Left & Right Side Walls -->
-                <geom name="head_left_trapezoid_cheek" class="visual" type="box" size="0.052 0.007 0.036" pos="0.002 0.068 0.001" euler="-0.24 0 -0.06" material="body_front_material"/>
-                <geom name="head_right_trapezoid_cheek" class="visual" type="box" size="0.052 0.007 0.036" pos="0.002 -0.068 0.001" euler="0.24 0 0.06" material="body_front_material"/>
-                <!-- Slanted Rear Head Backplate -->
-                <geom name="head_back_plate" class="visual" type="box" size="0.008 0.062 0.033" pos="-0.048 0 0.001" euler="0 -0.18 0" material="foot_bottom_tpu_material"/>
+                <!-- Eye cameras at the Camera Module 3 lenses (CAD `L/R_eye_cam_module3`): standard lens, 41 deg vertical FOV -->
+                <camera name="left_eye_cam" pos="0.05505 0.04 0.01034" fovy="41" xyaxes="0.0000 -1.0000 0.0000 0.0000 0.0000 1.0000"/>
 
-                <!-- Recessed Dark Charcoal BDX Face Cavity -->
-                <geom name="head_face_recess" class="visual" type="box" size="0.006 0.064 0.028" pos="0.048 0 0.000" material="bdx_visor_dark"/>
+                <!-- Projector: the ODM flashlight pod's 1 W LED (CAD `projector_led_1w`), shining forward -->
+                <light name="projector" pos="0.04555 0.09777 0.0192563" dir="1.0000 0.0000 0.0000" cutoff="20" exponent="8" diffuse="0.9 0.85 0.7" specular="0.2 0.2 0.2" castshadow="false" active="false"/>
+                <camera name="right_eye_cam" pos="0.05505 -0.04 0.01034" fovy="41" xyaxes="0.0000 -1.0000 0.0000 0.0000 0.0000 1.0000"/>
 
-                <!--
-                  Iconic BDX Asymmetric/Binocular LED Eye Bezels + Stereo Raspberry Pi Camera Module 3 Units
-                  (70 mm Stereo Baseline in the 1.35x Scaled Head)
-                -->
-                <!-- Left Eye Binocular Barrel (Slightly Larger BDX Primary Scope) -->
-                <geom name="left_eye_housing" class="visual" type="cylinder" size="0.024 0.008" pos="0.052 0.035 0.002" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
-                <geom name="left_eye_led_ring" class="visual" type="cylinder" size="0.019 0.0085" pos="0.053 0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
-                <geom name="left_eye_cam_lens" class="visual" type="cylinder" size="0.012 0.009" pos="0.054 0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
-                <geom name="left_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 0.035 0.002" material="rpi_green"/>
-                <camera name="left_eye_cam" pos="0.058 0.035 0.002" euler="0 -1.5708 -1.5708" fovy="41"/>
+                <!-- Antennas, each swung by a 9 g micro servo in the head about the ODM's tilted axis (Open Duck Mini
+                     `antennas.py`: 1-2 ms PWM = +/-45 deg) -->
+                <body name="left_antenna" pos="-0.116435 0.0606628 0.000704069">
+                  <joint name="left_antenna" class="micro_servo_9g" axis="-0.2631 0.9354 0.2362"/>
+                  <inertial pos="-0.0054 -0.0011 0.0081" mass="0.0048" fullinertia="3.65683e-06 3.67199e-06 4.32983e-07 -1.81925e-08 -1.64404e-07 7.77866e-07"/>
 
-                <!-- Right Eye Binocular Barrel (BDX Secondary Scope) -->
-                <geom name="right_eye_housing" class="visual" type="cylinder" size="0.021 0.008" pos="0.052 -0.035 0.002" euler="0 1.5708 0" material="foot_bottom_tpu_material"/>
-                <geom name="right_eye_led_ring" class="visual" type="cylinder" size="0.016 0.0085" pos="0.053 -0.035 0.002" euler="0 1.5708 0" material="bdx_eye_led"/>
-                <geom name="right_eye_cam_lens" class="visual" type="cylinder" size="0.010 0.009" pos="0.054 -0.035 0.002" euler="0 1.5708 0" material="camera_lens"/>
-                <geom name="right_rpi_cam3_pcb" class="visual" type="box" size="0.0058 0.0125 0.012" pos="0.042 -0.035 0.002" material="rpi_green"/>
-                <geom name="projector_lens" class="visual" type="cylinder" size="0.007 0.003" pos="0.055 0 -0.018" euler="0 1.5708 0" material="bdx_eye_led"/>
-                <light name="projector" pos="0.059 0 -0.018" dir="1 0 -0.25" cutoff="20" exponent="8" diffuse="0.9 0.85 0.7" specular="0.2 0.2 0.2" castshadow="false" active="false"/>
-                <camera name="right_eye_cam" pos="0.058 -0.035 0.002" euler="0 -1.5708 -1.5708" fovy="41"/>
-
-                <!-- BDX Twin Rear Antenna Ears, each swung fore/aft by a 9 g micro servo (servo bodies folded into the
-                     head inertial above; Open Duck Mini `antennas.py`: 1-2 ms PWM = +/-45 deg) -->
-                <body name="left_antenna" pos="-0.032 0.046 0.038">
-                  <joint name="left_antenna" class="micro_servo_9g"/>
-                  <inertial pos="-0.007 0.004 0.032" mass="0.003" diaginertia="0.0000009 0.0000009 0.0000001"/>
-                  <geom name="left_antenna_base" class="visual" type="cylinder" size="0.008 0.008" material="foot_bottom_tpu_material"/>
-                  <geom name="left_antenna_stalk" class="visual" type="capsule" fromto="0 0 0.004 -0.014 0.008 0.060" size="0.0035" material="foot_bottom_tpu_material"/>
+                  <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                  <geom name="left_antenna__cad_antenna" class="visual" type="mesh" mesh="left_antenna__cad_antenna" material="cad_antenna"/>
+                  <geom name="L_antenna_collision" class="collision" type="mesh" mesh="L_antenna_hull"/>
                 </body>
-                <body name="right_antenna" pos="-0.032 -0.046 0.038">
-                  <joint name="right_antenna" class="micro_servo_9g"/>
-                  <inertial pos="-0.007 -0.004 0.032" mass="0.003" diaginertia="0.0000009 0.0000009 0.0000001"/>
-                  <geom name="right_antenna_base" class="visual" type="cylinder" size="0.008 0.008" material="foot_bottom_tpu_material"/>
-                  <geom name="right_antenna_stalk" class="visual" type="capsule" fromto="0 0 0.004 -0.014 -0.008 0.060" size="0.0035" material="foot_bottom_tpu_material"/>
+                <body name="right_antenna" pos="-0.116435 -0.0606628 0.000704069">
+                  <joint name="right_antenna" class="micro_servo_9g" axis="0.2631 0.9354 -0.2362"/>
+                  <inertial pos="-0.0054 0.0011 0.0082" mass="0.0048" fullinertia="3.71934e-06 3.7314e-06 4.3608e-07 1.75791e-08 -1.66831e-07 -7.91502e-07"/>
+
+                  <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                  <geom name="right_antenna__cad_antenna" class="visual" type="mesh" mesh="right_antenna__cad_antenna" material="cad_antenna"/>
+                  <geom name="R_antenna_collision" class="collision" type="mesh" mesh="R_antenna_hull"/>
                 </body>
               </body>
             </body>
           </body>
         </body>
 
-        <!-- ==================== LEFT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
+        <!-- ==================== LEFT LEG CHAIN (hip roll GIM4305, hip pitch / knee GIM6010, GIM4305 wheel) ==================== -->
         <body name="hip_roll_assembly" pos="0 0.084 -0.044">
-          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Printed bracket from the
-               trunk floor to the hip-roll motor; this body carries the hip-roll GIM4305 (cad/design_loads.md). -->
-          <inertial pos="-0.0015 0.0014 -0.0409" mass="0.300" fullinertia="0.0003551 0.0002172 0.000396 -1.78e-06 -1.11e-05 2.38e-05"/>
-          <geom name="left_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
+          <!-- Fixed hip mount (no hip yaw): the printed bracket from the trunk floor, carrying the hip-roll GIM4305 -->
+          <inertial pos="-0.0015 0.0014 -0.0409" mass="0.2999" fullinertia="0.000355087 0.000217238 0.000396048 -1.77655e-06 -1.10557e-05 2.37658e-05"/>
 
+          <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+          <geom name="hip_roll_assembly__cad_harness" class="visual" type="mesh" mesh="hip_roll_assembly__cad_harness" material="cad_harness"/>
+          <geom name="hip_roll_assembly__cad_motor" class="visual" type="mesh" mesh="hip_roll_assembly__cad_motor" material="cad_motor"/>
+          <geom name="hip_roll_assembly__cad_print" class="visual" type="mesh" mesh="hip_roll_assembly__cad_print" material="cad_print"/>
+          <geom name="hip_roll_assembly__cad_rubber" class="visual" type="mesh" mesh="hip_roll_assembly__cad_rubber" material="cad_rubber"/>
+          <geom name="L_hip_mount_collision" class="collision" type="mesh" mesh="L_hip_mount_hull"/>
+          <geom name="L_hip_roll_gim4305_collision" class="collision" type="mesh" mesh="L_hip_roll_gim4305_hull"/>
           <body name="left_roll_to_pitch_assembly" pos="0 0.024 -0.044">
             <joint name="left_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
-            <inertial pos="0.0006 0.0475 0.0009" mass="0.508" fullinertia="0.0004081 0.0004255 0.0003916 2.34e-05 6.73e-06 6.85e-07"/>
-            <geom name="left_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
-            <geom name="left_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 0.018 0" material="foot_bottom_tpu_material"/>
+            <inertial pos="0.0006 0.0475 0.0009" mass="0.5077" fullinertia="0.000408067 0.000425474 0.000391606 2.34405e-05 6.7296e-06 6.84872e-07"/>
 
-            <!-- Thigh Link (`knee_and_ankle_assembly`, 1.35x scaled length = 0.118 m, +52 mm Y offset clears hip_roll) -->
+            <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+            <geom name="left_roll_to_pitch_assembly__cad_harness" class="visual" type="mesh" mesh="left_roll_to_pitch_assembly__cad_harness" material="cad_harness"/>
+            <geom name="left_roll_to_pitch_assembly__cad_motor" class="visual" type="mesh" mesh="left_roll_to_pitch_assembly__cad_motor" material="cad_motor"/>
+            <geom name="left_roll_to_pitch_assembly__cad_print" class="visual" type="mesh" mesh="left_roll_to_pitch_assembly__cad_print" material="cad_print"/>
+            <geom name="L_hip_roll_yoke_collision" class="collision" type="mesh" mesh="L_hip_roll_yoke_hull"/>
+            <geom name="L_hip_pitch_gim6010_collision" class="collision" type="mesh" mesh="L_hip_pitch_gim6010_hull"/>
+
+            <!-- Thigh Link (`knee_and_ankle_assembly`, 0.118 m) -->
             <body name="knee_and_ankle_assembly" pos="0 0.052 0">
               <joint name="left_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim6010"/>
-              <inertial pos="-0.0001 0.0045 -0.0999" mass="0.683" fullinertia="0.001291 0.00146 0.0004718 1.98e-06 -7.07e-07 -0.000184"/>
-              <geom name="left_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-              <geom name="left_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
-              <geom name="left_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
+              <inertial pos="-0.0001 0.0045 -0.0999" mass="0.6828" fullinertia="0.00129097 0.00146049 0.000471837 1.97847e-06 -7.06672e-07 -0.000184043"/>
 
-              <!-- Shin Link (`knee_and_ankle_assembly_2`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
+              <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+              <geom name="knee_and_ankle_assembly__cad_harness" class="visual" type="mesh" mesh="knee_and_ankle_assembly__cad_harness" material="cad_harness"/>
+              <geom name="knee_and_ankle_assembly__cad_metal" class="visual" type="mesh" mesh="knee_and_ankle_assembly__cad_metal" material="cad_metal"/>
+              <geom name="knee_and_ankle_assembly__cad_motor" class="visual" type="mesh" mesh="knee_and_ankle_assembly__cad_motor" material="cad_motor"/>
+              <geom name="knee_and_ankle_assembly__cad_print" class="visual" type="mesh" mesh="knee_and_ankle_assembly__cad_print" material="cad_print"/>
+              <geom name="L_thigh_outer_collision" class="collision" type="mesh" mesh="L_thigh_outer_hull"/>
+              <geom name="L_thigh_inner_collision" class="collision" type="mesh" mesh="L_thigh_inner_hull"/>
+              <geom name="L_knee_gim6010_collision" class="collision" type="mesh" mesh="L_knee_gim6010_hull"/>
+
+              <!-- Shin Link (`knee_and_ankle_assembly_2`, 0.118 m, wheel inboard) -->
               <body name="knee_and_ankle_assembly_2" pos="0 0 -0.118">
                 <joint name="left_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="-0.0001 -0.0269 -0.0890" mass="0.281" fullinertia="0.0005718 0.0006063 9.238e-05 1.01e-07 -4.15e-07 -1.8e-05"/>
-                <geom name="left_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-                <geom name="left_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 -0.024 -0.059" material="foot_bottom_tpu_material"/>
-                <geom name="left_shin_collision" class="collision" type="capsule" fromto="0 -0.024 0 0 -0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
-                <geom name="left_wheel_gim4305_stator" class="gim4305_canister" pos="0 -0.029 -0.118" euler="1.5708 0 0"/>
+                <inertial pos="-0.0001 -0.0269 -0.0890" mass="0.2807" fullinertia="0.000571806 0.000606311 9.23833e-05 1.00732e-07 -4.14617e-07 -1.79921e-05"/>
+
+                <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                <geom name="knee_and_ankle_assembly_2__cad_harness" class="visual" type="mesh" mesh="knee_and_ankle_assembly_2__cad_harness" material="cad_harness"/>
+                <geom name="knee_and_ankle_assembly_2__cad_motor" class="visual" type="mesh" mesh="knee_and_ankle_assembly_2__cad_motor" material="cad_motor"/>
+                <geom name="knee_and_ankle_assembly_2__cad_print" class="visual" type="mesh" mesh="knee_and_ankle_assembly_2__cad_print" material="cad_print"/>
+                <geom name="L_shin_collision" class="collision" type="mesh" mesh="L_shin_hull"/>
+                <geom name="L_wheel_gim4305_collision" class="collision" type="mesh" mesh="L_wheel_gim4305_hull"/>
 
                 <!-- Distal Wheel Assembly (`foot_assembly`, aligned at y = +112 mm directly under hip_roll y = +108 mm) -->
                 <body name="foot_assembly" pos="0 -0.048 -0.118">
                   <joint name="left_wheel" class="gim4305_wheel" axis="0 1 0"/>
-                  <inertial pos="0.0000 0.0000 0.0000" mass="0.252" fullinertia="0.000502 0.0009744 0.000502 0 0 0"/>
+                  <inertial pos="0.0000 -0.0002 0.0000" mass="0.2521" fullinertia="0.000501988 0.000974397 0.000501988 0 0 0"/>
+
+                  <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                  <geom name="foot_assembly__cad_print" class="visual" type="mesh" mesh="foot_assembly__cad_print" material="cad_print"/>
                   <geom name="left_foot_bottom_tpu" class="wheel_tire"/>
-                  <geom name="left_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
-                  <geom name="left_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
-                  <geom name="left_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
                   <site name="left_foot" pos="0 0 0" size="0.005"/>
                   <site name="left_wheel_touch" type="cylinder" size="0.077 0.017" euler="1.5707963 0 0" group="5" rgba="0 0 0 0"/>
                 </body>
@@ -339,44 +392,63 @@
           </body>
         </body>
 
-        <!-- ==================== RIGHT LEG CHAIN (Exact open_duck_mini_v2 Hierarchy + 4 GIM4305 Joints + Wheel) ==================== -->
+        <!-- ==================== RIGHT LEG CHAIN (hip roll GIM4305, hip pitch / knee GIM6010, GIM4305 wheel) ==================== -->
         <body name="hip_roll_assembly_2" pos="0 -0.084 -0.044">
-          <!-- Fixed hip mount (no hip-yaw motor: the controller held it at 0). Printed bracket from the
-               trunk floor to the hip-roll motor; this body carries the hip-roll GIM4305 (cad/design_loads.md). -->
-          <inertial pos="-0.0015 -0.0015 -0.0409" mass="0.300" fullinertia="0.0003564 0.0002172 0.0003973 1.56e-06 -1.11e-05 -2.39e-05"/>
-          <geom name="right_hip_mount" class="visual" type="box" size="0.028 0.026 0.012" pos="0 0 -0.026" material="body_front_material"/>
+          <!-- Fixed hip mount (no hip yaw): the printed bracket from the trunk floor, carrying the hip-roll GIM4305 -->
+          <inertial pos="-0.0015 -0.0015 -0.0409" mass="0.2999" fullinertia="0.000356366 0.000217238 0.000397327 1.55827e-06 -1.10557e-05 -2.38615e-05"/>
 
+          <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+          <geom name="hip_roll_assembly_2__cad_harness" class="visual" type="mesh" mesh="hip_roll_assembly_2__cad_harness" material="cad_harness"/>
+          <geom name="hip_roll_assembly_2__cad_motor" class="visual" type="mesh" mesh="hip_roll_assembly_2__cad_motor" material="cad_motor"/>
+          <geom name="hip_roll_assembly_2__cad_print" class="visual" type="mesh" mesh="hip_roll_assembly_2__cad_print" material="cad_print"/>
+          <geom name="hip_roll_assembly_2__cad_rubber" class="visual" type="mesh" mesh="hip_roll_assembly_2__cad_rubber" material="cad_rubber"/>
+          <geom name="R_hip_mount_collision" class="collision" type="mesh" mesh="R_hip_mount_hull"/>
+          <geom name="R_hip_roll_gim4305_collision" class="collision" type="mesh" mesh="R_hip_roll_gim4305_hull"/>
           <body name="right_roll_to_pitch_assembly" pos="0 -0.024 -0.044">
             <joint name="right_hip_roll" type="hinge" axis="1 0 0" range="-0.436332 0.436332" class="gim4305"/>
-            <inertial pos="0.0009 -0.0475 0.0009" mass="0.508" fullinertia="0.0004081 0.0004252 0.0003914 -2.26e-05 7.13e-06 -6.85e-07"/>
-            <geom name="right_hip_roll_gim4305" class="gim4305_canister" euler="0 1.5708 0"/>
-            <geom name="right_roll_to_pitch_shell" class="visual" type="box" size="0.026 0.022 0.026" pos="0 -0.018 0" material="foot_bottom_tpu_material"/>
+            <inertial pos="0.0009 -0.0475 0.0009" mass="0.5077" fullinertia="0.000408067 0.000425223 0.000391355 -2.26455e-05 7.12574e-06 -6.84872e-07"/>
 
-            <!-- Thigh Link (`knee_and_ankle_assembly_3`, 1.35x scaled length = 0.118 m, -52 mm Y offset clears hip_roll) -->
+            <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+            <geom name="right_roll_to_pitch_assembly__cad_harness" class="visual" type="mesh" mesh="right_roll_to_pitch_assembly__cad_harness" material="cad_harness"/>
+            <geom name="right_roll_to_pitch_assembly__cad_motor" class="visual" type="mesh" mesh="right_roll_to_pitch_assembly__cad_motor" material="cad_motor"/>
+            <geom name="right_roll_to_pitch_assembly__cad_print" class="visual" type="mesh" mesh="right_roll_to_pitch_assembly__cad_print" material="cad_print"/>
+            <geom name="R_hip_roll_yoke_collision" class="collision" type="mesh" mesh="R_hip_roll_yoke_hull"/>
+            <geom name="R_hip_pitch_gim6010_collision" class="collision" type="mesh" mesh="R_hip_pitch_gim6010_hull"/>
+
+            <!-- Thigh Link (`knee_and_ankle_assembly_3`, 0.118 m) -->
             <body name="knee_and_ankle_assembly_3" pos="0 -0.052 0">
               <joint name="right_hip_pitch" type="hinge" axis="0 1 0" range="-0.523599 1.22173" class="gim6010"/>
-              <inertial pos="-0.0003 -0.0045 -0.0999" mass="0.683" fullinertia="0.001291 0.00146 0.0004718 -1.19e-06 -4.05e-06 0.000184"/>
-              <geom name="right_hip_pitch_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-              <geom name="right_thigh_shell" class="visual" type="box" size="0.025 0.018 0.059" pos="0 0 -0.059" material="body_front_material"/>
-              <geom name="right_thigh_collision" class="collision" type="capsule" fromto="0 0 0 0 0 -0.118" size="0.020" material="body_front_material"/>
+              <inertial pos="-0.0003 -0.0045 -0.0999" mass="0.6828" fullinertia="0.00129097 0.00146043 0.000471772 -1.1917e-06 -4.05444e-06 0.000184043"/>
 
-              <!-- Shin Link (`knee_and_ankle_assembly_4`, 1.35x scaled length = 0.118 m, inboard wheel routing) -->
+              <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+              <geom name="knee_and_ankle_assembly_3__cad_harness" class="visual" type="mesh" mesh="knee_and_ankle_assembly_3__cad_harness" material="cad_harness"/>
+              <geom name="knee_and_ankle_assembly_3__cad_metal" class="visual" type="mesh" mesh="knee_and_ankle_assembly_3__cad_metal" material="cad_metal"/>
+              <geom name="knee_and_ankle_assembly_3__cad_motor" class="visual" type="mesh" mesh="knee_and_ankle_assembly_3__cad_motor" material="cad_motor"/>
+              <geom name="knee_and_ankle_assembly_3__cad_print" class="visual" type="mesh" mesh="knee_and_ankle_assembly_3__cad_print" material="cad_print"/>
+              <geom name="R_thigh_outer_collision" class="collision" type="mesh" mesh="R_thigh_outer_hull"/>
+              <geom name="R_thigh_inner_collision" class="collision" type="mesh" mesh="R_thigh_inner_hull"/>
+              <geom name="R_knee_gim6010_collision" class="collision" type="mesh" mesh="R_knee_gim6010_hull"/>
+
+              <!-- Shin Link (`knee_and_ankle_assembly_4`, 0.118 m, wheel inboard) -->
               <body name="knee_and_ankle_assembly_4" pos="0 0 -0.118">
                 <joint name="right_knee" type="hinge" axis="0 1 0" range="-1.5708 1.5708" class="gim6010"/>
-                <inertial pos="0.0001 0.0269 -0.0890" mass="0.281" fullinertia="0.0005718 0.0006063 9.238e-05 1.01e-07 4.15e-07 1.8e-05"/>
-                <geom name="right_knee_gim6010" class="gim6010_canister" euler="1.5708 0 0"/>
-                <geom name="right_shin_shell" class="visual" type="box" size="0.022 0.016 0.059" pos="0 0.024 -0.059" material="foot_bottom_tpu_material"/>
-                <geom name="right_shin_collision" class="collision" type="capsule" fromto="0 0.024 0 0 0.024 -0.118" size="0.018" material="foot_bottom_tpu_material"/>
-                <geom name="right_wheel_gim4305_stator" class="gim4305_canister" pos="0 0.029 -0.118" euler="1.5708 0 0"/>
+                <inertial pos="0.0001 0.0269 -0.0890" mass="0.2807" fullinertia="0.000571806 0.000606311 9.23833e-05 1.00733e-07 4.14615e-07 1.79921e-05"/>
+
+                <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                <geom name="knee_and_ankle_assembly_4__cad_harness" class="visual" type="mesh" mesh="knee_and_ankle_assembly_4__cad_harness" material="cad_harness"/>
+                <geom name="knee_and_ankle_assembly_4__cad_motor" class="visual" type="mesh" mesh="knee_and_ankle_assembly_4__cad_motor" material="cad_motor"/>
+                <geom name="knee_and_ankle_assembly_4__cad_print" class="visual" type="mesh" mesh="knee_and_ankle_assembly_4__cad_print" material="cad_print"/>
+                <geom name="R_shin_collision" class="collision" type="mesh" mesh="R_shin_hull"/>
+                <geom name="R_wheel_gim4305_collision" class="collision" type="mesh" mesh="R_wheel_gim4305_hull"/>
 
                 <!-- Distal Wheel Assembly (`foot_assembly_2`, aligned at y = -112 mm directly under hip_roll y = -108 mm) -->
                 <body name="foot_assembly_2" pos="0 0.048 -0.118">
                   <joint name="right_wheel" class="gim4305_wheel" axis="0 1 0"/>
-                  <inertial pos="0.0000 0.0000 0.0000" mass="0.252" fullinertia="0.000502 0.0009744 0.000502 0 0 0"/>
+                  <inertial pos="0.0000 0.0002 0.0000" mass="0.2521" fullinertia="0.000501988 0.000974397 0.000501988 0 0 0"/>
+
+                  <!-- CAD geoms: generated by cad/freecad/export_sim.py -->
+                  <geom name="foot_assembly_2__cad_print" class="visual" type="mesh" mesh="foot_assembly_2__cad_print" material="cad_print"/>
                   <geom name="right_foot_bottom_tpu" class="wheel_tire"/>
-                  <geom name="right_wheel_dish" class="visual" type="cylinder" size="0.048 0.017" euler="1.5708 0 0" material="body_front_material"/>
-                  <geom name="right_wheel_hub_cap" class="visual" type="cylinder" size="0.020 0.018" euler="1.5708 0 0" material="foot_bottom_tpu_material"/>
-                  <geom name="right_wheel_marker" class="visual" type="box" size="0.044 0.0175 0.007" material="foot_bottom_tpu_material"/>
                   <site name="right_foot" pos="0 0 0" size="0.005"/>
                   <site name="right_wheel_touch" type="cylinder" size="0.077 0.017" euler="1.5707963 0 0" group="5" rgba="0 0 0 0"/>
                 </body>
@@ -389,7 +461,14 @@
   </worldbody>
 
   <!-- ==================== ACTUATORS (6 Leg DOFs + 4 STS3215 Head DOFs + 2 GIM4305-10 Wheels + 2 Antenna Servos) ==================== -->
+
+  <contact>
+    <exclude body1="head_pitch_to_yaw" body2="head_assembly"/>
+    <exclude body1="neck_pitch_assembly" body2="head_assembly"/>
+  </contact>
+
   <actuator>
+
     <!-- Left Leg 3 Upper Joints (hip roll GIM4305-10, hip pitch / knee per profile) -->
     <position name="left_hip_roll" joint="left_hip_roll" class="gim4305"/>
     <position name="left_hip_pitch" joint="left_hip_pitch" class="gim6010"/>
@@ -416,7 +495,9 @@
   </actuator>
 
   <!-- ==================== SENSORS (Exact open_duck_mini_v2 `sensors.xml` Suite + Wheel Odometry) ==================== -->
+
   <sensor>
+
     <!-- IMU Sensors from Open Duck Mini v2 `xmls/sensors.xml` -->
     <gyro site="imu" name="gyro"/>
     <velocimeter site="imu" name="local_linvel"/>
@@ -448,14 +529,14 @@
   </sensor>
 
   <!-- ==================== KEYFRAMES (1.35x Scaled Balanced Crouch Posture) ==================== -->
+
   <keyframe>
+
     <!--
       With 0.118 m thigh & shin links at hip_pitch = +0.50 rad, knee = -1.00 rad (knees bend backward),
       vertical leg drop = 2 * 0.118 * cos(0.50) = 0.2071 m; plus hip offset (0.074 m) and wheel radius (0.075 m)
       -> base z = 0.3561 m places the 75 mm wheels tangent to the z = 0 floor.
     -->
-    <key name="home_balanced"
-         qpos="0 0 0.3701 1 0 0 0 0.15 -0.15 0 0 0 0 0 0.50 -1.00 0 0 0.50 -1.00 0"
-         ctrl="0 0.50 -1.00 0 0.50 -1.00 0.15 -0.15 0 0 0 0 0 0"/>
+    <key name="home_balanced" qpos="0 0 0.3701 1 0 0 0 0.15 -0.15 0 0 0 0 0 0.50 -1.00 0 0 0.50 -1.00 0" ctrl="0 0.50 -1.00 0 0.50 -1.00 0.15 -0.15 0 0 0 0 0 0"/>
   </keyframe>
 </mujoco>

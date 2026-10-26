@@ -1,0 +1,1069 @@
+{
+ "trunk_tub": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.98,
+   0.85,
+   0.3
+  ],
+  "transparency": 65
+ },
+ "trunk_cover": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.98,
+   0.85,
+   0.3
+  ],
+  "transparency": 65
+ },
+ "trunk_lid": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.98,
+   0.85,
+   0.3
+  ],
+  "transparency": 65
+ },
+ "pi_deck_frame": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "electronics_shelf": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "battery_6s2p_cells": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.2,
+   0.42,
+   0.85
+  ],
+  "transparency": 0
+ },
+ "battery_6s2p_wrap": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.15,
+   0.15,
+   0.6
+  ],
+  "transparency": 70
+ },
+ "bms_6s_100a": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "main_fuse_40a": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "antispark_switch_120a": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "buck_7v4_10a_servos": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "buck_5v1_5a_pi": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "buck_5v_5a_peripherals": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "estop_22mm": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.8,
+   0.15,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "charge_port_gx16": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "power",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "fan_40x10_5v": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.12,
+   0.12,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "raspberry_pi_5": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "pi_active_cooler": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "hat_standoffs_16mm": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "ai_hat_plus_26tops": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "teensy_carrier_pcb": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "teensy_40": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.12,
+   0.12,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "can_transceivers": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "teensy_terminals": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "imu_icm42688p": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.5,
+   0.1,
+   0.5
+  ],
+  "transparency": 0
+ },
+ "bus_servo_adapter": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.1,
+   0.25,
+   0.55
+  ],
+  "transparency": 0
+ },
+ "max98357a_i2s_amp": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.2,
+   0.2,
+   0.5
+  ],
+  "transparency": 0
+ },
+ "speaker_40mm_3w": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.12,
+   0.12,
+   0.12
+  ],
+  "transparency": 0
+ },
+ "usb_nav_cam": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "L_hip_mount": {
+  "body": "hip_roll_assembly",
+  "part": "L_HipMount",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_hip_roll_gim4305": {
+  "body": "hip_roll_assembly",
+  "part": "L_HipMount",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "L_hip_roll_end_cap": {
+  "body": "hip_roll_assembly",
+  "part": "L_HipMount",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_harness_grommet": {
+  "body": "hip_roll_assembly",
+  "part": "L_HipMount",
+  "tag": "cable",
+  "rgb": [
+   0.07,
+   0.07,
+   0.07
+  ],
+  "transparency": 0
+ },
+ "L_harness_body": {
+  "body": "hip_roll_assembly",
+  "part": "L_HipMount",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "L_hip_roll_yoke": {
+  "body": "left_roll_to_pitch_assembly",
+  "part": "L_HipRoll",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_harness_yoke": {
+  "body": "left_roll_to_pitch_assembly",
+  "part": "L_HipRoll",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "L_hip_pitch_gim6010": {
+  "body": "left_roll_to_pitch_assembly",
+  "part": "L_HipRoll",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "L_thigh_outer": {
+  "body": "knee_and_ankle_assembly",
+  "part": "L_Thigh",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_thigh_inner": {
+  "body": "knee_and_ankle_assembly",
+  "part": "L_Thigh",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_hip_clamp_ring": {
+  "body": "knee_and_ankle_assembly",
+  "part": "L_Thigh",
+  "tag": "metal",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "L_harness_thigh": {
+  "body": "knee_and_ankle_assembly",
+  "part": "L_Thigh",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "L_knee_gim6010": {
+  "body": "knee_and_ankle_assembly",
+  "part": "L_Thigh",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "L_shin": {
+  "body": "knee_and_ankle_assembly_2",
+  "part": "L_Shin",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_harness_shin": {
+  "body": "knee_and_ankle_assembly_2",
+  "part": "L_Shin",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "L_wheel_gim4305": {
+  "body": "knee_and_ankle_assembly_2",
+  "part": "L_Shin",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "L_wheel_end_cap": {
+  "body": "knee_and_ankle_assembly_2",
+  "part": "L_Shin",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_wheel_hub": {
+  "body": "foot_assembly",
+  "part": "L_Wheel",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "L_tire_vytaflex40": {
+  "body": "foot_assembly",
+  "part": "L_Wheel",
+  "tag": "tire",
+  "rgb": [
+   0.07,
+   0.07,
+   0.07
+  ],
+  "transparency": 0
+ },
+ "R_hip_mount": {
+  "body": "hip_roll_assembly_2",
+  "part": "R_HipMount",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_hip_roll_gim4305": {
+  "body": "hip_roll_assembly_2",
+  "part": "R_HipMount",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "R_hip_roll_end_cap": {
+  "body": "hip_roll_assembly_2",
+  "part": "R_HipMount",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_harness_grommet": {
+  "body": "hip_roll_assembly_2",
+  "part": "R_HipMount",
+  "tag": "cable",
+  "rgb": [
+   0.07,
+   0.07,
+   0.07
+  ],
+  "transparency": 0
+ },
+ "R_harness_body": {
+  "body": "hip_roll_assembly_2",
+  "part": "R_HipMount",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "R_hip_roll_yoke": {
+  "body": "right_roll_to_pitch_assembly",
+  "part": "R_HipRoll",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_harness_yoke": {
+  "body": "right_roll_to_pitch_assembly",
+  "part": "R_HipRoll",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "R_hip_pitch_gim6010": {
+  "body": "right_roll_to_pitch_assembly",
+  "part": "R_HipRoll",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "R_thigh_outer": {
+  "body": "knee_and_ankle_assembly_3",
+  "part": "R_Thigh",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_thigh_inner": {
+  "body": "knee_and_ankle_assembly_3",
+  "part": "R_Thigh",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_hip_clamp_ring": {
+  "body": "knee_and_ankle_assembly_3",
+  "part": "R_Thigh",
+  "tag": "metal",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "R_harness_thigh": {
+  "body": "knee_and_ankle_assembly_3",
+  "part": "R_Thigh",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "R_knee_gim6010": {
+  "body": "knee_and_ankle_assembly_3",
+  "part": "R_Thigh",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "R_shin": {
+  "body": "knee_and_ankle_assembly_4",
+  "part": "R_Shin",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_harness_shin": {
+  "body": "knee_and_ankle_assembly_4",
+  "part": "R_Shin",
+  "tag": "cable",
+  "rgb": [
+   0.13,
+   0.13,
+   0.14
+  ],
+  "transparency": 0
+ },
+ "R_wheel_gim4305": {
+  "body": "knee_and_ankle_assembly_4",
+  "part": "R_Shin",
+  "tag": "motor",
+  "rgb": [
+   0.22,
+   0.23,
+   0.26
+  ],
+  "transparency": 0
+ },
+ "R_wheel_end_cap": {
+  "body": "knee_and_ankle_assembly_4",
+  "part": "R_Shin",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_wheel_hub": {
+  "body": "foot_assembly_2",
+  "part": "R_Wheel",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "R_tire_vytaflex40": {
+  "body": "foot_assembly_2",
+  "part": "R_Wheel",
+  "tag": "tire",
+  "rgb": [
+   0.07,
+   0.07,
+   0.07
+  ],
+  "transparency": 0
+ },
+ "neck_servo_pocket": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "neck_left_sheet": {
+  "body": "neck_pitch_assembly",
+  "part": "NeckPitch",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "neck_right_sheet": {
+  "body": "neck_pitch_assembly",
+  "part": "NeckPitch",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "head_pitch_to_yaw001": {
+  "body": "head_pitch_to_yaw",
+  "part": "HeadPitch",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "head_yaw_to_roll": {
+  "body": "neck_yaw_assembly",
+  "part": "HeadYaw",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "head_bot_sheet": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "head_roll_mount": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "head_roll_bearing": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "bearing",
+  "rgb": [
+   0.75,
+   0.75,
+   0.78
+  ],
+  "transparency": 0
+ },
+ "L_antenna_sg90": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "R_antenna_sg90": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "L_antenna": {
+  "body": "left_antenna",
+  "part": "L_Antenna",
+  "tag": "printed",
+  "rgb": [
+   0.95,
+   0.75,
+   0.1
+  ],
+  "transparency": 0
+ },
+ "left_antenna_holder": {
+  "body": "left_antenna",
+  "part": "L_Antenna",
+  "tag": "printed",
+  "rgb": [
+   0.95,
+   0.75,
+   0.1
+  ],
+  "transparency": 0
+ },
+ "right_antenna_holder": {
+  "body": "right_antenna",
+  "part": "R_Antenna",
+  "tag": "printed",
+  "rgb": [
+   0.95,
+   0.75,
+   0.1
+  ],
+  "transparency": 0
+ },
+ "R_antenna": {
+  "body": "right_antenna",
+  "part": "R_Antenna",
+  "tag": "printed",
+  "rgb": [
+   0.95,
+   0.75,
+   0.1
+  ],
+  "transparency": 0
+ },
+ "sts3215_neck_pitch": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "sts3215_head_pitch": {
+  "body": "neck_pitch_assembly",
+  "part": "NeckPitch",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "sts3215_head_yaw": {
+  "body": "neck_yaw_assembly",
+  "part": "HeadYaw",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "sts3215_head_roll": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "servo",
+  "rgb": [
+   0.1,
+   0.12,
+   0.18
+  ],
+  "transparency": 0
+ },
+ "head_shell": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   0.98,
+   0.85,
+   0.3
+  ],
+  "transparency": 60
+ },
+ "projector_pod": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "projector_reflector": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
+ "projector_led_1w": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.95,
+   0.95,
+   0.7
+  ],
+  "transparency": 0
+ },
+ "L_eye_cam_module3": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "L_eye_led_ring": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "transparency": 0
+ },
+ "L_eye_diffuser": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   1,
+   1,
+   1
+  ],
+  "transparency": 50
+ },
+ "R_eye_cam_module3": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "R_eye_led_ring": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.9,
+   0.9,
+   0.9
+  ],
+  "transparency": 0
+ },
+ "R_eye_diffuser": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "printed",
+  "rgb": [
+   1,
+   1,
+   1
+  ],
+  "transparency": 50
+ },
+ "microphone_inmp441": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ },
+ "projector_mosfet": {
+  "body": "head_assembly",
+  "part": "Head",
+  "tag": "electronics",
+  "rgb": [
+   0.05,
+   0.45,
+   0.2
+  ],
+  "transparency": 0
+ }
+}

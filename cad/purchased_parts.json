@@ -1,5 +1,5 @@
 {
-  "_about": "Real dimensions of purchased parts for CAD (mm, g). 'confidence': drawing = official mechanical drawing, step = measured from the vendor STEP with FreeCAD, datasheet = manufacturer spec, listing = retailer listing, estimate = not yet sourced. 'model_check' compares an MJCF geom's full dimensions against the real envelope (tools/check_cad_clearances.py). Vendor files: tools/fetch_vendor_cad.sh.",
+  "_about": "Real dimensions of purchased parts for CAD (mm, g). 'confidence': drawing = official mechanical drawing, step = measured from the vendor STEP with FreeCAD, datasheet = manufacturer spec, listing = retailer listing, estimate = not yet sourced. Vendor files: tools/fetch_vendor_cad.sh.",
   "parts": [
     {
       "id": "gim6010_8",
@@ -26,15 +26,7 @@
         "https://cdn.shopify.com/s/files/1/0673/6848/5000/files/6010-8_Output_Shaft_Mounting_Dimensions_Drawing.pdf",
         "https://sdalal1.github.io/assets/pdf/SteadyWin_GIM6010-8_Manual_rev1.pdf"
       ],
-      "verify": "Radial protrusion (Ø86.6 bbox), connector exit direction, which face your driver variant puts the connector on.",
-      "model_check": {
-        "geom": "left_hip_pitch_gim6010",
-        "shape": "cylinder",
-        "dims_mm": [
-          80,
-          44
-        ]
-      }
+      "verify": "Radial protrusion (Ø86.6 bbox), connector exit direction, which face your driver variant puts the connector on."
     },
     {
       "id": "gim4305_10",
@@ -58,15 +50,7 @@
         "https://cdn.shopify.com/s/files/1/0673/6848/5000/files/SteadyWin_GIM4305_10.step",
         "https://aifitlab.com/products/steadywin-gim4305-planetary-reducer-servo-motor"
       ],
-      "verify": "Axial/radial load limits with SteadyWin (the wheel motors carry the robot's weight and landing loads radially, and side loads axially).",
-      "model_check": {
-        "geom": "left_hip_roll_gim4305",
-        "shape": "cylinder",
-        "dims_mm": [
-          53,
-          33
-        ]
-      }
+      "verify": "Axial/radial load limits with SteadyWin (the wheel motors carry the robot's weight and landing loads radially, and side loads axially)."
     },
     {
       "id": "sts3215",
@@ -106,16 +90,7 @@
       "sources": [
         "https://protosupplies.com/product/servo-motor-micro-mg90s/"
       ],
-      "verify": "Tab hole spacing and horn height on the part you buy. The model assumes 9 g (SG90); MG90S adds 4.4 g per side in the head.",
-      "model_check": {
-        "geom": "left_antenna_servo_9g",
-        "shape": "box",
-        "dims_mm": [
-          22.8,
-          12.2,
-          28.5
-        ]
-      }
+      "verify": "Tab hole spacing and horn height on the part you buy. The model assumes 9 g (SG90); MG90S adds 4.4 g per side in the head."
     },
     {
       "id": "battery_6s2p",
@@ -133,16 +108,7 @@
       "sources": [
         "https://18650batterystore.com/products/molicel-p45b"
       ],
-      "verify": "Final pack envelope from the builder / your layout.",
-      "model_check": {
-        "geom": "battery_pack_6s",
-        "shape": "box",
-        "dims_mm": [
-          73,
-          89,
-          68
-        ]
-      }
+      "verify": "Final pack envelope from the builder / your layout."
     },
     {
       "id": "raspberry_pi_5",
@@ -161,16 +127,7 @@
         "https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-mechanical-drawing.pdf",
         "https://www.step.parts/step/raspberry_pi_5.step"
       ],
-      "verify": "Leave room for USB/Ethernet plugs and the cooler's fan inlet.",
-      "model_check": {
-        "geom": "raspberry_pi_5",
-        "shape": "box",
-        "dims_mm": [
-          85,
-          56,
-          16
-        ]
-      }
+      "verify": "Leave room for USB/Ethernet plugs and the cooler's fan inlet."
     },
     {
       "id": "ai_hat_plus_26",
@@ -187,16 +144,7 @@
       "confidence": "datasheet",
       "sources": [
         "https://core-electronics.com.au/raspberry-pi-ai-hat-26-tops-for-raspberry-pi-5.html"
-      ],
-      "model_check": {
-        "geom": "ai_hat_plus_26tops",
-        "shape": "box",
-        "dims_mm": [
-          65.1,
-          56.7,
-          5.5
-        ]
-      }
+      ]
     },
     {
       "id": "teensy_40",
@@ -233,16 +181,7 @@
       "sources": [
         "https://cdn.sparkfun.com/assets/c/b/3/a/1/Camera_Module_3_Product_Brief.pdf"
       ],
-      "verify": "Set the 70 mm baseline between lens axes, not PCB centres.",
-      "model_check": {
-        "geom": "left_rpi_cam3_pcb",
-        "shape": "box",
-        "dims_mm": [
-          11.3,
-          25,
-          23.9
-        ]
-      }
+      "verify": "Set the 70 mm baseline between lens axes, not PCB centres."
     },
     {
       "id": "ws2812b_ring_12",
@@ -292,16 +231,7 @@
       "confidence": "listing",
       "sources": [
         "https://www.adafruit.com/product/3006"
-      ],
-      "model_check": {
-        "geom": "max98357a_i2s_amp",
-        "shape": "box",
-        "dims_mm": [
-          18,
-          19,
-          3
-        ]
-      }
+      ]
     },
     {
       "id": "inmp441",

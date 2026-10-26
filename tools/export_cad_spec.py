@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Exports the CAD spec from an MJCF: every joint (anchor, axis, range, actuator), body frame, part placement (geoms),
-camera and light, in millimetres, plus the derived key dimensions CAD must hold (link lengths, track, scrub offset,
-crouch heights). Also renders cad/purchased_parts.md from cad/purchased_parts.json.
+Exports the CAD spec from an MJCF: every joint (anchor, axis, range, actuator), body frame, geom, camera and light, in
+millimetres, plus the derived key dimensions CAD must hold (link lengths, track, scrub offset, crouch heights). Also
+renders cad/purchased_parts.md from cad/purchased_parts.json.
 
 Frames: world at the `home_balanced` keyframe, floor at z = 0, x forward, y left, z up. "local" values are in the
-parent body's frame, as in the MJCF. The model is the source of truth: change it, re-run this, then update CAD.
+parent body's frame, as in the MJCF. The model is the source of truth for the leg joints (the CAD is built from this
+export); the shapes, masses, neck body positions, cameras, light and IMU come back from the CAD (export_sim.py).
 
 Writes cad/hardpoints.json, cad/hardpoints.md, cad/purchased_parts.md.
 Usage: python3 tools/export_cad_spec.py [--robot gim6010]
@@ -24,7 +25,7 @@ sys.path.insert(0, str(ROOT))
 import simulate_wheeled_duck as swd  # noqa: E402
 
 CAD = ROOT / "cad"
-GEOM_TYPES = {0: "plane", 2: "sphere", 3: "capsule", 5: "cylinder", 6: "box"}
+GEOM_TYPES = {0: "plane", 2: "sphere", 3: "capsule", 5: "cylinder", 6: "box", 7: "mesh"}
 JOINT_TYPES = {0: "free", 3: "hinge"}
 
 
@@ -37,8 +38,10 @@ def name(m, obj, i):
 
 
 def geom_dims(m, g):
-    """Full dimensions (mm): box x/y/z, cylinder/capsule [diameter, length], sphere [diameter]."""
+    """Full dimensions (mm): box x/y/z, cylinder/capsule [diameter, length], sphere [diameter], mesh: bounding box."""
     s, t = m.geom_size[g], m.geom_type[g]
+    if t == 7:
+        return mm(2 * m.geom_aabb[g, 3:])
     if t == 6:
         return mm(2 * s)
     if t in (3, 5):
@@ -189,12 +192,14 @@ def hardpoints_md(spec):
         L.append(f"| `{s['name']}` | site | `{s['body']}` | {fmt(s['pos_local_mm'])} | {fmt(s['pos_world_mm'])} | |")
     for i in spec["lights"]:
         L.append(f"| `{i['name']}` | light | `{i['body']}` | {fmt(i['pos_local_mm'])} | | dir {fmt(i['dir_local'])}, cutoff {i['cutoff_deg']}° |")
-    L += ["", "## Part placement (geoms)", "",
-          "Dims: box = x, y, z; cylinder / capsule = Ø, length (along the geom's local z); sphere = Ø. Position and "
-          "orientation are in the owning body's frame. Full data incl. world centres: `hardpoints.json`.", "",
+    L += ["", "## Part placement (primitive geoms)", "",
+          "The mesh geoms (every part's shape and the collision hulls) are exported from the FreeCAD assembly by "
+          "`cad/freecad/export_sim.py`; they are listed in `hardpoints.json` only. Dims: box = x, y, z; cylinder / "
+          "capsule = Ø, length (along the geom's local z); sphere = Ø. Position and orientation are in the owning "
+          "body's frame.", "",
           "| Geom | Body | Type | Dims (mm) | Position (local, mm) | Quat (local, wxyz) | Role |",
           "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |"]
-    for g in spec["geoms"]:
+    for g in (g for g in spec["geoms"] if g["type"] != "mesh"):
         L.append(f"| `{g['name']}` | `{g['body']}` | {g['type']} | {fmt(g['dims_mm'])} | {fmt(g['pos_local_mm'])} | "
                  f"{fmt(g['quat_local_wxyz'])} | {g['role']} |")
     return "\n".join(L) + "\n"
