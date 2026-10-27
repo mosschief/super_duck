@@ -10,6 +10,11 @@
 | `open_duck_wheeled_v2.xml` | **Baseline model (`--robot gim4305`, `3.87 kg`)**: Original all-GIM4305-10 leg/wheel configuration with a `6S1P` battery pack (also with fixed hip mounts) |
 | `simulate_wheeled_duck.py` | `500 Hz` full-state LQR wheel-balancing, measured leg-fold odometry compensation, online pitch-trim learner, quadratic posture feedforward, `C`-key jump state machine (with MIT-mode `kd` scheduling & airborne reaction-wheel attitude control), and `SimToReal` domain randomization (`--realism SEED --arch mcu|feather|pi --imu fast|bno055`) |
 | `test_scenarios.py` | Automated ground-truth benchmark suite: `stand_still`, `drive_turn_brake`, `brake_settle`, `crouch_stand`, `push` (`±20 N`, `±30 N`, `±40 N`), `jump`, `jump_driving`, and `thermal` (sustained RMS torque vs. continuous motor rating) |
+| `test_robustness.py` | Robustness suite (~90 scenarios, ~1.5 min on all cores, `--report` -> `reports/robustness.md`): slopes held and driven, ramps, door thresholds and curbs, uneven floor, low grip, turns at speed, battery sag (motor speed-torque curves at the pack voltage), e-stop at speed, CAN frame loss / driver timeouts / stale feedback, IMU mounting error / gyro drift / vibration, falls, a wall, drops, bad landings, a full head-range sweep, and a 20 min duty cycle (thermal, plus joint load cycles for fatigue -> `cad/fatigue_cycles.md`) |
+| `tools/sensitivity_sweep.py` | One-factor-at-a-time sweep of the sim-to-real factors on `crouch_stand` / `brake_settle` -> `reports/sensitivity.md` |
+| `tools/export_fea_loads.py` | The worst joint wrenches of the hard scenarios as vectors in each printed leg part's frame -> `cad/fea_loads.json` |
+| `tools/fea_printed_parts.py` | Linear static FEA of the printed leg parts under those loads (gmsh + scikit-fem, in `~/.venvs/fea`: `python3 -m venv ~/.venvs/fea && ~/.venvs/fea/bin/pip install gmsh scikit-fem pyamg meshio`; needs `cad/freecad/printed/` from a CAD build; ~1 h) -> `cad/fea_report.md` |
+| `tools/sysid.py` | Bench system identification (torque chirp log -> inertia, damping, Coulomb friction, gravity) to set the MJCF's motor parameters from the real robot; `selftest` checks it on synthetic logs from the sim |
 | `tools/upgrade_motor.py` | Upgrades specified leg joints in an MJCF from `gim4305` (`150 g`, `3.47 N·m`) to `gim6010` (`388 g`, `11 N·m` stall / `5 N·m` rated) with exact cylindrical inertia shifts |
 | `tools/battery_pack.py` | Configures trunk battery pack geometry and parallel-axis inertia (`6s1p` `~0.48 kg` `90 Wh` vs. `6s2p` `~0.90 kg` `180 Wh`) |
 | `tools/add_trunk_electronics.py` | Folds the `41 g` AI HAT+ (26 TOPS) and `8 g` Teensy 4.0 Dual-CAN + IMU (or Feather M4 CAN) into `trunk_assembly` |
@@ -177,6 +182,7 @@ python3 simulate_wheeled_duck.py --realism 3 --arch mcu --imu fast
 # 4. Run the full ground-truth scenario & thermal test suite (ideal + 12 randomized robots)
 python3 test_scenarios.py
 python3 test_scenarios.py --realism 12 --arch mcu --imu fast
+python3 test_robustness.py --report          # terrain, faults, impacts, endurance (reports/robustness.md)
 
 # 5. Run the battery & motor power budget analysis
 python3 tools/power_budget.py --battery-wh 180

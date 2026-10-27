@@ -73,8 +73,7 @@ four neck joints over the MJCF ranges (neck pitch −20…65°, head pitch ±45�
     also turned and rolled; straight ahead there is more room)
   - With the ODM-shaped body (top cover 18 mm above the neck axis, like the ODM's) this is tighter than with the old
     lid-topped box (−30° / +30° / +60°): the head's corners reach the cover rim at full yaw and roll.
-- **To do in the controller / sim:** clip head commands to this envelope (a coupled limit; MJCF joint ranges can't express
-  it), and enable head/trunk contact in the sim so violations show up.
+- **Done (2026-10-26):** the controller clips every head command to this envelope (`clip_neck_envelope` in `simulate_wheeled_duck.py`; the MJCF joint ranges can't express the coupled limit), and the sim has head / trunk contact on. `test_robustness.py -k head` sweeps the whole command range: no contacts.
 
 ## Joint structure (as modeled)
 
@@ -150,7 +149,6 @@ mounts. Orientation:
 
 ## Not done yet
 
-- Controller: clip head commands to the neck envelope above (TODO in `simulate_wheeled_duck.py`).
 - No far-side bearing supports at the hip roll / hip pitch / knee (open issue 2). At the hip pitch there's no room for one: the hip-roll motor's wrap is 3 mm inboard of the yoke plate on that axis. The thigh's 13 mm outer sheet carries the bending instead, which leaves 15–22 N·m on the GIM6010's own bearing at a landing peak: ask SteadyWin for its moment rating.
 - `design_loads.md` gives bending only at the joint anchors, and has no sideways wheel impacts, side falls, one-wheel landings, motor-stall case, cycle counts or temperatures.
 - Leg sweep: `sweep_legs.py` poses the left leg over its joint ranges and writes `leg_sweep_report.md`.

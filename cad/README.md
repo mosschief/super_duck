@@ -64,7 +64,7 @@ Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
 4. **Neck pitch reaches 5.4 N·m on landings**, above what the STS3215 can hold, so the neck hits its joint limit.
    Give it a real hard stop that isn't the servo.
 5. **Printed parts must clear the head and neck motion**: head roll ±26°, neck pitch −17°…+52°, head pitch and yaw
-   at their controller clips. The head hits the trunk outside the neck envelope (`freecad/neck_envelope.md`; the sim sees the same contacts, `clearance_report.md`): clip head commands to it.
+   at their controller clips. The head hits the trunk outside the neck envelope (`freecad/neck_envelope.md`; the sim sees the same contacts, `clearance_report.md`); the controller now clips head commands to it (`test_robustness.py -k head`: no contacts).
 6. **Closed (2026-10-16)**: the hip-yaw bracket no longer turns, so it needs no swept clearance under the trunk.
 7. **Space still to reserve**: the e-stop needs ~45 mm behind the rear panel; the speaker depth depends on the part
    (the model assumes 6 mm, with 0.5 mm to the battery). The bucks and the bus servo adapter are now placed in the

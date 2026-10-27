@@ -213,6 +213,7 @@ class ScaledWheeledDuckController:
         self.target_yaw = 0.0
         self.crouch_delta = 0.0       # Adjusts crouch depth while keeping wheels under hips
         self.head_yaw_offset = 0.0    # Manual head pan offset (rad)
+        self.head_pose = None         # (neck_pitch, head_pitch, head_yaw, head_roll) command, or None = auto gimbal
         self.antenna_cmd = 0.0        # Antenna servo target (rad, + = tips swung forward/upright), both sides
         self.projector_on = False
         self.nominal_hip_pitch = 0.50   # knees bend backward (bird-style)
@@ -243,6 +244,7 @@ class ScaledWheeledDuckController:
         self.target_yaw = 0.0
         self.crouch_delta = 0.0
         self.head_yaw_offset = 0.0
+        self.head_pose = None
         self.antenna_cmd = 0.0
         self.pitch_trim = self.profile.initial_pitch_trim
         self.jump_phase = "idle"
@@ -443,15 +445,17 @@ class ScaledWheeledDuckController:
         knee_cmd = self.nominal_knee_pitch - 2.0 * leg_delta
         self.commanded_leg_fold = hip_pitch_cmd + knee_cmd
 
-        # 4. Horizon-Stabilized Stereo Camera Gimbal (Looks into turns + manual pan)
-        # TODO: the head hits the trunk at same-direction pitch extremes (cad/freecad/neck_envelope.md). Clip to the
-        # coupled CAD envelope, which the MJCF joint ranges can't express:
-        #   neck_pitch + head_pitch >= -15 deg,  head_pitch <= +15 deg,  neck_pitch + head_pitch <= +65 deg
-        # and enable head/trunk contact in the sim so violations show up.
-        neck_pitch_cmd = np.clip(0.15 - 0.5 * pitch, -0.30, 0.90)
-        head_pitch_cmd = np.clip(-0.15 - 0.5 * pitch, -0.70, 0.70)
-        head_yaw_cmd = np.clip(-0.6 * yaw_err + self.head_yaw_offset, -1.5, 1.5)
-        head_roll_cmd = np.clip(-roll, -0.45, 0.45)
+        # 4. Horizon-Stabilized Stereo Camera Gimbal (Looks into turns + manual pan), or a commanded head pose
+        if self.head_pose is not None:
+            neck_pitch_cmd, head_pitch_cmd, head_yaw_cmd, head_roll_cmd = self.head_pose
+        else:
+            neck_pitch_cmd = 0.15 - 0.5 * pitch
+            head_pitch_cmd = -0.15 - 0.5 * pitch
+            head_yaw_cmd = -0.6 * yaw_err + self.head_yaw_offset
+            head_roll_cmd = -roll
+        neck_pitch_cmd, head_pitch_cmd = self.clip_neck_envelope(neck_pitch_cmd, head_pitch_cmd)
+        head_yaw_cmd = float(np.clip(head_yaw_cmd, -1.5, 1.5))
+        head_roll_cmd = float(np.clip(head_roll_cmd, -0.45, 0.45))
 
         ctrl = np.array([
             # Left leg (hip roll, hip pitch, knee)
@@ -489,6 +493,22 @@ class ScaledWheeledDuckController:
             "jump_phase": self.jump_phase,
         }
         return ctrl, telemetry
+
+    # Neck envelope (cad/freecad/neck_envelope.md, the CAD's clash-free region for any head yaw / roll): the head
+    # hits the trunk when both pitch joints go to their extremes in the same direction. MJCF joint ranges can't
+    # express this coupled limit, so every head command goes through `clip_neck_envelope`.
+    NECK_RANGE = (-0.30, 0.90)               # neck_pitch command range (rad)
+    HEAD_PITCH_RANGE = (-0.70, math.radians(15.0))
+    NECK_SUM_RANGE = (math.radians(-15.0), math.radians(65.0))   # neck_pitch + head_pitch
+
+    def clip_neck_envelope(self, neck: float, head: float) -> Tuple[float, float]:
+        """Clips (neck_pitch, head_pitch) into the clash-free envelope. The head pitch gives way first (it keeps the
+        neck's gaze lift), then the neck."""
+        neck = float(np.clip(neck, *self.NECK_RANGE))
+        lo, hi = self.NECK_SUM_RANGE
+        head = float(np.clip(head, max(self.HEAD_PITCH_RANGE[0], lo - neck), min(self.HEAD_PITCH_RANGE[1], hi - neck)))
+        neck = float(np.clip(neck, lo - head, hi - head))
+        return neck, head
 
     def posture_trim(self, fold: float) -> float:
         """Change in balance lean (rad) vs. zero leg fold, from the profile's fit (see `RobotProfile`).

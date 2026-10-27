@@ -34,19 +34,33 @@ REALISM_CFG = swd.RealismConfig()
 make_controller = lambda model: swd.ScaledWheeledDuckController(PROFILE)
 
 
-def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None):
+def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None, spec_edit=None, init=None,
+        faults=None, hook=None, fallen=None):
     """Simulates one scenario. events: [(t, key)], pushes: [(t, Fx newtons)] applied 0.1 s to the base.
     If `torques` is a list, each step's [time, actuator forces (nu), actuator velocities (nu)] row is appended.
+
+    Hooks (test_robustness.py): `spec_edit(spec)` edits the MjSpec before compiling (terrain, obstacles);
+    `init(model, data)` sets the start state after the keyframe; `faults(realism)` returns an object with the
+    SimToReal `sense` / `actuate` interface that wraps the (optional) realism layer; `hook(model, data, ctl)` runs
+    before every control tick; `fallen(model, data)` replaces the base-height fall test.
 
     Returns (log, fell, realism) where log rows are
     [t, x, y, z, v_fwd, pitch_deg, yaw_deg, wheel_clearance, wheel_saturated].
     """
-    model = mujoco.MjModel.from_xml_path(XML)
+    if spec_edit is None:
+        model = mujoco.MjModel.from_xml_path(XML)
+    else:
+        spec = mujoco.MjSpec.from_file(XML)
+        spec_edit(spec)
+        model = spec.compile()
     realism = swd.SimToReal(model, REALISM_CFG, seed=realism_seed) if realism_seed is not None else None
     data = mujoco.MjData(model)
     mujoco.mj_resetDataKeyframe(model, data, 0)
+    if init is not None:
+        init(model, data)
     mujoco.mj_forward(model, data)
     ctl = make_controller(model)
+    layer = faults(realism) if faults is not None else realism
     base = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "base")
     wheels = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, n) for n in ("foot_assembly", "foot_assembly_2")]
     events = sorted(events)
@@ -60,7 +74,9 @@ def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None):
             for t_push, force in pushes:
                 if t_push <= data.time < t_push + 0.1:
                     data.xfrc_applied[base, 0] = force
-            info = swd.step_robot(model, data, ctl, realism)
+            if hook is not None:
+                hook(model, data, ctl)
+            info = swd.step_robot(model, data, ctl, layer)
             if torques is not None:
                 torques.append(np.concatenate(([data.time], data.actuator_force, data.actuator_velocity)))
 
@@ -70,7 +86,7 @@ def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None):
             saturated = max(abs(info["tau_left"]), abs(info["tau_right"])) > 0.98 * ctl.params.max_wheel_torque
             log.append((data.time, data.qpos[0], data.qpos[1], data.qpos[2], v_fwd, math.degrees(pitch),
                         math.degrees(yaw), clearance, saturated))
-            if data.qpos[2] < FALLEN_BASE_Z:
+            if (fallen(model, data) if fallen is not None else data.qpos[2] < FALLEN_BASE_Z):
                 return np.array(log), True, realism
     return np.array(log), False, realism
 
