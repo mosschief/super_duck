@@ -22,27 +22,27 @@ Exported to `printed/<name>.step` in the part's body frame. Mass at 100% infill,
 
 | Part | Body | Volume (cm³) | Mass @100% (g) |
 | :--- | :--- | ---: | ---: |
-| `trunk_tub` | `trunk_assembly` | 420.5 | 534 |
-| `trunk_cover` | `trunk_assembly` | 148.4 | 188 |
+| `trunk_tub` | `trunk_assembly` | 429.8 | 546 |
+| `trunk_cover` | `trunk_assembly` | 149.8 | 190 |
 | `trunk_lid` | `trunk_assembly` | 52.7 | 67 |
 | `pi_deck_frame` | `trunk_assembly` | 7.8 | 10 |
 | `electronics_shelf` | `trunk_assembly` | 11.4 | 14 |
-| `L_hip_mount` | `hip_roll_assembly` | 116.2 | 148 |
+| `L_hip_mount` | `hip_roll_assembly` | 140.0 | 178 |
 | `L_hip_roll_end_cap` | `hip_roll_assembly` | 5.0 | 6 |
-| `L_hip_roll_yoke` | `left_roll_to_pitch_assembly` | 80.1 | 102 |
+| `L_hip_roll_yoke` | `left_roll_to_pitch_assembly` | 99.8 | 127 |
 | `L_thigh_outer` | `knee_and_ankle_assembly` | 146.9 | 187 |
 | `L_thigh_inner` | `knee_and_ankle_assembly` | 82.0 | 104 |
-| `L_shin` | `knee_and_ankle_assembly_2` | 107.9 | 137 |
+| `L_shin` | `knee_and_ankle_assembly_2` | 141.5 | 180 |
 | `L_wheel_end_cap` | `knee_and_ankle_assembly_2` | 3.1 | 4 |
-| `L_wheel_hub` | `foot_assembly` | 122.9 | 156 |
-| `R_hip_mount` | `hip_roll_assembly_2` | 116.2 | 148 |
+| `L_wheel_hub` | `foot_assembly` | 122.1 | 155 |
+| `R_hip_mount` | `hip_roll_assembly_2` | 140.0 | 178 |
 | `R_hip_roll_end_cap` | `hip_roll_assembly_2` | 5.0 | 6 |
-| `R_hip_roll_yoke` | `right_roll_to_pitch_assembly` | 80.1 | 102 |
+| `R_hip_roll_yoke` | `right_roll_to_pitch_assembly` | 99.8 | 127 |
 | `R_thigh_outer` | `knee_and_ankle_assembly_3` | 146.9 | 187 |
 | `R_thigh_inner` | `knee_and_ankle_assembly_3` | 82.0 | 104 |
-| `R_shin` | `knee_and_ankle_assembly_4` | 107.9 | 137 |
+| `R_shin` | `knee_and_ankle_assembly_4` | 141.5 | 180 |
 | `R_wheel_end_cap` | `knee_and_ankle_assembly_4` | 3.1 | 4 |
-| `R_wheel_hub` | `foot_assembly_2` | 122.9 | 156 |
+| `R_wheel_hub` | `foot_assembly_2` | 122.1 | 155 |
 | `neck_servo_pocket` | `trunk_assembly` | 22.1 | 28 |
 | `neck_left_sheet` | `neck_pitch_assembly` | 8.1 | 10 |
 | `neck_right_sheet` | `neck_pitch_assembly` | 6.2 | 8 |

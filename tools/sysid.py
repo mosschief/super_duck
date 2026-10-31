@@ -61,6 +61,9 @@ def synthetic(joint, actuator, seconds=8.0, amp=0.6, noise=True, seed=0):
     spec.body("base").pos = [0, 0, 0.6]
     spec.delete(spec.key("home_balanced"))
     m = spec.compile()
+    # the robot touches nothing on the stand; with the base welded to the world MuJoCo no longer filters
+    # parent-child contacts, so the hip-mount / yoke collision hulls would rub
+    m.opt.disableflags |= mujoco.mjtDisableBit.mjDSBL_CONTACT
     d = mujoco.MjData(m)
     j = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, joint)
     a = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator)

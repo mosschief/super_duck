@@ -40,7 +40,7 @@ the joint angle, so you can pose a leg or the head by editing the rotation angle
 | Change | Why |
 | :--- | :--- |
 | **Charge port**: GX16-2 aviation socket on the tail end face (z −38), under the e-stop | Keyed, latching, and can't short like a barrel jack. Wire it to the BMS charge port (C−/P−) and pack +, before the anti-spark switch, so it charges with the robot off. Use a 25.2 V CC/CV charger at 3–4 A (GX16-2 contacts are rated ~5 A), with a 10 A fuse in the charge lead |
-| E-stop on the tail end face (y 0, z −8), its contact block reaching into the tail | Open issue 7 |
+| E-stop on the tail end face (y 0, z −8), its contact block reaching into the tail. A guard ring round it (Ø40 / Ø48, open at the bottom over the charge port), 2 mm prouder than the mushroom, printed with the shell (its top 4 mm is the cover's) | Open issue 7. In the sim a fall onto the tail put up to 1.1 kN through the bare button; the ring takes it now, and a palm still reaches the button through the 4 mm gap. The mushroom size is a guess (Ø32 × 20, not published): measure it and adjust the ring |
 | Teensy carrier (42 × 30) + ICM-42688-P on a shelf cantilevered off the rear bulkhead (z 34–37) | The sim boxes were outside / overlapping |
 | Amp on the rear bulkhead; fuse, anti-spark switch and peripheral buck on a shelf in the tail (z −60); BMS on edge across the bay just ahead of the pack (x 12…20); speaker under a grille on the tail's top face | The ODM body's bottom chamfers took the floor corners they used |
 | **Ventilation**: rounded 4 mm slots. Low inlet through the floor down the middle of the underside, between the hip-mount shelves and under the servo buck (4 slots, x 20…68, y ±12, about 7.5 cm²); exhaust high on both side walls beside the Pi, under the lid (x −40…8, z 22…46, 9 a side, about 17 cm²); a 40 × 10 mm fan on the rear bulkhead's tail face (y −38, z 6, Ø38 bore, 4x M3 on 32 mm) blowing out of the tail's tapered sides (6 slots a side, about 12 cm²). The intake slots first put low on the side walls were moved to the underside (user choice) | ~10 W typical / ~20 W peak inside (Pi 5, AI HAT+, bucks); sealed, the air inside would reach ~45–50 °C at peak. It breathes by convection with the fan off |
@@ -77,17 +77,22 @@ four neck joints over the MJCF ranges (neck pitch −20…65°, head pitch ±45�
 
 ## Joint structure (as modeled)
 
-- **Hip mount** (fixed): shelf under the body floor (3x M4 into heat inserts, counterbored), its top face flush on the
-  floor; a web hugging the bottom chamfer 0.5 mm off the skin; a rib out to the GIM4305 rear-face plate (7 mm; 6x M2.5
-  on Ø47.5, Ø41 boss hole: use M2.5 × 10, since more than 3 mm of thread engagement damages the motor). Between the
-  body and the end cap the rib and plate are one block down to the plate's bottom, ramped at its outboard end, so the
-  hip-pitch reaction twists a closed section instead of an open cross (R4 fillet in the plate/rib corner beyond it).
+- **Hip mount** (fixed): shelf under the body floor (3x M4 into heat inserts at x −50, 0, 55, counterbored; the front
+  one moved in from x 58, where its counterbore broke through the shelf's end), its top face flush on the floor; a web hugging the bottom chamfer 0.5 mm off the skin; a rib out to the GIM4305 rear-face plate (7 mm; 6x M2.5
+  on Ø47.5, Ø41 boss hole: use M2.5 × 10, since more than 3 mm of thread engagement damages the motor). From the
+  body out to the roll axis the rib and plate are one block: the plate's outline extruded back to the rib's rear face
+  (above the rib only to y 96 and z −55, clear of the harness and the end cap's cable drop; past the roll axis only
+  10 mm deep, clear of the yoke's motor lead at −25° roll), bored Ø56 for the end cap
+  and the motor's rear screws. The hip-pitch reaction twists a closed section instead of an open cross; the old block
+  stopped at y 78 and the bare cross beyond it broke first in a drop (`../fea_report.md`).
   The plate's outboard end is round, R 29.5 about the roll axis, and its top edge runs into that round through an R 10
   bend, so the hip-pitch motor cover clears it at ±25° roll.
 - **Hip casing (hip-roll yoke)**: GIM4305 output (3x M3 on Ø27, round Ø66 plate) → GIM6010 hip-pitch housing inboard
   face (8x M3 on Ø74, Ø60 cover clearance). A slotted Ø88 can encloses the hip-pitch housing and a slotted Ø66 wrap
-  turns with the roll output around the GIM4305 (2.5 mm radial clearance). Top and bottom walls 1 mm clear of the Ø60
-  bore, 3 mm gussets where they meet the motor plates. The 3x M3 into the GIM4305 output carry ~10–13 N·m of bending
+  turns with the roll output around the GIM4305 (2.5 mm radial clearance). GIM4305 output plate 9 mm. Top and bottom walls
+  6 mm, 1 mm clear of the Ø60 bore and out flush with the hip-pitch plate's back edge (outer corners r 43–45 off the
+  hip-pitch axis, inside the thigh's R47 scallop), 5 mm gussets where they meet the motor plates. The output screws
+  are 3 mm longer than on a 6 mm plate. The 3x M3 into the GIM4305 output carry ~10–13 N·m of bending
   at a landing: steel washers, threadlocker, and torque them to ~1 N·m (≥ 350 N preload each).
 - **Thigh**: twin sheets, one outline (hull of R32 at the hip, R46 at the knee, 2 mm edge fillets). The wheel is 74 mm
   inboard of the outer sheet and the hip-pitch motor has no far-side bearing, so from the hip to the walls the outer
@@ -99,13 +104,15 @@ four neck joints over the MJCF ranges (neck pitch −20…65°, head pitch ±45�
   clips up) and the inner tray (inner sheet, walls, the slotted Ø88 knee can and the ring the housing bolts to, on
   its inner sheet). The knee-housing screws clamp them together; 4x M3 × 14 socket heads into heat inserts in wall
   bosses join them along the length.
-- **Shin**: one outline (R28 knee, R32 wheel). The outer sheet (6 mm) on the knee output, the inner sheet (6 mm) on the
+- **Shin**: outline R28 at the knee, R32 at the wheel; the outer sheet alone is R40 at the knee, so its 14 mm edges
+  run on down outside the tyre circle as flanges (it was a bare 6 mm sheet between the tyre circle and the scallop).
+  The outer sheet (6 mm) on the knee output, the inner sheet (6 mm) on the
   wheel GIM4305 rear face, scalloped R54 (tapered into the outer sheet) so it clears the thigh at ±90° knee. The gap between them
   is filled, so below the scallop the shin is one 15.5 mm slab, pocketed Ø57 for the wheel motor. From the knee down,
   wherever it clears the tyre by 3.5 mm, the outer sheet is 14 mm (y −36…−22); the knee-output screws (M3 × 14) sit
   in counterbores in it.
 - **Wheel**: hub web on the GIM4305 output (3x M3 with washers: the drive torque reverses), Ø138 rim with 12 Ø3 tread
-  key holes and grooves, VytaFlex tread (`../tires.md`).
+  key holes and 3 grooves 1.5 mm deep that open into them (at 1 mm they only touched the holes, an edge no mesher takes), VytaFlex tread (`../tires.md`).
 
 ## Strength (FEM)
 

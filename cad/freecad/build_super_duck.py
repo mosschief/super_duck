@@ -265,6 +265,14 @@ shell = body_out.cut(body_in)
 top_open = box(-49.1, 65.9, -28.75, 28.75, 60, 100)               # opening round the neck
 top_open = dp.round_corners(top_open, [((x, y, None), 6) for x in (-49.1, 65.9) for y in (-28.75, 28.75)])
 shell = shell.cut(top_open)       # closed sides: the ODM's leg openings aren't needed, our hip motors are outside
+# E-stop guard: a ring round the mushroom, 2 mm prouder than it, so a fall onto the tail lands on the ring (the sim
+# put up to 1.1 kN through the bare button). 4 mm clear of the head all round, so a palm still reaches it; open at
+# the bottom, clear of the charge port's cap. The tail end face is only 34 mm wide, so the ring sits on the tapered
+# tail sides. Its top crosses the split: that bit is the cover's.
+ESTOP_C = V(-142.25, 0, -8)
+estop_guard = tube(48, 40, 34, (-130.25, 0, ESTOP_C.z), (-1, 0, 0)).cut(
+    [box(-170, -120, -12, 12, -60, ESTOP_C.z - 12), body_in])
+shell = fuse([shell, estop_guard])
 
 
 def vent_slot(w, z0, z1, depth=12):
@@ -349,7 +357,8 @@ tub = fuse([tub] + [a.common(fill_in) if i > 2 else a for i, a in enumerate(adds
 # holes through the walls are teardrops (45 deg roof, flat top), so they print upright without support
 cuts = [dp.teardrop(22.5, 10, (-146, 0, -8), (1, 0, 0)), dp.teardrop(16.2, 10, (-146, 0, -38), (1, 0, 0)),  # e-stop,
         dp.teardrop(40, 10, (-78, 0, -25), (1, 0, 0))]                     # charge port, rear bulkhead cable hole
-for x in (-50, 0, 58):                        # hip-mount shelf: M4 heat inserts, blind, from below
+HM_BOLTS_X = (-50, 0, 55)   # hip-mount shelf bolts (y ±30); the front one's counterbore stays 3 mm inside the shelf's end
+for x in HM_BOLTS_X:                          # hip-mount shelf: M4 heat inserts, blind, from below
     for s in (1, -1):
         cuts.append(cyl(5.6, 6.5, (x, s * 30, BODY_BOT - 0.1)))
 for x, y in LID_SCREWS:                       # lid screws into the bulkhead bosses
@@ -481,16 +490,22 @@ for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assem
     PZ = AZ - 29.5                                                  # plate bottom, flush with the rounded end
     MB = BODY_BOT - 6                                               # underside of the shelf
     PT = -17.5                                                      # plate's rear face (7 mm plate)
-    # The hip-pitch reaction twists the rib about y, so between the body and the end cap (y 44..78) the rib and
-    # the plate are one solid block down to the plate's bottom, ramped up to the rib at its outboard end: a closed
-    # section (walls + infill when printed) in place of the open cross, ~11x the twist stiffness.
+    # The hip-pitch reaction twists the rib about y, so from the body out to the roll axis the rib and the plate
+    # are one solid block: the plate's outline extruded back to the rib's rear face (above the rib only to y 96 and
+    # z -55, clear of the harness and the end cap's cable drop; beyond the roll axis only 10 mm deep, as the yoke's
+    # motor lead swings past behind it at -25 deg roll): a closed section (walls + infill when printed). The end-cap seat is
+    # bored through it (Ø56), so the end cap and the motor's rear screws are as reachable as before.
+    # A drop used to break the open cross where a shorter block stopped at y 78 (FEA: safety factor 1.0).
     hm = fuse([box(-58, 62, 14, 63.25, MB, -40),                             # shelf + web under the chamfer
                box(PT, -10.5, 44, AY - 22, PZ, -50), box(PT, -10.5, 44, AY, PZ, AZ),   # GIM4305 plate
                dp.rounded_plate_yz([(AY - 22, -60, 10), (AY, AZ, 29.5)], PT, -10.5),     # top rounds into the end
+               fuse([box(-35, PT, 44, AY - 22, PZ, -50),                     # block behind it: the plate's outline
+                     dp.rounded_plate_yz([(AY - 22, -60, 10), (AY, AZ, 29.5)], -35, PT).common(fuse([
+                         box(-35, PT, 44, AY, PZ, MB), box(-28, PT, AY, AY + 30, PZ, MB),   # under the rib,
+                         box(-35, PT, 44, AY - 12, MB, -55)]))]).cut(        # above it to y 96, under the harness
+                   cyl(56, 20, (-36, AY, AZ), (1, 0, 0))),                   # and the end cap's cable drop
                box(-35, -10.5, 44, 125, MB, BODY_BOT),                       # rib
-               Part.Face(Part.makePolygon([V(-35, y_, z_) for y_, z_ in      # rib boxed down to the plate's bottom,
-                                           ((44, PZ), (58, PZ), (78, MB), (44, MB), (44, PZ))])).extrude(V(PT + 35, 0, 0))
-               ]).removeSplitter()                                           # its end ramped (no square corner)
+               ]).removeSplitter()
     hm = dp.round_corners(hm, [((x, y, None), 12) for x in (-58, 62) for y in (14, 63.25)] +
                           [((None, 44, PZ), 10), ((-35, 125, None), 8)])
     hm = dp.round_corners(hm, [((PT, None, MB), 4)], strict=False)
@@ -499,8 +514,8 @@ for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assem
     hm = fuse([hm, hm_full.common(box(-100, 100, 0, 200, BODY_BOT - 0.6, BODY_BOT)).cut(odm_body())])  # ...shelf flush
     hm = hm.cut([cyl(41, 20, (-20, AY, AZ), (1, 0, 0)), cyl(56, 9.6, (PT - 9.5, AY, AZ), (1, 0, 0))] +   # + end-cap seat
                 bolt_circle(47.5, 6, 2.7, 20, (-20, AY, AZ), "x", 30) +
-                [cyl(4.5, 20, (x, 30, MB - 5)) for x in (-50, 0, 58)] +
-                [cyl(8, 3, (x, 30, MB - 0.01)) for x in (-50, 0, 58)])      # counterbores
+                [cyl(4.5, 20, (x, 30, MB - 5)) for x in HM_BOLTS_X] +
+                [cyl(8, 3, (x, 30, MB - 0.01)) for x in HM_BOLTS_X])        # counterbores
 
     # --- leg harness (one 6 mm bundle per leg: 2x 16 AWG power + the CAN twisted pair, a short drop to each
     # motor). It crosses the hip-roll, hip-pitch and knee joints on their axes, where a joint only twists the
@@ -535,21 +550,25 @@ for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assem
     # --- hip-roll yoke = hip casing (roll body frame, origin on the roll axis): GIM4305 output -> GIM6010 housing.
     # A slotted can around the GIM6010 hip-pitch housing (bolted to its inboard face, Ø74) and a slotted wrap
     # around the GIM4305 hip-roll motor (it turns with the roll output, 2.5 mm radial clearance).
-    # top / bottom walls 1 mm clear of the Ø60 bore (no feather edge); 3 mm gussets in the inside corners
-    # where they meet the two motor plates (print it on the GIM4305 output plate: see README)
+    # top / bottom walls 1 mm clear of the Ø60 bore (no feather edge), 6 mm thick (outer corners at r 43 off the
+    # hip-pitch axis, inside the can's R44, so the thigh's R47 scallop still clears them), run out flush with the
+    # GIM6010 plate's back edge; 5 mm gussets in the inside corners where they meet the two motor plates (print it
+    # on the GIM4305 output plate: see README). 3 mm walls stopping short at x -8 gave a safety factor of 1.5 in a drop.
     def gusset(tri, d):
         return Part.Face(Part.makePolygon([V(*p) for p in tri + [tri[0]]])).extrude(V(*d))
     gus = []
     for sz in (1, -1):
-        gus += [gusset([(16.5, 0, sz * 31), (13.5, 0, sz * 31), (16.5, 0, sz * 28)], (0, 36, 0)),
-                gusset([(-8, 36, sz * 31), (-8, 33, sz * 31), (-8, 36, sz * 28)], (24.5, 0, 0))]
-    yk = fuse([cyl(66, 6, (16.5, 0, 0), (1, 0, 0)), box(16.5, 22.5, 0, 41, -34, 34),  # GIM4305 output plate
-               cyl(88, 5, (0, 36, 0), (0, 1, 0)), box(-10, 22.5, 36, 41, -34, 34),
-               box(-8, 22.5, 0, 41, 31, 34), box(-8, 22.5, 0, 41, -34, -31)] + gus + [
+        gus += [gusset([(16.5, 0, sz * 31), (11.5, 0, sz * 31), (16.5, 0, sz * 26)], (0, 36, 0)),
+                gusset([(-10, 36, sz * 31), (-10, 31, sz * 31), (-10, 36, sz * 26)], (26.5, 0, 0))]
+    # GIM4305 output plate 9 mm (x 16.5..25.5; it bent round the motor's output flange): corners r 45 off the
+    # hip-pitch axis, 2 mm inside the thigh's R47 scallop
+    yk = fuse([cyl(66, 9, (16.5, 0, 0), (1, 0, 0)), box(16.5, 25.5, 0, 41, -37, 37),  # GIM4305 output plate
+               cyl(88, 5, (0, 36, 0), (0, 1, 0)), box(-10, 22.5, 36, 41, -37, 37),
+               box(-10, 22.5, 0, 41, 31, 37), box(-10, 22.5, 0, 41, -37, -31)] + gus + [
                dp.along_y(dp.slotted_can(88, 81.5, 25, 8, 9, 15, phase=22.5), 41),   # GIM6010 can, y 41..66
                dp.along_x(dp.slotted_can(66, 58, 24.5, 6, 8, 12, phase=30), -8)])    # GIM4305 wrap, x -8..16.5
-    yk = yk.cut([cyl(60, 15, (0, 28, 0), (0, 1, 0)), cyl(12, 10, (14, 0, 0), (1, 0, 0))] +
-                bolt_circle(27, 3, 3.4, 10, (14, 0, 0), "x", 90) +
+    yk = yk.cut([cyl(60, 15, (0, 28, 0), (0, 1, 0)), cyl(12, 14, (14, 0, 0), (1, 0, 0))] +
+                bolt_circle(27, 3, 3.4, 14, (14, 0, 0), "x", 90) +
                 bolt_circle(74, 8, 3.4, 10, (0, 33, 0), "y", 22.5))
     # harness on the yoke: from the roll axis behind the hip mount, out and up a post off the yoke's top wall,
     # over the hip-pitch motor (a clip on its can) and down the thigh's outer face to the hip-pitch axis. The
@@ -639,10 +658,14 @@ for s, hb, rb, tb, sb, fb in ((1, "hip_roll_assembly", "left_roll_to_pitch_assem
     # 15.5 mm slab, pocketed for the wheel motor.
     # From the knee to the scallop the outer sheet is 14 mm (y -36..-22) wherever it clears the tyre by 3.5 mm:
     # the wheel sits 23 mm inboard, so that stretch carries the side bending alone.
+    # The outer sheet alone is wider at the knee (R40, the inner one R28): between the end of the 14 mm stretch
+    # (the tyre circle) and the scallop it was a bare 6 mm sheet (safety factor 1.5 in a drop); wider, the 14 mm
+    # edges run on down outside the tyre circle as flanges. Its layer (y -36..-22) has only the tyre beside it.
     SH = [(0, 0, 28), (0, KZ, 32)]
+    SHA = [(0, 0, 40), (0, KZ, 32)]
     TYRE_CLR = 78.5                                                 # tyre R75 + 3.5
-    a = fuse([rounded_plate_xz(SH, -28, -22, fillet=2),
-              rounded_plate_xz(SH, -36, -27.5).cut(cyl(2 * TYRE_CLR, 10, (0, -37, KZ), (0, 1, 0)))])
+    a = fuse([rounded_plate_xz(SHA, -28, -22, fillet=2),
+              rounded_plate_xz(SHA, -36, -27.5).cut(cyl(2 * TYRE_CLR, 10, (0, -37, KZ), (0, 1, 0)))])
     a = a.cut([cyl(57, 10.5, (0, -29, KZ), (0, 1, 0))])
     b = fuse([rounded_plate_xz(SH, -18.5, -12.5, fillet=2), rounded_plate_xz(SH, -22.5, -18)])
     b = b.cut([cyl(108, 9, (0, -20.5, 0), (0, 1, 0)), cyl(57, 10.5, (0, -29, KZ), (0, 1, 0)),

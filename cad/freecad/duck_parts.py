@@ -536,9 +536,9 @@ def wheel_hub():
     cuts = bolt_circle(27, 3, 3.4, 10, (0, -5, 0), "y", 90)
     cuts += [cyl(10, 10, (0, -5, 0), (0, 1, 0))]
     cuts += bolt_circle(92, 6, 24, 10, (0, -5, 0), "y", 30)        # lightening
-    cuts += bolt_circle(133, 12, 3, 40, (0, -20, 0), "y", 15)       # tread key holes (1 mm wall each side)
-    for y in (-8, 0, 8):                                             # key grooves
-        cuts.append(tube(140, 136, 1.2, (0, y - 0.6, 0), (0, 1, 0)))
+    cuts += bolt_circle(133, 12, 3, 40, (0, -20, 0), "y", 15)       # tread key holes (1 mm wall inside)
+    for y in (-8, 0, 8):                                             # key grooves, 1.5 deep: they open into the
+        cuts.append(tube(140, 135, 1.2, (0, y - 0.6, 0), (0, 1, 0)))  # holes (1 deep, they only touched them: no mesh)
     return hub.cut(cuts)
 
 
