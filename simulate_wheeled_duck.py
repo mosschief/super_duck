@@ -234,6 +234,11 @@ class ScaledWheeledDuckController:
     FREEFALL_ACCEL = 3.0   # m/s^2, IMU acceleration magnitude below this is free fall (standing reads 9.81)
     FREEFALL_TIME = 0.025  # s, it must last this long to count as a drop
     TOUCHDOWN_ACCEL = 15.0  # m/s^2, the first reading above this ends a drop
+    # A drop also ends once the IMU has read "supported" (> SUPPORTED_ACCEL) for SUPPORTED_TIME: a wheel bouncing off
+    # a curb nose is a few mm of real free fall that lands too softly for TOUCHDOWN_ACCEL, and it used to leave the
+    # robot on the ground in "drop" (wheels on attitude hold, not balancing) for the 1 s timeout, enough to fall.
+    SUPPORTED_ACCEL = 7.0   # m/s^2 (free fall reads ~0, standing 9.81)
+    SUPPORTED_TIME = 0.02   # s
     DROP_LEGS_SETTLE = 0.5  # s after a leg move before free fall counts
     DROP_DELTA = 0.10      # Crouch held through a drop: of the poses tried (-0.15 to 0.20) this lands softest
 
@@ -270,6 +275,7 @@ class ScaledWheeledDuckController:
         self.filtered_voltage = None
         self.low_battery = False
         self.freefall_time = 0.0
+        self.supported_time = 0.0
         self.landing_from_drop = False
         self.reset_requested = False
 
@@ -297,6 +303,7 @@ class ScaledWheeledDuckController:
         self.last_crouch = 0.0
         self.yaw_ref = None
         self.freefall_time = 0.0
+        self.supported_time = 0.0
         self.low_battery = False
         self.jump_phase = "idle"
         self.jump_timer = 0.0
@@ -681,7 +688,7 @@ class ScaledWheeledDuckController:
             return
         self.freefall_time = self.freefall_time + dt if accel_mag < self.FREEFALL_ACCEL else 0.0
         if self.freefall_time >= self.FREEFALL_TIME:
-            self.jump_phase, self.jump_timer, self.freefall_time = "drop", 0.0, 0.0
+            self.jump_phase, self.jump_timer, self.freefall_time, self.supported_time = "drop", 0.0, 0.0, 0.0
             self.landing_from_drop = True
             print("[Drop] Free fall, bracing")
 
@@ -696,8 +703,13 @@ class ScaledWheeledDuckController:
         self.jump_timer += dt
         t = self.jump_timer
         if self.jump_phase == "drop":
-            # Ends at touchdown (or after 1 s: nothing falls that long indoors, so the sensor must be wrong)
-            if (accel_mag is not None and accel_mag > self.TOUCHDOWN_ACCEL) or t >= 1.0:
+            # Ends at touchdown: an impact spike, or a soft landing read as `SUPPORTED_TIME` of ~1 g (or after 1 s:
+            # nothing falls that long indoors, so the sensor must be wrong)
+            supported = accel_mag is not None and accel_mag > self.SUPPORTED_ACCEL
+            self.supported_time = self.supported_time + dt if supported else 0.0
+            if ((accel_mag is not None and accel_mag > self.TOUCHDOWN_ACCEL) or self.supported_time >= self.SUPPORTED_TIME
+                    or t >= 1.0):
+                self.supported_time = 0.0
                 self.jump_phase, self.jump_timer = "land", 0.0
                 self.target_x = x_pos
                 return self.DROP_DELTA, False

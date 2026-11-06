@@ -120,6 +120,36 @@ def add_box(spec, name, half, pos, euler=(0, 0, 0)):
                             rgba=[0.45, 0.5, 0.58, 1])
 
 
+STEP_EDGE = 0.003   # m, edge radius of a step (threshold / curb): see `add_step`
+
+
+def add_step(spec, name, x0, x1, y0, y1, h):
+    """A step of height h over x0..x1 (a threshold, or a curb when long) built so the tire only ever touches capsules:
+    a row of touching STEP_EDGE-radius capsules across the path, crests at h, over a core box up to their axes.
+
+    Why not a plain box: against a *cylinder* (the tire), MuJoCo's convex collider (native EPA in 3.17, and libccd's
+    MPR on long boxes) reports a box or mesh *face* normal at a box edge instead of the true radial one. With the
+    wheel on a 20 mm edge it reports the front face's horizontal normal at 2.4 mm depth where the geometry gives
+    (0.64, -0.76) at 3.7 mm. A horizontal normal turns the edge into a vertical wall the tire can only climb by
+    friction (mu 1.25, so it slips and spins at the 3.47 N*m stall), and the robot fell at every 20-30 mm step.
+    It does the same at any box corner the tire rolls over, including a flat top's corners just behind a rounded
+    nose (the tire sinks ~3 mm into the edge, far enough to reach them). Capsule-cylinder contacts come out radial,
+    and the core box's edges sit on the capsule axes, out of reach. The front capsule is a 3 mm arris, which a sharp
+    real threshold has anyway; it eases the climb by < 1 deg of contact angle (20 mm: 43.1 -> 42.1 deg from vertical).
+    The ridged top (6 mm pitch) sags 0.06 mm between crests under a 75 mm wheel, and the tire's ~40 mm contact patch
+    spans ~6 of them, so it rolls as on a flat top."""
+    rho = min(STEP_EDGE, h / 2.0)
+    n = max(1, int(round((x1 - x0) / (2 * rho))))
+    pitch = (x1 - x0 - 2 * rho) / max(n - 1, 1)
+    for i in range(n):
+        xe = x0 + rho + i * pitch
+        spec.worldbody.add_geom(name=f"{name}_ridge{i}", type=mujoco.mjtGeom.mjGEOM_CAPSULE, size=[rho, 0, 0],
+                                fromto=[xe, y0 + rho, h - rho, xe, y1 - rho, h - rho], rgba=[0.45, 0.5, 0.58, 1])
+    if h - rho > 1e-6:
+        add_box(spec, f"{name}_core", ((x1 - x0) / 2 - rho, (y1 - y0) / 2, (h - rho) / 2),
+                ((x0 + x1) / 2, (y0 + y1) / 2, (h - rho) / 2))
+
+
 def tilt_world(axis, deg):
     """(spec_edit, init) tilting the floor about the world origin by `deg` about `axis`, robot spawned on it."""
     q = np.zeros(4)
@@ -217,15 +247,22 @@ def ramp(deg, up=True, L=1.2):
 
 def threshold(h_mm, v=0.6, side=None, curb=False):
     """A door threshold (30 mm deep strip) or a curb (step up) across the path at x = 1.0, at speed v. side='left'
-    puts it under the left wheel only."""
+    puts it under the left wheel only. Built with `add_step` (a 3 mm edge radius), not a box: MuJoCo's collider turns
+    a box edge into a vertical wall for the cylinder tire.
+
+    All the heights here are within the wheel's torque: on a sharp edge of height h the wheel pivots about the edge
+    at sin(a) = sqrt(r^2 - (r - h)^2) / r from vertical, needing tau = W r sin(a) per wheel (W = 34.5 N wheel load):
+    20 mm 1.76 N*m, 30 mm 2.07 N*m, against 3.47 N*m stall. Friction needs mu > tan(a) - (forward push from the
+    body); tan(a) = 0.93 at 20 mm and 1.33 at 30 mm against the tire's 1.25, so 30 mm needs a ~1 N push per wheel,
+    which the robot's forward lean onto the edge supplies."""
     h = h_mm / 1000.0
 
     def spec_edit(spec):
         y0, y1 = (0.03, 0.4) if side == "left" else (-0.4, 0.4)
         if curb:
-            add_box(spec, "curb", (1.5, (y1 - y0) / 2, h / 2), (1.0 + 1.5, (y0 + y1) / 2, h / 2))
+            add_step(spec, "curb", 1.0, 4.0, y0, y1, h)
         else:
-            add_box(spec, "threshold", (0.015, (y1 - y0) / 2, h / 2), (1.0, (y0 + y1) / 2, h / 2))
+            add_step(spec, "threshold", 0.985, 1.015, y0, y1, h)
 
     def scenario(seed):
         log, fell, _ = run(seed, events=drive(1.0, v) + [(1.0 + 2.6 / v, "space")], duration=3.0 + 2.6 / v + 3,
