@@ -169,12 +169,13 @@ def slope(deg, direction):
     spec_edit, init = tilt_world(axis, sign * deg)
 
     def scenario(seed):
-        ev = drive(6.0, 0.45) + [(9.0, "space")]
-        log, fell, _ = run(seed, events=ev, duration=15.0, spec_edit=spec_edit, init=init)
+        ev = drive(8.0, 0.45) + [(11.0, "space")]
+        log, fell, _ = run(seed, events=ev, duration=17.0, spec_edit=spec_edit, init=init)
         if fell:
             return False, True, f"fell at t={log[-1, 0]:.1f} s"
-        park, hold = hold_drift(log, 3, 6), hold_drift(log, 12, 15)
-        return result(park < 5 and hold < 5, False, f"parked drift {park:.1f} cm (3-6 s), after brake {hold:.1f} cm (12-15 s)")
+        # It starts with no idea of the slope: the first seconds are the trim learner rolling it back to its hold point
+        park, hold = hold_drift(log, 5, 8), hold_drift(log, 14, 17)
+        return result(park < 5 and hold < 5, False, f"parked drift {park:.1f} cm (5-8 s), after brake {hold:.1f} cm (14-17 s)")
     scenario.__name__ = f"slope {direction} {deg} deg"
     return scenario
 
@@ -304,41 +305,60 @@ def turn_at_speed(v, deg):
 
 
 # ---------------------------------------------------------------- power
-GIM4305_NO_LOAD_RPM = 366.0           # at 24 V (max_joint_vel 38.33 rad/s)
-GIM4305_RPM_PER_NM = 366.0 / (1.53 * 3.47)   # same curve shape as the GIM6010-8's (16.8 N*m intercept / 11 stall)
-
-
 def battery(volts, base):
     """Runs a scenario with both motors' torque-speed curves at the pack voltage (no-load speed ~ V / 24 V).
     Stall torque is current-limited by the drivers and stays put down to ~19 V."""
-    prof = dataclasses.replace(T.PROFILE, leg_torque_curve=(11.0, 285.0 * volts / 24.0, 17.0))
-
     def hook(m, d, ctl):
-        rpm = np.abs(d.qvel[m.jnt_dofadr[m.actuator_trnid[swd.WHEEL_ACTUATORS, 0]]]) * 60 / (2 * math.pi)
-        lim = np.clip((GIM4305_NO_LOAD_RPM * volts / 24.0 - rpm) / GIM4305_RPM_PER_NM, 0.05, 3.47)
-        m.actuator_forcerange[swd.WHEEL_ACTUATORS, 0] = -lim
-        m.actuator_forcerange[swd.WHEEL_ACTUATORS, 1] = lim
+        ctl.bus_voltage = volts
 
     def scenario(seed):
-        old_run, old_ctl = T.run, T.make_controller
+        old_run = T.run
         T.run = lambda *a, **kw: old_run(*a, hook=hook, fallen=make_fallen(), **kw)
-        T.make_controller = lambda model: swd.ScaledWheeledDuckController(prof)
         try:
             return base(seed)
         finally:
-            T.run, T.make_controller = old_run, old_ctl
+            T.run = old_run
     scenario.__name__ = f"battery {volts:.1f} V {base.__name__}"
     return scenario
 
 
 def top_speed(seed):
-    """Full speed (1.5 m/s) for 3 s, then brake."""
-    log, fell, _ = T.run(drive(1.0, 1.5) + [(6.0, "space")], 10.0, realism_seed=seed)
+    """Top speed (1.8 m/s) for 4 s, then brake. The controller's speed cap sets what it reaches: 1.75 m/s at the 21 V
+    cutoff."""
+    log, fell, _ = T.run(drive(1.0, 1.8) + [(7.0, "space")], 11.0, realism_seed=seed)
     if fell:
         return False, True, f"fell at t={log[-1, 0]:.1f} s"
-    v = T.window(log, 4.5, 6.0)[:, 4].mean()
-    stop = np.abs(T.window(log, 8.5, 10)[:, 4]).max()
-    return v > 1.35 and stop < 0.08, False, f"cruise {v:.2f} m/s (cmd 1.50), |v| after brake {stop:.3f} m/s"
+    v = T.window(log, 5.5, 7.0)[:, 4].mean()
+    stop = np.abs(T.window(log, 9.5, 11)[:, 4]).max()
+    return v > 1.65 and stop < 0.08, False, f"cruise {v:.2f} m/s (cmd 1.80), |v| after brake {stop:.3f} m/s"
+
+
+def low_battery(v0):
+    """The pack sags from 22 V to 20.5 V over 10 s while cruising at v0: the robot must stop and stay up, and ignore
+    the driver and the jump key afterwards."""
+    def hook(m, d, ctl):
+        ctl.bus_voltage = 22.0 - 1.5 * min(d.time / 10.0, 1.0)
+
+    def scenario(seed):
+        log, fell, _ = run(seed, events=drive(1.0, v0) + drive(14.0, 0.6) + [(15.0, "c")], duration=18.0, hook=hook)
+        if fell:
+            return False, True, f"fell at t={log[-1, 0]:.1f} s"
+        v = np.abs(T.window(log, 14.0, 18.0)[:, 4]).max()
+        lift = T.window(log, 14.0, 18.0)[:, 7].max() * 1000
+        return result(v < 0.1 and lift < 5, False, f"parked: |v| {v:.3f} m/s after the keys, wheels off the floor {lift:.1f} mm")
+    scenario.__name__ = f"low battery while driving @{v0:.1f}"
+    return scenario
+
+
+def cruise_push(v, force):
+    """A shove (0.1 s) while cruising. Forward is the hard way: the wheels must speed up to get back under the trunk."""
+    def scenario(seed):
+        log, fell, _ = run(seed, events=drive(1.0, v), duration=9.0, pushes=[(5.0, force)])
+        if fell:
+            return False, True, f"fell at t={log[-1, 0]:.1f} s"
+        return True, False, f"max |pitch| {np.abs(T.window(log, 5, 9)[:, 5]).max():.0f} deg"
+    scenario.__name__ = f"push {force:+d} N @{v:.1f} m/s"
+    return scenario
 
 
 _LIMP = set()                      # actuators without power right now (see Limp)
@@ -565,7 +585,8 @@ def drop(h_cm):
 
 
 def bad_landing(kind):
-    """Jump landing on a cross slope, or with one wheel landing on a 15 mm plate."""
+    """Jump landing on a cross slope, or with one wheel landing mid-way along a 15 mm plate (only the landing counts:
+    driving on and off the plate has its own measurement, `plate_edge`)."""
     def scenario(seed):
         if kind == "slope":
             spec_edit, init = tilt_world((1, 0, 0), 8.0)
@@ -574,9 +595,10 @@ def bad_landing(kind):
             def spec_edit(spec):
                 add_box(spec, "plate", (0.6, 0.2, 0.0075), (1.4, 0.23, 0.0075))
             init = None
-            ev = drive(1.0, 0.6) + [(2.6, "c"), (5.0, "space")]
+            ev = drive(1.0, 0.6) + [(3.5, "c"), (5.0, "space")]
         c = Contacts()
-        log, fell, _ = run(seed, events=ev, duration=7.0, spec_edit=spec_edit, init=init, fallen=make_fallen(c))
+        count = (lambda m, d: c(m, d) if d.time >= 3.5 and d.time < 5.0 else None) if kind == "plate" else c
+        log, fell, _ = run(seed, events=ev, duration=7.0, spec_edit=spec_edit, init=init, fallen=make_fallen(count))
         if fell:
             return False, True, f"fell at t={log[-1, 0]:.1f} s"
         return result(c.wheels() < TIRE_RADIAL_LIMIT, False,
@@ -586,6 +608,17 @@ def bad_landing(kind):
 
 
 # ---------------------------------------------------------------- head
+def plate_edge(seed):
+    """One wheel driving on and off a 15 mm plate at 0.6 m/s: the wheel hits a square edge. A short contact spike, and
+    the sim's tyre is stiffer than the real TPU, so this is a measurement rather than a limit."""
+    def spec_edit(spec):
+        add_box(spec, "plate", (0.6, 0.2, 0.0075), (1.4, 0.23, 0.0075))
+    c = Contacts()
+    log, fell, _ = run(seed, events=drive(1.0, 0.6) + [(5.0, "space")], duration=7.0, spec_edit=spec_edit,
+                       fallen=make_fallen(c))
+    return None, False, f"{'fell, ' if fell else ''}peak wheel force {c.wheels():.0f} N (GIM4305 radial {TIRE_RADIAL_LIMIT:.0f} N)"
+
+
 def head_sweep(seed):
     """Commands the head over its whole range (neck, head pitch, yaw, roll extremes) while balancing; the neck
     envelope clip must keep the head and antennas off the trunk."""
@@ -727,10 +760,12 @@ SCENARIOS = (
                                                      threshold(20, side="left")]
     + [threshold(h, curb=True) for h in (10, 20, 30)]
     + [uneven(a) for a in (5, 10, 20)]
-    + [turn_at_speed(v, d) for v in (0.6, 1.2, 1.5) for d in (45, 90)]
+    + [turn_at_speed(v, d) for v in (0.6, 1.2, 1.5, 1.8) for d in (45, 90)]
+    + [cruise_push(v, f) for v in (0.6, 1.05, 1.5, 1.8) for f in (20, 30, -30)]
     + [low_grip(mu, b) for mu in (0.3, 0.4, 0.5, 0.6) for b in (T.drive_turn_brake, T.push(30), T.jump)]
-    + [battery(v, b) for v in (25.2, 22.2, 19.8) for b in (top_speed, T.push(40), T.jump)]
-    + [estop(v) for v in (0.0, 0.6, 1.5)]
+    + [battery(v, b) for v in (25.2, 22.2, 21.1) for b in (top_speed, T.push(40), T.jump)]
+    + [low_battery(0.6), low_battery(1.5)]
+    + [estop(v) for v in (0.0, 0.6, 1.8)]
     + [can_fault("CAN left wheel frames lost 20 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.02, WHEEL_L)]),
        can_fault("CAN left wheel frames lost 100 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.1, WHEEL_L)]),
        can_fault("CAN left bus lost 50 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.05, LEFT_BUS)]),
@@ -744,8 +779,8 @@ SCENARIOS = (
     + [imu_fault(f"IMU mounted {d:+d} deg off", imu_offset_deg=d) for d in (1, 2, 3, -3)]
     + [imu_fault("gyro bias drift 0.05 deg/s per s", gyro_drift=0.05),
        imu_fault("vibration noise @1.0 m/s", vib=(3.0, 0.5), speed=1.05)]
-    + [fall_at_speed(v) for v in (0.0, 0.6, 1.5)] + [wall(0.6), wall(1.2)]
-    + [drop(h) for h in (3, 6, 10)] + [bad_landing("slope"), bad_landing("plate")]
+    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8)] + [wall(0.6), wall(1.2)]
+    + [drop(h) for h in (3, 6, 10)] + [bad_landing("slope"), bad_landing("plate"), plate_edge]
     + [head_sweep, endurance(20)]
 )
 

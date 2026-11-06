@@ -8,8 +8,8 @@ Robot profiles (`--robot`): `gim6010` (default, the build) = SteadyWin GIM6010-8
 (`open_duck_wheeled_v2.xml`).
 
 Live Keyboard Driving Controls (inside the 3D MuJoCo Viewer Window):
-  - Up Arrow    or 'I' / 'W' : Increase forward speed (+0.15 m/s per press, up to +1.50 m/s)
-  - Down Arrow  or 'K' / 'S' : Decrease speed / reverse (-0.15 m/s per press, down to -1.50 m/s)
+  - Up Arrow    or 'I' / 'W' : Increase forward speed (+0.15 m/s per press, up to +1.80 m/s; less on a low pack)
+  - Down Arrow  or 'K' / 'S' : Decrease speed / reverse (-0.15 m/s per press, down to -1.80 m/s)
   - Left Arrow  or 'J' / 'A' : Steer left (+15 deg heading step per press)
   - Right Arrow or 'L' / 'D' : Steer right (-15 deg heading step per press)
   - Spacebar                 : Brake to a full stop (zero speed & hold current position)
@@ -93,6 +93,7 @@ class RobotProfile:
     # None = not modelled (MuJoCo's forcerange is otherwise speed-independent).
     leg_torque_curve: Tuple[float, float, float] = None   # (stall N*m, no-load rpm, rpm drop per N*m)
     curve_actuators: Tuple[int, ...] = ()                 # actuator indices the curve applies to
+    wheel_torque_curve: Tuple[float, float, float] = None # the same for the wheel motors (at 24 V, like the leg curve)
 
 
 PROFILES = {
@@ -112,6 +113,8 @@ PROFILES = {
         thrust_wheel_mode="zero",
         leg_torque_curve=(11.0, 285.0, 17.0),   # manual sec 1.2 characteristic curve (24 V)
         curve_actuators=(1, 2, 4, 5),           # hip pitch, knee (both legs)
+        # GIM4305-10: 3.47 N*m stall, 366 rpm no load. Same curve shape as the GIM6010-8 (intercept 1.53 x stall).
+        wheel_torque_curve=(3.47, 366.0, 366.0 / (1.53 * 3.47)),
     ),
     # Original design: SteadyWin GIM4305-10 on every joint (open_duck_wheeled_v2.xml as first downloaded).
     "gim4305": RobotProfile(
@@ -202,6 +205,33 @@ class ScaledWheeledDuckController:
     MAX_CROUCH = 0.24
     RAMP_JERK = 8.0        # m/s^3, how quickly the speed ramp's acceleration may fade out near the target speed
     REANCHOR_DIST = 0.30   # m; pushed further than this from the hold point -> hold wherever it comes to rest
+    # m/s. Wheel drag and the GIM4305-10's curve set this: at 2.2 m/s it falls over on a full pack, at 1.95 m/s the
+    # same turn survives or falls on small gain changes. `speed_cap` lowers it as the pack sags.
+    MAX_SPEED = 1.80
+    # Wheel torque (N*m) kept free at top speed: drag and the motor's speed-torque curve use up the rest, and a
+    # balancing robot with none left can't drive under itself to catch a forward lean.
+    SPEED_HEADROOM = 0.25
+    TURN_RATE_MAX = 2.5    # rad/s, heading reference rate at low speed
+    TURN_ACCEL_MAX = 1.5   # m/s^2, sideways: speed x turn rate. About half the 3.3 m/s^2 that tips the robot.
+    LOW_BATTERY_V = 21.0   # V, bus voltage (filtered) that parks the robot: below this a 40 N shove knocks it over
+    LOW_BATTERY_CLEAR_V = 21.8   # V, only a charged pack clears it (a parked pack recovers a few tenths on its own)
+    VOLTAGE_FILTER_S = 2.0  # s, so the sag of a jump or a hard stop doesn't count as a flat pack
+    TRIM_LIMIT = 0.30      # rad, enough for the lean on a 15 deg slope on top of the standing lean
+    # Trim learner while parked: gain = TRIM_GAIN_PARKED + self.TRIM_GAIN_PER_M * |position error|, (rad/s) per m. The gain
+    # grows with the error so a slope is learned in ~5 s, without a high gain stirring the robot up on a flat floor.
+    TRIM_GAIN_PARKED = 0.03
+    TRIM_GAIN_PER_M = 0.3
+    TRIM_VEL_WEIGHT = 1.0  # m of position-equivalent error per m/s
+    TRIM_GAIN_CRUISE = 0.02  # (rad/s) per (m/s of speed error), while cruising
+    TRIM_HOLDOFF = 1.0     # s after start-up and after a leg move
+    GYRO_BIAS_TAU = 30.0   # s, drift-following low-pass
+    GYRO_BIAS_PRIOR = 500  # samples: the running average starts as if the first second had read zero
+    GYRO_STILL_RATE = 0.05  # rad/s (~3 deg/s), faster than this is real motion
+    FREEFALL_ACCEL = 3.0   # m/s^2, IMU acceleration magnitude below this is free fall (standing reads 9.81)
+    FREEFALL_TIME = 0.025  # s, it must last this long to count as a drop
+    TOUCHDOWN_ACCEL = 15.0  # m/s^2, the first reading above this ends a drop
+    DROP_LEGS_SETTLE = 0.5  # s after a leg move before free fall counts
+    DROP_DELTA = 0.10      # Crouch held through a drop: of the poses tried (-0.15 to 0.20) this lands softest
 
     def __init__(self, profile: RobotProfile = None, params: ScaledWheeledDuckParams = None):
         self.profile = profile or PROFILES[DEFAULT_ROBOT]
@@ -225,7 +255,18 @@ class ScaledWheeledDuckController:
         # Starting value from the profile's fit; each 1 deg of trim error parks the robot ~25 cm off its hold point,
         # so it matters (on hardware, persist the learned trim between runs).
         self.pitch_trim = self.profile.initial_pitch_trim
-        self.trim_adapt_gain = 0.01   # (rad/s) per (m of position-equivalent error)
+        self.trim_adapt_gain = self.TRIM_GAIN_PARKED
+        self.run_time = 0.0
+        self.legs_moved_age = 10.0    # s since the legs were last told to move (crouch key, jump, drop)
+        self.last_crouch = 0.0
+        self.yaw_ref = None           # Rate-limited heading the wheels steer to (`target_yaw` is where it's going)
+        self.gyro_bias = np.zeros(3)  # Learned while parked: see `_update_gyro_bias`
+        self.gyro_samples = 0
+        self.bus_voltage = None       # Set by whoever reads the GIM drivers' bus voltage (CAN); None = not measured
+        self.filtered_voltage = None
+        self.low_battery = False
+        self.freefall_time = 0.0
+        self.landing_from_drop = False
         self.reset_requested = False
 
         # Jump state machine: "idle" -> "crouch" -> "thrust" -> "flight" -> "land" -> "idle"
@@ -247,6 +288,12 @@ class ScaledWheeledDuckController:
         self.head_pose = None
         self.antenna_cmd = 0.0
         self.pitch_trim = self.profile.initial_pitch_trim
+        self.run_time = 0.0
+        self.legs_moved_age = 10.0
+        self.last_crouch = 0.0
+        self.yaw_ref = None
+        self.freefall_time = 0.0
+        self.low_battery = False
         self.jump_phase = "idle"
         self.jump_timer = 0.0
         self.jump_requested = False
@@ -258,10 +305,10 @@ class ScaledWheeledDuckController:
     def handle_keypress(self, keycode: int) -> None:
         """Processes live keyboard commands from the MuJoCo viewer window."""
         if keycode in (KEY_UP, ord("I"), ord("i"), ord("W"), ord("w")):
-            self.cmd_vel = float(np.clip(self.cmd_vel + 0.15, -1.50, 1.50))
+            self.cmd_vel = float(np.clip(self.cmd_vel + 0.15, -self.MAX_SPEED, self.MAX_SPEED))
             print(f"[Drive] Target Speed: {self.cmd_vel:+.2f} m/s")
         elif keycode in (KEY_DOWN, ord("K"), ord("k"), ord("S"), ord("s")):
-            self.cmd_vel = float(np.clip(self.cmd_vel - 0.15, -1.50, 1.50))
+            self.cmd_vel = float(np.clip(self.cmd_vel - 0.15, -self.MAX_SPEED, self.MAX_SPEED))
             print(f"[Drive] Target Speed: {self.cmd_vel:+.2f} m/s")
         elif keycode in (KEY_LEFT, ord("J"), ord("j"), ord("A"), ord("a")):
             self.target_yaw += math.radians(15.0)
@@ -314,11 +361,13 @@ class ScaledWheeledDuckController:
         right_wheel_vel: float,
         leg_fold: float = None,
         leg_fold_rate: float = 0.0,
+        accel_mag: float = None,
         dt: float = 0.002,
     ) -> Tuple[np.ndarray, dict]:
         """
         `leg_fold` / `leg_fold_rate` are the measured hip_pitch + knee angle (and its rate), averaged over both legs,
         from the GIM4305 encoders. If omitted, the commanded value is used (no servo lag compensation).
+        `accel_mag` is the magnitude of the IMU's acceleration reading (m/s^2); without it drops aren't detected.
 
         Computes the 14-element MuJoCo `data.ctrl` vector (no hip yaw: the hips are fixed mounts, steering is by
         wheel torque difference):
@@ -329,13 +378,17 @@ class ScaledWheeledDuckController:
           [12:14] antenna 9 g micro servo targets (left_antenna, right_antenna)
         """
         roll, pitch, yaw = quat_to_euler_zyx(quat_wxyz)
-        roll_rate, pitch_rate, yaw_rate = gyro_xyz
+        self._update_battery(dt)
+        parked_before = abs(self.cmd_vel) < 1e-3 and abs(self.target_vel) < 0.05 and not self.settling
+        self._update_gyro_bias(gyro_xyz, parked_before and self.jump_phase == "idle", dt)
+        roll_rate, pitch_rate, yaw_rate = np.asarray(gyro_xyz, dtype=float) - self.gyro_bias
 
         # Smoothly ramp target velocity toward keyboard-commanded speed (limits pitch jerk). The accel limit also
         # tapers as sqrt(2*J*|dv|) near the target (an "S-curve" arrival): the robot must lean to accelerate, so
         # an abrupt end to the ramp leaves it leaning, and un-leaning makes it roll back (~10 cm after a brake).
         max_accel = 2.50 if self.braking else 1.20  # m/s^2
-        vel_diff = self.cmd_vel - self.target_vel
+        cap = self.speed_cap()
+        vel_diff = float(np.clip(self.cmd_vel, -cap, cap)) - self.target_vel
         max_accel = min(max_accel, math.sqrt(2.0 * self.RAMP_JERK * abs(vel_diff)))
         self.target_vel += float(np.clip(vel_diff, -max_accel * dt, max_accel * dt))
         if self.braking and abs(self.target_vel) < 1e-6:
@@ -355,7 +408,12 @@ class ScaledWheeledDuckController:
         x_vel = R * mean_wheel_omega
 
         # 0. Jump State Machine ('C' key): crouch -> explosive thrust -> flight (wheels unloaded) -> soft landing
-        leg_delta, airborne = self._update_jump(x_pos, x_vel, dt)
+        if self.crouch_delta != self.last_crouch or self.jump_phase != "idle":
+            self.legs_moved_age = 0.0
+            self.last_crouch = self.crouch_delta
+        self.legs_moved_age += dt
+        self._detect_drop(accel_mag, dt)
+        leg_delta, airborne = self._update_jump(x_pos, x_vel, accel_mag, dt)
 
         # Advance target_x reference when driving; clamp windup so braking is immediate
         if abs(self.cmd_vel) > 1e-3 or abs(self.target_vel) > 1e-3:
@@ -391,17 +449,27 @@ class ScaledWheeledDuckController:
         total_balance_torque = float(np.dot(-self.k_lqr, state_err))
 
         # Online CoM-offset (pitch trim) estimator: a persistent position error while parked means the trim is
-        # wrong (the LQR is fighting gravity). Slowly integrate it away. Only runs when parked (while driving the
-        # robot *must* lean to accelerate, which would corrupt the estimate) and is frozen during jumps.
+        # wrong (the LQR is fighting gravity, a slope or a mis-mounted IMU). Integrate it away. Runs when parked (while
+        # the speed ramps the robot *must* lean to accelerate, which would corrupt the estimate) and is frozen in jumps.
         # Also frozen while settling after a brake/push: the robot is still rolling to a stop then, and learning
         # from that motion skewed the trim by ~0.5 deg, which shows up as a ~12 cm roll-back once it stops
         # (at rest K_pitch * trim_error = K_x * pos_error, i.e. ~25 cm of offset per degree of trim error).
         # Do not also gate on |x_vel|: a badly wrong trim makes the robot creep at a steady speed, and a speed gate
         # then freezes the very estimator that would fix it (seen as a 0.18 m/s endless creep on a heavier robot).
         parked = abs(self.cmd_vel) < 1e-3 and abs(self.target_vel) < 0.05 and not self.settling
-        if self.jump_phase == "idle" and parked:
-            trim_err = pos_err + 0.5 * (x_vel - self.target_vel)
-            self.pitch_trim = float(np.clip(self.pitch_trim - self.trim_adapt_gain * trim_err * dt, -0.20, 0.20))
+        # Also held off just after the legs move (a crouch rolls the robot a few cm and back on its own) and at start-up
+        # (it's still settling onto its wheels).
+        self.run_time += dt
+        if parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF:
+            trim_err = pos_err + self.TRIM_VEL_WEIGHT * (x_vel - self.target_vel)
+            gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
+            self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
+                                            -self.TRIM_LIMIT, self.TRIM_LIMIT))
+        elif self.jump_phase == "idle" and abs(self.cmd_vel) > 1e-3 and abs(vel_diff) < 1e-3:
+            # Cruising at a steady speed (no ramp, so no lean to accelerate): a speed error means the lean is wrong,
+            # as on a slope. Learning it here means the robot doesn't start the slope's lean from scratch at each stop.
+            self.pitch_trim = float(np.clip(self.pitch_trim - self.TRIM_GAIN_CRUISE * (x_vel - self.target_vel) * dt,
+                                            -self.TRIM_LIMIT, self.TRIM_LIMIT))
 
         if airborne:
             # Wheels are unloaded, so LQR odometry is meaningless. Use the two hub motors as a reaction wheel
@@ -413,8 +481,16 @@ class ScaledWheeledDuckController:
             total_balance_torque = (6.0 * pitch_err + 0.6 * pitch_rate) if self.profile.thrust_wheel_mode == "attitude" else 0.0
 
         # 2. Differential Yaw Steering Torque
-        yaw_err = math.atan2(math.sin(yaw - self.target_yaw), math.cos(yaw - self.target_yaw))
-        yaw_torque = 0.0 if airborne else (-1.45 * yaw_err - 0.30 * yaw_rate)
+        # The heading reference moves at a limited rate: a 90 deg step used to put the whole difference on the wheels at
+        # once, which at 1.2 m/s took the torque the balance needed and tipped the robot over.
+        if self.yaw_ref is None:
+            self.yaw_ref = self.target_yaw
+        yaw_todo = math.atan2(math.sin(self.target_yaw - self.yaw_ref), math.cos(self.target_yaw - self.yaw_ref))
+        turn_rate_max = min(self.TURN_RATE_MAX, self.TURN_ACCEL_MAX / max(abs(x_vel), 1e-3))
+        turn_rate_ref = float(np.clip(yaw_todo / dt, -turn_rate_max, turn_rate_max))
+        self.yaw_ref += turn_rate_ref * dt
+        yaw_err = math.atan2(math.sin(yaw - self.yaw_ref), math.cos(yaw - self.yaw_ref))
+        yaw_torque = 0.0 if airborne else (-1.45 * yaw_err - 0.30 * (yaw_rate - turn_rate_ref))
 
         # Per-wheel friction feedforward (viscous + Coulomb) at the reference speed. Without it the LQR needs a
         # persistent velocity error to supply the drag torque, so cruise speed overshot the command by ~17%.
@@ -435,7 +511,7 @@ class ScaledWheeledDuckController:
         )
 
         # 3. 4-DOF GIM4305-10 Upper Leg Coordination (Roll Leveling + Turn Banking + Crouch Height)
-        turn_bank = np.clip(-0.12 * x_vel * yaw_err, -0.12, 0.12)
+        turn_bank = np.clip(-math.atan2(x_vel * turn_rate_ref, self.params.gravity), -0.12, 0.12)
         roll_comp = np.clip(-0.55 * (roll - turn_bank) - 0.10 * roll_rate, -0.30, 0.30)
         # NOTE: the previous hip-pitch balance assist (-0.18*pitch_err - 0.04*pitch_rate) was removed: with the
         # compliant kp=32 GIM4305 position loops it coupled into the LQR and produced a saturated ~2.5 Hz
@@ -451,7 +527,8 @@ class ScaledWheeledDuckController:
         else:
             neck_pitch_cmd = 0.15 - 0.5 * pitch
             head_pitch_cmd = -0.15 - 0.5 * pitch
-            head_yaw_cmd = -0.6 * yaw_err + self.head_yaw_offset
+            look = math.atan2(math.sin(yaw - self.target_yaw), math.cos(yaw - self.target_yaw))   # into the turn
+            head_yaw_cmd = -0.6 * look + self.head_yaw_offset
             head_roll_cmd = -roll
         neck_pitch_cmd, head_pitch_cmd = self.clip_neck_envelope(neck_pitch_cmd, head_pitch_cmd)
         head_yaw_cmd = float(np.clip(head_yaw_cmd, -1.5, 1.5))
@@ -538,15 +615,80 @@ class ScaledWheeledDuckController:
     JUMP_FLIGHT_TIME = 0.20     # s (wheels unloaded; tucks legs toward landing pose)
     JUMP_LAND_TIME = 0.50       # s (blend back to the driver's crouch setting)
 
-    def _update_jump(self, x_pos: float, x_vel: float, dt: float) -> Tuple[float, bool]:
+    def speed_cap(self) -> float:
+        """Top speed (m/s) that leaves `SPEED_HEADROOM` of wheel torque after drag, at the present bus voltage.
+
+        Available torque = (no-load rpm x V / 24 - rpm) / (rpm drop per N*m), drag = viscous x omega + Coulomb.
+        """
+        curve = self.profile.wheel_torque_curve
+        if curve is None:
+            return self.MAX_SPEED
+        _, no_load_rpm, rpm_per_nm = curve
+        volts = 24.0 if self.filtered_voltage is None else self.filtered_voltage
+        rpm_per_rad_s = 60.0 / (2.0 * math.pi)
+        free = no_load_rpm * volts / 24.0 / rpm_per_nm - self.params.wheel_coulomb - self.SPEED_HEADROOM
+        omega = free / (rpm_per_rad_s / rpm_per_nm + self.params.wheel_viscous)
+        return float(np.clip(omega * self.params.wheel_radius, 0.0, self.MAX_SPEED))
+
+    def _update_battery(self, dt: float) -> None:
+        """Low battery: stop, crouch to shorten the eventual fall, refuse to drive or jump until the pack is charged."""
+        if self.bus_voltage is None:
+            return
+        if self.filtered_voltage is None:
+            self.filtered_voltage = float(self.bus_voltage)
+        self.filtered_voltage += (self.bus_voltage - self.filtered_voltage) * dt / self.VOLTAGE_FILTER_S
+        if not self.low_battery and self.filtered_voltage < self.LOW_BATTERY_V:
+            self.low_battery = True
+            self.braking = abs(self.target_vel) > 1e-6
+            print(f"[Battery] {self.filtered_voltage:.1f} V: parking")
+        elif self.low_battery and self.filtered_voltage > self.LOW_BATTERY_CLEAR_V:
+            self.low_battery = False
+            print(f"[Battery] {self.filtered_voltage:.1f} V: ok")
+        if self.low_battery:
+            self.cmd_vel = 0.0
+            self.jump_requested = False
+            self.crouch_delta = min(self.MAX_CROUCH, self.crouch_delta + 0.10 * dt)
+
+    def _update_gyro_bias(self, gyro_xyz, parked: bool, dt: float) -> None:
+        """A parked robot's mean turn rate is zero, so the gyro's mean is its bias. A running average gets close within
+        seconds; after that a slow low-pass follows temperature drift. Any real motion is left out of the average."""
+        gyro = np.asarray(gyro_xyz, dtype=float)
+        if not parked or np.abs(gyro).max() > self.GYRO_STILL_RATE:
+            return
+        self.gyro_samples += 1
+        k = max(1.0 / (self.gyro_samples + self.GYRO_BIAS_PRIOR), dt / self.GYRO_BIAS_TAU)
+        self.gyro_bias = self.gyro_bias + k * (gyro - self.gyro_bias)
+
+    def _detect_drop(self, accel_mag: float, dt: float) -> None:
+        """Free fall (off a step, or lifted and let go): straighten the legs for stroke and soften them to take the
+        landing. The IMU reads near zero in free fall, whichever way the robot is tilted. A fast crouch reads low too (the
+        trunk drops away from the wheels), so it doesn't count just after the legs were told to move."""
+        if accel_mag is None or self.jump_phase != "idle" or self.legs_moved_age < self.DROP_LEGS_SETTLE:
+            self.freefall_time = 0.0
+            return
+        self.freefall_time = self.freefall_time + dt if accel_mag < self.FREEFALL_ACCEL else 0.0
+        if self.freefall_time >= self.FREEFALL_TIME:
+            self.jump_phase, self.jump_timer, self.freefall_time = "drop", 0.0, 0.0
+            self.landing_from_drop = True
+            print("[Drop] Free fall, bracing")
+
+    def _update_jump(self, x_pos: float, x_vel: float, accel_mag: float, dt: float) -> Tuple[float, bool]:
         """Advances the timed jump state machine. Returns (leg_delta, airborne)."""
         if self.jump_requested and self.jump_phase == "idle":
             self.jump_phase, self.jump_timer, self.jump_requested = "crouch", 0.0, False
+            self.landing_from_drop = False
         if self.jump_phase == "idle":
             return self.crouch_delta, False
 
         self.jump_timer += dt
         t = self.jump_timer
+        if self.jump_phase == "drop":
+            # Ends at touchdown (or after 1 s: nothing falls that long indoors, so the sensor must be wrong)
+            if (accel_mag is not None and accel_mag > self.TOUCHDOWN_ACCEL) or t >= 1.0:
+                self.jump_phase, self.jump_timer = "land", 0.0
+                self.target_x = x_pos
+                return self.DROP_DELTA, False
+            return self.DROP_DELTA, True
         if self.jump_phase == "crouch":
             # Smooth cosine wind-up from the current crouch into the deep crouch
             a = 0.5 - 0.5 * math.cos(math.pi * min(t / (0.75 * self.JUMP_CROUCH_TIME), 1.0))
@@ -571,7 +713,8 @@ class ScaledWheeledDuckController:
         if t >= self.JUMP_LAND_TIME:
             self.jump_phase, self.jump_timer = "idle", 0.0
             print("[Jump] Landed.")
-        return self.JUMP_LAND_DELTA + a * (self.crouch_delta - self.JUMP_LAND_DELTA), False
+        start = self.DROP_DELTA if self.landing_from_drop else self.JUMP_LAND_DELTA
+        return start + a * (self.crouch_delta - start), False
 
 
 LEG_ACTUATORS = slice(0, 6)  # ctrl[0:6] are the six leg position servos (hip roll, hip pitch, knee x2)
@@ -606,6 +749,7 @@ class RealismConfig:
                                                 #   tick; "bno055": fused orientation AND gyro held at 100 Hz (fusion rate)
     gyro_noise_dps: float = 0.3                 # gyro white noise, RMS per sample (deg/s)
     gyro_bias_dps: float = 0.5                  # constant per-axis gyro bias, drawn in +/- this range (deg/s)
+    accel_noise: float = 0.1                    # accelerometer magnitude noise, RMS per sample (m/s^2)
     orient_noise_deg: float = 0.2               # orientation estimate jitter, RMS per axis (deg)
     bno055_rate_hz: float = 100.0               # BNO055 fusion-mode output rate (orientation and gyro)
     encoder_counts: int = 16384                 # 14-bit encoders (counts per revolution)
@@ -683,7 +827,7 @@ class SimToReal:
                 f"motor x{self.motor_strength:.2f} | {self.cfg.arch} imu={self.cfg.imu} latency={self.latency_ms:.1f}ms "
                 f"legs@{1.0 / (self.leg_period * self.dt):.0f}Hz CAN {100 * load:.0f}%")
 
-    def sense(self, quat, gyro, lw_pos, rw_pos, lw_vel, rw_vel, leg_fold, leg_fold_rate):
+    def sense(self, quat, gyro, lw_pos, rw_pos, lw_vel, rw_vel, leg_fold, leg_fold_rate, accel_mag=None):
         """Corrupts perfect MuJoCo sensor readings the way the IMU and GIM encoders (over CAN) would."""
         import mujoco
         cfg, rng = self.cfg, self.rng
@@ -704,7 +848,9 @@ class SimToReal:
         lw_pos, rw_pos = (round(p / tick) * tick for p in (lw_pos, rw_pos))
         lw_vel, rw_vel = (v + rng.normal(0.0, cfg.wheel_vel_noise) for v in (lw_vel, rw_vel))
         q, g = self.held_imu
-        return q.copy(), g.copy(), lw_pos, rw_pos, lw_vel, rw_vel, *self.held_legs
+        if accel_mag is not None:
+            accel_mag = abs(accel_mag + rng.normal(0.0, cfg.accel_noise))
+        return q.copy(), g.copy(), lw_pos, rw_pos, lw_vel, rw_vel, *self.held_legs, accel_mag
 
     def actuate(self, ctrl: np.ndarray) -> np.ndarray:
         """Returns the command the motors apply this step: delayed, legs updated only at the leg rate, and (pi)
@@ -749,20 +895,22 @@ def read_sensors(model, data) -> tuple:
     leg_fold_rate = 0.5 * sum(v for _, v in legs)
 
     return (s("orientation", 4), s("gyro", 3), float(s("left_wheel_pos")[0]), float(s("right_wheel_pos")[0]),
-            float(s("left_wheel_vel")[0]), float(s("right_wheel_vel")[0]), float(leg_fold), float(leg_fold_rate))
+            float(s("left_wheel_vel")[0]), float(s("right_wheel_vel")[0]), float(leg_fold), float(leg_fold_rate),
+            float(np.linalg.norm(s("accelerometer", 3))))
 
 
-def apply_leg_torque_curve(model, data, curve, actuators) -> None:
-    """Caps the GIM6010-8 joints' torque at what the motor can deliver at its current speed.
+def apply_torque_curve(model, data, curve, actuators, floor: float = 0.5, volts: float = 24.0) -> None:
+    """Caps the motors' torque at what they can deliver at their current speed.
 
     MuJoCo's forcerange is speed-independent, but a real motor runs out of voltage as it speeds up: the GIM6010-8
     gives 11 N*m at standstill but only ~6 N*m at the ~185 rpm the jump thrust reaches.
     """
     stall, no_load_rpm, rpm_per_nm = curve
+    no_load_rpm *= volts / 24.0   # no-load speed goes with the pack voltage; drivers current-limit the stall torque
     actuators = list(actuators)
     dof = model.jnt_dofadr[model.actuator_trnid[actuators, 0]]
     rpm = np.abs(data.qvel[dof]) * 60.0 / (2.0 * math.pi)
-    limit = np.clip((no_load_rpm - rpm) / rpm_per_nm, 0.5, stall)
+    limit = np.clip((no_load_rpm - rpm) / rpm_per_nm, floor, stall)
     model.actuator_forcerange[actuators, 0] = -limit
     model.actuator_forcerange[actuators, 1] = limit
 
@@ -776,8 +924,12 @@ def step_robot(model, data, controller: "ScaledWheeledDuckController", realism: 
     ctrl, info = controller.compute_control(*sensors, dt=float(model.opt.timestep))
     data.ctrl[:] = realism.actuate(ctrl) if realism is not None else ctrl
     apply_leg_servo_kd(model, controller.leg_servo_kd())
+    volts = 24.0 if controller.bus_voltage is None else controller.bus_voltage
     if controller.profile.leg_torque_curve is not None:
-        apply_leg_torque_curve(model, data, controller.profile.leg_torque_curve, controller.profile.curve_actuators)
+        apply_torque_curve(model, data, controller.profile.leg_torque_curve, controller.profile.curve_actuators,
+                           volts=volts)
+    if controller.profile.wheel_torque_curve is not None:
+        apply_torque_curve(model, data, controller.profile.wheel_torque_curve, (10, 11), floor=0.05, volts=volts)
     mujoco.mj_step(model, data)
     return info
 
