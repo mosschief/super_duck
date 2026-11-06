@@ -305,6 +305,9 @@ def turn_at_speed(v, deg):
 
 
 # ---------------------------------------------------------------- power
+holder_volts = {}   # pack voltage of the running battery() scenario, for top_speed's expected cap
+
+
 def battery(volts, base):
     """Runs a scenario with both motors' torque-speed curves at the pack voltage (no-load speed ~ V / 24 V).
     Stall torque is current-limited by the drivers and stays put down to ~19 V."""
@@ -314,23 +317,30 @@ def battery(volts, base):
     def scenario(seed):
         old_run = T.run
         T.run = lambda *a, **kw: old_run(*a, hook=hook, fallen=make_fallen(), **kw)
+        holder_volts["v"] = volts
         try:
             return base(seed)
         finally:
             T.run = old_run
+            holder_volts.pop("v", None)
     scenario.__name__ = f"battery {volts:.1f} V {base.__name__}"
     return scenario
 
 
 def top_speed(seed):
-    """Top speed (1.8 m/s) for 4 s, then brake. The controller's speed cap sets what it reaches: 1.75 m/s at the 21 V
-    cutoff."""
-    log, fell, _ = T.run(drive(1.0, 1.8) + [(7.0, "space")], 11.0, realism_seed=seed)
+    """Top speed (MAX_SPEED, 2.5 m/s) for 4 s, then brake. The controller's speed cap sets what it reaches at the pack
+    voltage: all of it at 25.2 V, 2.43 m/s at 22.2 V, 2.30 m/s at the 21 V cutoff."""
+    vmax = swd.ScaledWheeledDuckController.MAX_SPEED
+    probe = T.make_controller(None)
+    probe.filtered_voltage = holder_volts.get("v")
+    want = probe.speed_cap()
+    log, fell, _ = T.run(drive(1.0, vmax) + [(7.0, "space")], 11.0, realism_seed=seed)
     if fell:
         return False, True, f"fell at t={log[-1, 0]:.1f} s"
     v = T.window(log, 5.5, 7.0)[:, 4].mean()
     stop = np.abs(T.window(log, 9.5, 11)[:, 4]).max()
-    return v > 1.65 and stop < 0.08, False, f"cruise {v:.2f} m/s (cmd 1.80), |v| after brake {stop:.3f} m/s"
+    return (v > want - 0.1 and stop < 0.08), False, (f"cruise {v:.2f} m/s (cmd {vmax:.2f}, capped to {want:.2f}), "
+                                                     f"|v| after brake {stop:.3f} m/s")
 
 
 def low_battery(v0):
@@ -760,12 +770,12 @@ SCENARIOS = (
                                                      threshold(20, side="left")]
     + [threshold(h, curb=True) for h in (10, 20, 30)]
     + [uneven(a) for a in (5, 10, 20)]
-    + [turn_at_speed(v, d) for v in (0.6, 1.2, 1.5, 1.8) for d in (45, 90)]
-    + [cruise_push(v, f) for v in (0.6, 1.05, 1.5, 1.8) for f in (20, 30, -30)]
+    + [turn_at_speed(v, d) for v in (0.6, 1.2, 1.5, 1.8, 2.2, 2.5) for d in (45, 90)]
+    + [cruise_push(v, f) for v in (0.6, 1.05, 1.5, 1.8, 2.5) for f in (20, 30, -30)]
     + [low_grip(mu, b) for mu in (0.3, 0.4, 0.5, 0.6) for b in (T.drive_turn_brake, T.push(30), T.jump)]
     + [battery(v, b) for v in (25.2, 22.2, 21.1) for b in (top_speed, T.push(40), T.jump)]
-    + [low_battery(0.6), low_battery(1.5)]
-    + [estop(v) for v in (0.0, 0.6, 1.8)]
+    + [low_battery(0.6), low_battery(1.5), low_battery(2.5)]
+    + [estop(v) for v in (0.0, 0.6, 1.8, 2.5)]
     + [can_fault("CAN left wheel frames lost 20 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.02, WHEEL_L)]),
        can_fault("CAN left wheel frames lost 100 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.1, WHEEL_L)]),
        can_fault("CAN left bus lost 50 ms @0.6", drive(1.0, 0.6), 7.0, hold=[(4.0, 4.05, LEFT_BUS)]),
@@ -779,7 +789,7 @@ SCENARIOS = (
     + [imu_fault(f"IMU mounted {d:+d} deg off", imu_offset_deg=d) for d in (1, 2, 3, -3)]
     + [imu_fault("gyro bias drift 0.05 deg/s per s", gyro_drift=0.05),
        imu_fault("vibration noise @1.0 m/s", vib=(3.0, 0.5), speed=1.05)]
-    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8)] + [wall(0.6), wall(1.2)]
+    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8, 2.5)] + [wall(0.6), wall(1.2)]
     + [drop(h) for h in (3, 6, 10)] + [bad_landing("slope"), bad_landing("plate"), plate_edge]
     + [head_sweep, endurance(20)]
 )

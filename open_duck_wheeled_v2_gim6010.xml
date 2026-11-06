@@ -177,9 +177,15 @@
         <position kp="32.0" kv="4.0" forcerange="-3.47 3.47" inheritrange="1"/>
       </default>
 
-      <!-- SteadyWin GIM4305-10 Wheel Hub Motor (Direct Torque Control at Ankle/Foot Assembly) -->
+      <!-- SteadyWin GIM4305-10 Wheel Hub Motor (Direct Torque Control at Ankle/Foot Assembly)
+           The sim caps the motor torque with the listing's shaft speed-torque curve (1 N*m at 300 rpm, 0 at 366 rpm,
+           24 V; simulate_wheeled_duck.py `apply_torque_curve`), which already includes the motor's and gearbox's own
+           losses. So the joint keeps only a little bearing / seal drag. The old damping="0.05" counted the motor's
+           losses twice: it ate 1.2 N*m at 1.8 m/s and kept the unloaded wheel below its 300 rpm *rated* speed. The
+           balance tuning leaned on that damper, so the controller now supplies it about the reference speed
+           (`WHEEL_DAMPING`), where it costs no torque at a steady cruise. Measure on the bench with tools/sysid.py. -->
       <default class="gim4305_wheel">
-        <joint type="hinge" axis="0 1 0" limited="false" damping="0.05" frictionloss="0.015" armature="0.0038"/>
+        <joint type="hinge" axis="0 1 0" limited="false" damping="0.005" frictionloss="0.015" armature="0.0038"/>
         <motor ctrlrange="-3.47 3.47" forcerange="-3.47 3.47" gear="1.0"/>
       </default>
 

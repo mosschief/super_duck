@@ -8,8 +8,8 @@ Robot profiles (`--robot`): `gim6010` (default, the build) = SteadyWin GIM6010-8
 (`open_duck_wheeled_v2.xml`).
 
 Live Keyboard Driving Controls (inside the 3D MuJoCo Viewer Window):
-  - Up Arrow    or 'I' / 'W' : Increase forward speed (+0.15 m/s per press, up to +1.80 m/s; less on a low pack)
-  - Down Arrow  or 'K' / 'S' : Decrease speed / reverse (-0.15 m/s per press, down to -1.80 m/s)
+  - Up Arrow    or 'I' / 'W' : Increase forward speed (+0.15 m/s per press, up to +2.50 m/s; less on a low pack)
+  - Down Arrow  or 'K' / 'S' : Decrease speed / reverse (-0.15 m/s per press, down to -2.50 m/s)
   - Left Arrow  or 'J' / 'A' : Steer left (+15 deg heading step per press)
   - Right Arrow or 'L' / 'D' : Steer right (-15 deg heading step per press)
   - Spacebar                 : Brake to a full stop (zero speed & hold current position)
@@ -103,7 +103,8 @@ PROFILES = {
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
         params=ScaledWheeledDuckParams(body_mass=6.529, wheel_mass=0.251, wheel_track=0.224, com_height=0.2211,
-                                       body_pitch_inertia=0.1050, wheel_inertia=0.00477),   # sim = CAD (2026-10-31)
+                                       body_pitch_inertia=0.1050, wheel_inertia=0.00477,    # sim = CAD (2026-10-31)
+                                       wheel_viscous=0.005),   # = the MJCF's gim4305_wheel joint
         initial_pitch_trim=0.0758,
         posture_coeffs=(-0.1574, 0.0358),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
@@ -205,12 +206,15 @@ class ScaledWheeledDuckController:
     MAX_CROUCH = 0.24
     RAMP_JERK = 8.0        # m/s^3, how quickly the speed ramp's acceleration may fade out near the target speed
     REANCHOR_DIST = 0.30   # m; pushed further than this from the hold point -> hold wherever it comes to rest
-    # m/s. Wheel drag and the GIM4305-10's curve set this: at 2.2 m/s it falls over on a full pack, at 1.95 m/s the
-    # same turn survives or falls on small gain changes. `speed_cap` lowers it as the pack sags.
-    MAX_SPEED = 1.80
+    # m/s. The GIM4305-10's speed-torque curve sets this through `speed_cap` (2.78 m/s on a full pack, 2.43 at 22.2 V,
+    # 2.30 at the 21 V cutoff). This caps it below that: at 2.8 m/s a 90 deg turn knocks 3 of 10 randomized
+    # robots over (the outer wheel runs out of speed), at 2.5 m/s none. It was 1.8 while the wheel joint
+    # double-counted the motor's losses (see the MJCF's `gim4305_wheel`).
+    MAX_SPEED = 2.50
     # Wheel torque (N*m) kept free at top speed: drag and the motor's speed-torque curve use up the rest, and a
     # balancing robot with none left can't drive under itself to catch a forward lean.
     SPEED_HEADROOM = 0.25
+    WHEEL_DAMPING = 0.045  # N*m*s/rad, virtual wheel damper about the reference speed (see `compute_control`)
     TURN_RATE_MAX = 2.5    # rad/s, heading reference rate at low speed
     TURN_ACCEL_MAX = 1.5   # m/s^2, sideways: speed x turn rate. About half the 3.3 m/s^2 that tips the robot.
     LOW_BATTERY_V = 21.0   # V, bus voltage (filtered) that parks the robot: below this a 40 N shove knocks it over
@@ -499,13 +503,22 @@ class ScaledWheeledDuckController:
             wheel_ff = (self.params.wheel_viscous * self.target_vel / R
                         + self.params.wheel_coulomb * math.copysign(1.0, self.target_vel))
 
+        # Virtual wheel damper on each wheel's speed (encoder, relative to the foot) about the reference speed. The
+        # balance tuning was done with a 0.05 N*m*s/rad passive wheel damper that the feedforward above cancelled at
+        # the reference speed, so it acted on exactly this error. Without it, slopes held 2 cm looser and a leg
+        # going limp for 300 ms knocked the robot over. Being a damper about the reference, it costs no torque at a
+        # steady cruise, where the passive one ate 1.2 N*m per wheel at 1.8 m/s.
+        omega_ref = self.target_vel / R
+        damp_left = -self.WHEEL_DAMPING * (left_wheel_vel - omega_ref)
+        damp_right = -self.WHEEL_DAMPING * (right_wheel_vel - omega_ref)
+
         tau_left = np.clip(
-            0.5 * total_balance_torque - yaw_torque + wheel_ff,
+            0.5 * total_balance_torque - yaw_torque + wheel_ff + damp_left,
             -self.params.max_wheel_torque,
             self.params.max_wheel_torque,
         )
         tau_right = np.clip(
-            0.5 * total_balance_torque + yaw_torque + wheel_ff,
+            0.5 * total_balance_torque + yaw_torque + wheel_ff + damp_right,
             -self.params.max_wheel_torque,
             self.params.max_wheel_torque,
         )
@@ -904,15 +917,20 @@ def apply_torque_curve(model, data, curve, actuators, floor: float = 0.5, volts:
 
     MuJoCo's forcerange is speed-independent, but a real motor runs out of voltage as it speeds up: the GIM6010-8
     gives 11 N*m at standstill but only ~6 N*m at the ~185 rpm the jump thrust reaches.
+
+    The curve only limits torque *with* the motion (motoring). Torque against it (braking) is helped by the back-EMF
+    instead of fought by it, so there the drivers' current limit (stall torque) is the only cap. Capping both ways
+    let a wheel at 2.5 m/s brake with only 0.7 N*m, and a backward shove at that speed tipped the robot over.
     """
     stall, no_load_rpm, rpm_per_nm = curve
     no_load_rpm *= volts / 24.0   # no-load speed goes with the pack voltage; drivers current-limit the stall torque
     actuators = list(actuators)
     dof = model.jnt_dofadr[model.actuator_trnid[actuators, 0]]
-    rpm = np.abs(data.qvel[dof]) * 60.0 / (2.0 * math.pi)
+    vel = data.qvel[dof]
+    rpm = np.abs(vel) * 60.0 / (2.0 * math.pi)
     limit = np.clip((no_load_rpm - rpm) / rpm_per_nm, floor, stall)
-    model.actuator_forcerange[actuators, 0] = -limit
-    model.actuator_forcerange[actuators, 1] = limit
+    model.actuator_forcerange[actuators, 0] = np.where(vel < 0, -limit, -stall)
+    model.actuator_forcerange[actuators, 1] = np.where(vel > 0, limit, stall)
 
 
 def step_robot(model, data, controller: "ScaledWheeledDuckController", realism: "SimToReal" = None) -> dict:
