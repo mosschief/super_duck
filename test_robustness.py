@@ -361,7 +361,11 @@ def low_battery(v0):
 
 
 def cruise_push(v, force):
-    """A shove (0.1 s) while cruising. Forward is the hard way: the wheels must speed up to get back under the trunk."""
+    """A shove (0.1 s) while cruising. Forward is the hard way: the wheels must speed up to get back under the trunk.
+
+    At 2.5 m/s the GIM4305-10s can't: both wheels' torque only covers their drag at 2.77 m/s (366 rpm no-load curve), and
+    a 20 N shove alone takes the robot to 2.78 m/s, before the wheels have run ahead to tip it back. The fall cutoff
+    (`fall_cutoff`) is what the controller can do there."""
     def scenario(seed):
         log, fell, _ = run(seed, events=drive(1.0, v), duration=9.0, pushes=[(5.0, force)])
         if fell:
@@ -552,6 +556,42 @@ def fall_at_speed(v, force=90.0):
             return None, False, f"stayed up (wheel peak {c.wheels():.0f} N)"
         return None, False, f"first {c.first[0]}; peak ground force " + ", ".join(f"{k} {f:.0f} N" for k, f in hits)
     scenario.__name__ = f"fall +{force:.0f} N @{v:.1f} m/s"
+    return scenario
+
+
+def fall_cutoff(v, force=30.0):
+    """A forward shove at v the wheels can't catch (at 2.5 m/s the motors have no speed left: see `cruise_push`), then
+    someone stands the robot back on its wheels and lets go 1.2 s later. The fall cutoff must stop the wheels driving it along the floor on
+    its head (without it: 4.4 m at 2.5 m/s), and re-arm the balance loop once it is upright, parked, not driving off."""
+    t_push, t_up, t_let_go = 5.0, 8.0, 9.2
+
+    def scenario(seed):
+        c = Contacts()
+        state = {}
+
+        def hook(m, d, ctl):
+            if d.time >= t_up and "xy" not in state:   # picked up and set down upright where it lies, at the
+                state["xy"] = d.qpos[0:2].copy()        # balance lean ...
+                state["q"] = np.zeros(4)
+                mujoco.mju_axisAngle2Quat(state["q"], np.array([0.0, 1.0, 0.0]), ctl.pitch_trim)
+                d.qpos[:] = m.key_qpos[0]
+                d.qvel[:] = 0.0
+            if "xy" in state and d.time < t_let_go:    # ... and held there by the trunk for a moment
+                d.qpos[0:2], d.qpos[3:7], d.qvel[0:6] = state["xy"], state["q"], 0.0
+        log, _, _ = T.run(drive(1.0, v), t_let_go + 4.0, pushes=[(t_push, force)], realism_seed=seed, hook=hook,
+                          fallen=lambda m, d: (c(m, d) if d.time < t_up else None, False)[1])
+        if c.first is None:
+            return result(True, False, "stayed up")
+        t_hit = c.first[1]
+        slide = T.window(log, t_up - 0.5, t_up)[-1, 1] - T.window(log, t_hit, t_up)[0, 1]
+        still = np.abs(T.window(log, t_up - 0.5, t_up)[:, 4]).max()
+        after = T.window(log, t_let_go, t_let_go + 4.0)
+        drift, tilt = hold_drift(log, t_let_go, t_let_go + 4.0), np.abs(after[:, 5]).max()
+        # A few cm of roll after letting go is the trim learner swapping the cruise lean for the parked one
+        return result(slide < 1.0 and still < 0.05 and drift < 10 and tilt < 15, False,
+                      f"slid {slide:.2f} m on the floor, |v| {still:.2f} m/s before pick-up; stood up: drift "
+                      f"{drift:.1f} cm, max |pitch| {tilt:.0f} deg")
+    scenario.__name__ = f"fall cutoff +{force:.0f} N @{v:.1f} m/s"
     return scenario
 
 
@@ -789,7 +829,7 @@ SCENARIOS = (
     + [imu_fault(f"IMU mounted {d:+d} deg off", imu_offset_deg=d) for d in (1, 2, 3, -3)]
     + [imu_fault("gyro bias drift 0.05 deg/s per s", gyro_drift=0.05),
        imu_fault("vibration noise @1.0 m/s", vib=(3.0, 0.5), speed=1.05)]
-    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8, 2.5)] + [wall(0.6), wall(1.2)]
+    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8, 2.5)] + [fall_cutoff(1.8), fall_cutoff(2.5)] + [wall(0.6), wall(1.2)]
     + [drop(h) for h in (3, 6, 10)] + [bad_landing("slope"), bad_landing("plate"), plate_edge]
     + [head_sweep, endurance(20)]
 )

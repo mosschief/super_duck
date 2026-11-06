@@ -214,6 +214,15 @@ class ScaledWheeledDuckController:
     # Wheel torque (N*m) kept free at top speed: drag and the motor's speed-torque curve use up the rest, and a
     # balancing robot with none left can't drive under itself to catch a forward lean.
     SPEED_HEADROOM = 0.25
+    # Fall cutoff. Past this lean beyond the balance lean no wheel torque brings the robot back (the worst recovered
+    # shove in the test suites peaks at 23 deg), and a fallen robot whose balance loop keeps driving scoots along the
+    # floor on its head: 4.4 m after a 30 N shove at 2.5 m/s, 5.4 m at 1.8 m/s (1.4 / 1.6 m with the cutoff). So
+    # the wheels go to zero torque and the drive command is cleared until the robot has been stood up again.
+    FALL_PITCH = math.radians(40.0)     # rad beyond the balance lean
+    FALL_ROLL = math.radians(45.0)      # rad; the wheels can't catch a sideways fall at all (turns bank <= 7 deg)
+    UPRIGHT_PITCH = math.radians(10.0)  # rad, held this close to the balance lean (and level) ...
+    UPRIGHT_RATE = 0.5                  # rad/s, ... this still ...
+    UPRIGHT_TIME = 1.0                  # s, ... this long re-arms the balance loop
     WHEEL_DAMPING = 0.045  # N*m*s/rad, virtual wheel damper about the reference speed (see `compute_control`)
     TURN_RATE_MAX = 2.5    # rad/s, heading reference rate at low speed
     TURN_ACCEL_MAX = 1.5   # m/s^2, sideways: speed x turn rate. About half the 3.3 m/s^2 that tips the robot.
@@ -272,6 +281,8 @@ class ScaledWheeledDuckController:
         self.freefall_time = 0.0
         self.landing_from_drop = False
         self.reset_requested = False
+        self.fallen = False           # Fall cutoff latched: wheels off until stood up (see FALL_PITCH)
+        self.upright_time = 0.0
 
         # Jump state machine: "idle" -> "crouch" -> "thrust" -> "flight" -> "land" -> "idle"
         self.jump_phase = "idle"
@@ -305,6 +316,8 @@ class ScaledWheeledDuckController:
         self.braking = False
         self.settling = False
         self.reset_requested = False
+        self.fallen = False
+        self.upright_time = 0.0
 
     def handle_keypress(self, keycode: int) -> None:
         """Processes live keyboard commands from the MuJoCo viewer window."""
@@ -441,6 +454,7 @@ class ScaledWheeledDuckController:
         # that to the slow trim learner made each 'Z'/'X' press roll the robot ~20 cm while it re-learned.
         balance_pitch = self.pitch_trim + self.posture_trim(fold)
         pitch_err = pitch - balance_pitch
+        self._update_fall(pitch_err, roll, pitch_rate, x_pos, yaw, dt)
         pos_err = float(np.clip(x_pos - self.target_x, -0.30, 0.30))
         # When actively cruising, soften position-hold weight so velocity tracking dominates cleanly
         pos_weight = 0.25 if abs(self.cmd_vel) > 1e-3 else 1.0
@@ -464,7 +478,9 @@ class ScaledWheeledDuckController:
         # Also held off just after the legs move (a crouch rolls the robot a few cm and back on its own) and at start-up
         # (it's still settling onto its wheels).
         self.run_time += dt
-        if parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF:
+        if self.fallen:
+            pass   # lying on the floor says nothing about the balance lean
+        elif parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF:
             trim_err = pos_err + self.TRIM_VEL_WEIGHT * (x_vel - self.target_vel)
             gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
             self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
@@ -522,6 +538,8 @@ class ScaledWheeledDuckController:
             -self.params.max_wheel_torque,
             self.params.max_wheel_torque,
         )
+        if self.fallen:
+            tau_left = tau_right = 0.0
 
         # 3. 4-DOF GIM4305-10 Upper Leg Coordination (Roll Leveling + Turn Banking + Crouch Height)
         turn_bank = np.clip(-math.atan2(x_vel * turn_rate_ref, self.params.gravity), -0.12, 0.12)
@@ -581,6 +599,7 @@ class ScaledWheeledDuckController:
             "tau_right": tau_right,
             "pitch_trim_deg": math.degrees(balance_pitch),
             "jump_phase": self.jump_phase,
+            "fallen": self.fallen,
         }
         return ctrl, telemetry
 
@@ -661,6 +680,27 @@ class ScaledWheeledDuckController:
             self.cmd_vel = 0.0
             self.jump_requested = False
             self.crouch_delta = min(self.MAX_CROUCH, self.crouch_delta + 0.10 * dt)
+
+    def _update_fall(self, pitch_err: float, roll: float, pitch_rate: float, x_pos: float, yaw: float, dt: float) -> None:
+        """Fall cutoff (see `FALL_PITCH`): latches past the fall lean, re-arms once held upright and still."""
+        if not self.fallen:
+            if abs(pitch_err) > self.FALL_PITCH or abs(roll) > self.FALL_ROLL:
+                self.fallen, self.upright_time = True, 0.0
+                self.cmd_vel = self.target_vel = 0.0
+                self.braking = self.settling = self.jump_requested = False
+                print(f"[Fall] pitch {math.degrees(pitch_err):+.0f} deg past the balance lean, roll "
+                      f"{math.degrees(roll):+.0f} deg: wheels off")
+            return
+        upright = (abs(pitch_err) < self.UPRIGHT_PITCH and abs(roll) < self.UPRIGHT_PITCH
+                   and abs(pitch_rate) < self.UPRIGHT_RATE)
+        self.upright_time = self.upright_time + dt if upright else 0.0
+        self.cmd_vel = self.target_vel = 0.0
+        self.target_x = x_pos
+        self.target_yaw = self.yaw_ref = yaw   # it may have been stood up facing anywhere
+        if self.upright_time >= self.UPRIGHT_TIME:
+            self.fallen = False
+            self.run_time = 0.0   # trim learner holds off as at start-up: it's still settling onto its wheels
+            print("[Fall] Upright again: balancing")
 
     def _update_gyro_bias(self, gyro_xyz, parked: bool, dt: float) -> None:
         """A parked robot's mean turn rate is zero, so the gyro's mean is its bias. A running average gets close within
