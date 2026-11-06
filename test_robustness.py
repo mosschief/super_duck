@@ -173,7 +173,7 @@ def slope(deg, direction):
         log, fell, _ = run(seed, events=ev, duration=17.0, spec_edit=spec_edit, init=init)
         if fell:
             return False, True, f"fell at t={log[-1, 0]:.1f} s"
-        # It starts with no idea of the slope: the first seconds are the trim learner rolling it back to its hold point
+        # It starts with no idea of the slope: it rolls downhill until the slope observer has it, then holds there
         park, hold = hold_drift(log, 5, 8), hold_drift(log, 14, 17)
         return result(park < 5 and hold < 5, False, f"parked drift {park:.1f} cm (5-8 s), after brake {hold:.1f} cm (14-17 s)")
     scenario.__name__ = f"slope {direction} {deg} deg"

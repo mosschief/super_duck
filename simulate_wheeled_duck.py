@@ -220,14 +220,36 @@ class ScaledWheeledDuckController:
     LOW_BATTERY_V = 21.0   # V, bus voltage (filtered) that parks the robot: below this a 40 N shove knocks it over
     LOW_BATTERY_CLEAR_V = 21.8   # V, only a charged pack clears it (a parked pack recovers a few tenths on its own)
     VOLTAGE_FILTER_S = 2.0  # s, so the sag of a jump or a hard stop doesn't count as a flat pack
-    TRIM_LIMIT = 0.30      # rad, enough for the lean on a 15 deg slope on top of the standing lean
+    TRIM_LIMIT = 0.30      # rad, standing lean plus a 15 deg slope's lean, should the slope feedforward be off
     # Trim learner while parked: gain = TRIM_GAIN_PARKED + self.TRIM_GAIN_PER_M * |position error|, (rad/s) per m. The gain
-    # grows with the error so a slope is learned in ~5 s, without a high gain stirring the robot up on a flat floor.
+    # grows with the error so a big trim error (CoM offset, IMU mounting) is learned in ~5 s, without a high gain stirring
+    # the robot up on a flat floor. Slopes are the slope observer's job (`_update_slope`); this takes up what it misses.
     TRIM_GAIN_PARKED = 0.03
     TRIM_GAIN_PER_M = 0.3
     TRIM_VEL_WEIGHT = 1.0  # m of position-equivalent error per m/s
     TRIM_GAIN_CRUISE = 0.02  # (rad/s) per (m/s of speed error), while cruising
     TRIM_HOLDOFF = 1.0     # s after start-up and after a leg move
+    # Slope observer (see `_update_slope`): momentum-observer bandwidth, the slower low-pass on what is fed forward
+    # (a real slope lasts; a shove or a bump doesn't), and the steepest slope it will feed forward.
+    SLOPE_OBS_TAU = 0.15   # s
+    SLOPE_FF_TAU = 0.5     # s
+    SLOPE_MAX_DEG = 20.0
+    # deg: estimates well under this are mostly not fed forward (scaled by s^4 / (s^4 + this^4)). On a flat floor the
+    # estimate wanders ~+/-0.2 deg (sensor noise, latency, motor torque-constant error while braking), and feeding that
+    # forward made the parked robot creep ~3 cm on randomized robots; the trim learner takes up the small slopes it
+    # leaves out. A hard deadband instead left 1.5 deg out on every slope (s^2 still ~0.2 deg at 10 deg): braking down
+    # 10 deg, the robot then crept at a steady 3-5 cm/s, too fast for a brake to count as settled.
+    SLOPE_DEADBAND_DEG = 1.5
+    # Lean per unit of slope torque, relative to the rigid-body figure M*R*sin(slope) / (m_b*l). Fitted in the sim on
+    # held slopes of 5-15 deg with the wheel friction removed (so the trim learner's leftover is the model error): the
+    # rigid-body figure is ~12% short (0.66 deg at 15 deg, a ~16 cm hold offset), presumably the leg servos giving
+    # under the wheel torque's reaction. Re-fit on hardware, like `posture_trim`.
+    SLOPE_LEAN_GAIN = 1.12
+    SLOPE_STICK_SPEED = 1.0  # rad/s: a wheel turning slower than this (relative to its leg) may be held by dry friction
+    # deg: the trim learner waits while the fed-forward slope is further than this from the observer's (it is still
+    # catching up). Otherwise both learned a fresh slope at once and the trim then spent ~5 s unlearning its share:
+    # parked on a 10 deg slope, it rolled 10 cm.
+    SLOPE_SETTLED_DEG = 1.0
     GYRO_BIAS_TAU = 30.0   # s, drift-following low-pass
     GYRO_BIAS_PRIOR = 500  # samples: the running average starts as if the first second had read zero
     GYRO_STILL_RATE = 0.05  # rad/s (~3 deg/s), faster than this is real motion
@@ -280,6 +302,12 @@ class ScaledWheeledDuckController:
         self.jump_takeoff_vel = 0.0
         self.braking = False
         self.settling = False
+        self.slope_obs = None         # Momentum observer state (see `_update_slope`); None = (re)start it
+        self.slope_force = 0.0        # N, observed external force along the ground (+ = pushing it forward)
+        self.slope_sin = 0.0          # sin(slope), + = uphill ahead, low-passed: what the feedforward uses
+        self.slope_gap = 0.0          # sin: observer's slope minus `slope_sin` (how far the feedforward still has to go)
+        self.slope_before = None      # `slope_sin` when the feedforward last started catching up while parked
+        self.last_wheel_torque = 0.0  # N*m, both wheels, as commanded last tick
 
     def reset_state(self) -> None:
         """Clears all driving/posture/jump references (used on 'R' reset)."""
@@ -304,6 +332,12 @@ class ScaledWheeledDuckController:
         self.jump_takeoff_vel = 0.0
         self.braking = False
         self.settling = False
+        self.slope_obs = None
+        self.slope_force = 0.0
+        self.slope_sin = 0.0
+        self.slope_gap = 0.0
+        self.slope_before = None
+        self.last_wheel_torque = 0.0
         self.reset_requested = False
 
     def handle_keypress(self, keycode: int) -> None:
@@ -418,6 +452,9 @@ class ScaledWheeledDuckController:
         self.legs_moved_age += dt
         self._detect_drop(accel_mag, dt)
         leg_delta, airborne = self._update_jump(x_pos, x_vel, accel_mag, dt)
+        self._update_slope(x_vel, pitch, pitch_rate, left_wheel_vel, right_wheel_vel,
+                           frozen=airborne or self.jump_phase != "idle" or self.legs_moved_age < self.TRIM_HOLDOFF,
+                           dt=dt)
 
         # Advance target_x reference when driving; clamp windup so braking is immediate
         if abs(self.cmd_vel) > 1e-3 or abs(self.target_vel) > 1e-3:
@@ -439,7 +476,17 @@ class ScaledWheeledDuckController:
         # Balance lean = learned trim (feedback, absorbs payload / build error) + posture feedforward: crouching
         # moves the trunk mass fore/aft, so the balance lean changes by ~+0.7 deg per 0.1 rad of crouch. Leaving
         # that to the slow trim learner made each 'Z'/'X' press roll the robot ~20 cm while it re-learned.
-        balance_pitch = self.pitch_trim + self.posture_trim(fold)
+        # Plus the slope feedforward (see `_update_slope`): on an incline the wheels must hold M*g*R*sin(slope) and the
+        # trunk must lean that far further uphill to carry it. The LQR has no integral term, so without this it only
+        # found that torque through standing errors: at 15 deg it crawled up at 0.16 m/s of a 0.45 command, and a brake
+        # there rolled it back 33 cm while the trim learner caught up (and then the learned "trim" was wrong at the top).
+        M = self.params.body_mass + 2.0 * self.params.wheel_mass
+        db = math.sin(math.radians(self.SLOPE_DEADBAND_DEG))
+        slope_ff = self.slope_sin ** 5 / (self.slope_sin ** 4 + db ** 4)
+        lean_sin = self.SLOPE_LEAN_GAIN * M * R * slope_ff / (self.params.body_mass * self.params.com_height)
+        slope_lean = math.asin(float(np.clip(lean_sin, -0.5, 0.5)))
+        slope_torque = M * self.params.gravity * R * slope_ff
+        balance_pitch = self.pitch_trim + self.posture_trim(fold) + slope_lean
         pitch_err = pitch - balance_pitch
         pos_err = float(np.clip(x_pos - self.target_x, -0.30, 0.30))
         # When actively cruising, soften position-hold weight so velocity tracking dominates cleanly
@@ -450,11 +497,11 @@ class ScaledWheeledDuckController:
             pitch_err,
             pitch_rate,
         ])
-        total_balance_torque = float(np.dot(-self.k_lqr, state_err))
+        total_balance_torque = float(np.dot(-self.k_lqr, state_err)) + slope_torque
 
         # Online CoM-offset (pitch trim) estimator: a persistent position error while parked means the trim is
-        # wrong (the LQR is fighting gravity, a slope or a mis-mounted IMU). Integrate it away. Runs when parked (while
-        # the speed ramps the robot *must* lean to accelerate, which would corrupt the estimate) and is frozen in jumps.
+        # wrong (the LQR is fighting a CoM offset, a mis-mounted IMU or what the slope feedforward missed). Integrate it
+        # away. Runs when parked (while the speed ramps the robot *must* lean to accelerate, which would corrupt the estimate) and is frozen in jumps.
         # Also frozen while settling after a brake/push: the robot is still rolling to a stop then, and learning
         # from that motion skewed the trim by ~0.5 deg, which shows up as a ~12 cm roll-back once it stops
         # (at rest K_pitch * trim_error = K_x * pos_error, i.e. ~25 cm of offset per degree of trim error).
@@ -464,14 +511,29 @@ class ScaledWheeledDuckController:
         # Also held off just after the legs move (a crouch rolls the robot a few cm and back on its own) and at start-up
         # (it's still settling onto its wheels).
         self.run_time += dt
-        if parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF:
+        # And while the slope feedforward is still settling onto a new slope (see SLOPE_SETTLED_DEG).
+        settled_sin = math.sin(math.radians(self.SLOPE_SETTLED_DEG))
+        slope_settled = abs(self.slope_gap) < settled_sin
+        if parked and not slope_settled and self.slope_before is None:
+            self.slope_before = self.slope_sin
+        elif slope_settled and self.slope_before is not None:
+            # Parked on a slope it didn't know (switched on there): the robot rolled downhill until the feedforward
+            # caught up. That run-out is not a trim error, and returning from it through the trim learner wound the
+            # trim up by ~1 deg (it rolled back and forth 7 cm for seconds). Hold where it is instead, like REANCHOR
+            # after a big push. A shove's blip in the estimate comes back to where it was and keeps the hold point.
+            if parked and abs(self.slope_sin - self.slope_before) > settled_sin:
+                self.target_x = x_pos
+                pos_err = 0.0
+            self.slope_before = None
+        if (parked and slope_settled and self.legs_moved_age > self.TRIM_HOLDOFF
+                and self.run_time > self.TRIM_HOLDOFF):
             trim_err = pos_err + self.TRIM_VEL_WEIGHT * (x_vel - self.target_vel)
             gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
             self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
                                             -self.TRIM_LIMIT, self.TRIM_LIMIT))
-        elif self.jump_phase == "idle" and abs(self.cmd_vel) > 1e-3 and abs(vel_diff) < 1e-3:
-            # Cruising at a steady speed (no ramp, so no lean to accelerate): a speed error means the lean is wrong,
-            # as on a slope. Learning it here means the robot doesn't start the slope's lean from scratch at each stop.
+        elif self.jump_phase == "idle" and abs(self.cmd_vel) > 1e-3 and abs(vel_diff) < 1e-3 and slope_settled:
+            # Cruising at a steady speed (no ramp, so no lean to accelerate): a speed error means the lean is wrong.
+            # Learning it here means the robot doesn't start from scratch at each stop.
             self.pitch_trim = float(np.clip(self.pitch_trim - self.TRIM_GAIN_CRUISE * (x_vel - self.target_vel) * dt,
                                             -self.TRIM_LIMIT, self.TRIM_LIMIT))
 
@@ -569,6 +631,8 @@ class ScaledWheeledDuckController:
             self.antenna_cmd,
         ], dtype=float)
 
+        self.last_wheel_torque = float(tau_left + tau_right)
+
         telemetry = {
             "roll_deg": math.degrees(roll),
             "pitch_deg": math.degrees(pitch),
@@ -580,6 +644,7 @@ class ScaledWheeledDuckController:
             "tau_left": tau_left,
             "tau_right": tau_right,
             "pitch_trim_deg": math.degrees(balance_pitch),
+            "slope_deg": math.degrees(math.asin(self.slope_sin)),
             "jump_phase": self.jump_phase,
         }
         return ctrl, telemetry
@@ -642,6 +707,48 @@ class ScaledWheeledDuckController:
         free = no_load_rpm * volts / 24.0 / rpm_per_nm - self.params.wheel_coulomb - self.SPEED_HEADROOM
         omega = free / (rpm_per_rad_s / rpm_per_nm + self.params.wheel_viscous)
         return float(np.clip(omega * self.params.wheel_radius, 0.0, self.MAX_SPEED))
+
+    def _update_slope(self, x_vel: float, pitch: float, pitch_rate: float, left_wheel_vel: float,
+                      right_wheel_vel: float, frozen: bool, dt: float) -> None:
+        """Estimates the slope underfoot from wheel odometry, the gyro and the wheel torque (a momentum observer).
+
+        The robot's momentum along the ground, p = (M + 2*I_w/R^2)*v + m_b*l*cos(pitch)*pitch_rate (wheels' rolling
+        speed, plus the trunk swinging over the axle, plus the wheels' spin), changes only through the wheel torque
+        and outside forces: dp/dt = tau/R - M*g*sin(slope) (+ a shove). The observer's output r follows the outside
+        force with a first-order lag of SLOPE_OBS_TAU without differentiating anything, so it is not noisy, and its
+        estimate does not depend on the IMU's mounting (pitch only enters through cos(pitch)). It does see any
+        lasting push as a slope, which is what the robot should lean into anyway; brief ones (a shove, a bump) are
+        mostly filtered out by the slower SLOPE_FF_TAU low-pass on what is fed forward. Accelerating is explained by
+        the momentum change, so the speed ramps and brakes don't read as slopes.
+
+        Torque is what was commanded last tick, less the wheel joints' modelled friction (on hardware: the drivers'
+        reported current). A torque-constant error scales the estimate (a 10% weak motor reads 15 deg as 16), and
+        the trim learner takes up the lean that leaves. Frozen (held) while a wheel may be unloaded or the legs are
+        moving the trunk mass around.
+        """
+        P = self.params
+        R = P.wheel_radius
+        M = P.body_mass + 2.0 * P.wheel_mass
+        p = (M + 2.0 * P.wheel_inertia / R ** 2) * x_vel + P.body_mass * P.com_height * math.cos(pitch) * pitch_rate
+        k = 1.0 / self.SLOPE_OBS_TAU
+        if self.slope_obs is None or frozen:
+            self.slope_obs = p - self.slope_force / k   # (re)start without a jump in the output
+            return
+        friction = sum(P.wheel_viscous * w + P.wheel_coulomb * math.tanh(w / 0.5) for w in (left_wheel_vel, right_wheel_vel))
+        self.slope_obs += ((self.last_wheel_torque - friction) / R + self.slope_force) * dt
+        self.slope_force = k * (p - self.slope_obs)
+        s_max = math.sin(math.radians(self.SLOPE_MAX_DEG))
+        s = float(np.clip(-self.slope_force / (M * P.gravity), -s_max, s_max))
+        self.slope_gap = s - self.slope_sin
+        # Backlash of the wheel joints' dry friction: near standstill it takes any value within +/-coulomb per wheel,
+        # so the observer can't tell +/-0.33 deg of slope from it. Following that made the estimate and the parked
+        # robot swing in an ~8 s limit cycle (0.6 deg, 3.7 cm on a 15 deg slope; none with the friction removed).
+        # Only near standstill: while both wheels turn the friction's direction is known (and the estimate then tracks
+        # a slope fully instead of stopping a band short of it, which left the robot creeping after a brake).
+        stuck = min(abs(left_wheel_vel), abs(right_wheel_vel)) < self.SLOPE_STICK_SPEED
+        band = 2.0 * P.wheel_coulomb / R / (M * P.gravity) if stuck else 0.0
+        s = self.slope_sin + math.copysign(max(abs(s - self.slope_sin) - band, 0.0), s - self.slope_sin)
+        self.slope_sin += (s - self.slope_sin) * dt / self.SLOPE_FF_TAU
 
     def _update_battery(self, dt: float) -> None:
         """Low battery: stop, crouch to shorten the eventual fall, refuse to drive or jump until the pack is charged."""
