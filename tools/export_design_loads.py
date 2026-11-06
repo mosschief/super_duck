@@ -42,7 +42,7 @@ SCENARIOS = {
     "jump while driving": (DRIVE_FIRST + [(4.0, "c")], [], 7.0),
     "push +40 N": ([], [(2.0, 40.0)], 6.0),
     "push -40 N": ([], [(2.0, -40.0)], 6.0),
-    "fall (push +90 N, indicative)": ([], [(2.0, 90.0)], 5.0),
+    "fall (push +120 N, indicative)": ([], [(2.0, 120.0)], 5.0),   # 100 N no longer knocks it over
 }
 
 
@@ -51,7 +51,7 @@ def simulate(m, events, pushes, duration):
     mujoco.mj_resetDataKeyframe(m, d, 0)
     mujoco.mj_forward(m, d)
     ctl = swd.ScaledWheeledDuckController(T.PROFILE)
-    base = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "base")
+    pusher = T.Pusher(m, d)
     joints = [j for j in range(m.njnt) if m.jnt_type[j] == 3]
     fixed = [b for b in range(2, m.nbody) if m.body_jntnum[b] == 0 and m.body_mass[m.body_parentid[b]] > 0]
     events = sorted(events)
@@ -61,10 +61,7 @@ def simulate(m, events, pushes, duration):
             while events and d.time >= events[0][0]:
                 key = events.pop(0)[1]
                 ctl.handle_keypress(T.KEYS[key] if key in T.KEYS else ord(key.upper()))
-            d.xfrc_applied[base] = 0
-            for t_push, force in pushes:
-                if t_push <= d.time < t_push + 0.1:
-                    d.xfrc_applied[base, 0] = force
+            pusher(d, sum(f for t_push, f in pushes if t_push <= d.time < t_push + 0.1))
             swd.step_robot(m, d, ctl)
             # mj_step's forward pass already ran mj_rnePostConstraint (the accelerometer needs it), so cfrc_int,
             # xanchor and subtree_com all describe the same state.

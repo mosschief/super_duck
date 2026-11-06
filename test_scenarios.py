@@ -34,9 +34,38 @@ REALISM_CFG = swd.RealismConfig()
 make_controller = lambda model: swd.ScaledWheeledDuckController(PROFILE)
 
 
+# Shoves are applied to the trunk at this standing height (m above the floor), on its centreline, at a point fixed in
+# the trunk (it tilts with it): the top of the trunk's back, where a hand would push. They used to go to the massless
+# `base` body, which MuJoCo applies at that body's inertial frame 0.71 m up, above the 0.57 m robot and 0.43 m above
+# its CoM, so every shove tipped it far harder than a push on its back would.
+PUSH_HEIGHT = 0.43
+
+
+class Pusher:
+    """Applies a horizontal (world x) shove at PUSH_HEIGHT on the trunk as an `xfrc_applied` force + moment."""
+
+    def __init__(self, model, data):
+        self.trunk = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "trunk_assembly")
+        # Locate the point in the trunk's frame from the standing keyframe
+        d0 = mujoco.MjData(model)
+        mujoco.mj_resetDataKeyframe(model, d0, 0)
+        mujoco.mj_forward(model, d0)
+        world = np.array([d0.xipos[self.trunk][0], d0.xipos[self.trunk][1], PUSH_HEIGHT])
+        self.local = d0.xmat[self.trunk].reshape(3, 3).T @ (world - d0.xpos[self.trunk])
+
+    def __call__(self, data, force_x: float) -> None:
+        data.xfrc_applied[self.trunk] = 0
+        if force_x:
+            t = self.trunk
+            point = data.xpos[t] + data.xmat[t].reshape(3, 3) @ self.local
+            f = np.array([force_x, 0.0, 0.0])
+            data.xfrc_applied[t, :3] = f
+            data.xfrc_applied[t, 3:] = np.cross(point - data.xipos[t], f)   # about the body's CoM, where MuJoCo applies it
+
+
 def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None, spec_edit=None, init=None,
         faults=None, hook=None, fallen=None):
-    """Simulates one scenario. events: [(t, key)], pushes: [(t, Fx newtons)] applied 0.1 s to the base.
+    """Simulates one scenario. events: [(t, key)], pushes: [(t, Fx newtons)] applied 0.1 s to the trunk at PUSH_HEIGHT.
     If `torques` is a list, each step's [time, actuator forces (nu), actuator velocities (nu)] row is appended.
 
     Hooks (test_robustness.py): `spec_edit(spec)` edits the MjSpec before compiling (terrain, obstacles);
@@ -60,8 +89,8 @@ def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None, spe
         init(model, data)
     mujoco.mj_forward(model, data)
     ctl = make_controller(model)
+    pusher = Pusher(model, data)
     layer = faults(realism) if faults is not None else realism
-    base = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "base")
     wheels = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, n) for n in ("foot_assembly", "foot_assembly_2")]
     events = sorted(events)
     log = []
@@ -70,10 +99,7 @@ def run(events=(), duration=8.0, pushes=(), realism_seed=None, torques=None, spe
             while events and data.time >= events[0][0]:
                 key = events.pop(0)[1]
                 ctl.handle_keypress(KEYS[key] if key in KEYS else ord(key.upper()))
-            data.xfrc_applied[base] = 0
-            for t_push, force in pushes:
-                if t_push <= data.time < t_push + 0.1:
-                    data.xfrc_applied[base, 0] = force
+            pusher(data, sum(f for t_push, f in pushes if t_push <= data.time < t_push + 0.1))
             if hook is not None:
                 hook(model, data, ctl)
             info = swd.step_robot(model, data, ctl, layer)

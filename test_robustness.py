@@ -407,7 +407,10 @@ def cruise_push(v, force):
 
     At 2.5 m/s the GIM4305-10s can't: both wheels' torque only covers their drag at 2.77 m/s (366 rpm no-load curve), and
     a 20 N shove alone takes the robot to 2.78 m/s, before the wheels have run ahead to tip it back. The fall cutoff
-    (`fall_cutoff`) is what the controller can do there."""
+    (`fall_cutoff`) is what the controller can do there.
+
+    Largest forward shove recovered (0.1 s at T.PUSH_HEIGHT, ideal sensors): 100 N standing, 80 N at 0.6 m/s, 60 N at
+    1.1, 40 N at 1.5, 30 N at 1.8, under 20 N at 2.2 and 2.5. Backward shoves up to 100 N are recovered at all speeds."""
     def scenario(seed):
         log, fell, _ = run(seed, events=drive(1.0, v), duration=9.0, pushes=[(5.0, force)])
         if fell:
@@ -587,7 +590,7 @@ def imu_fault(name, imu_offset_deg=0.0, gyro_drift=0.0, vib=(0.0, 0.0), speed=0.
 
 
 # ---------------------------------------------------------------- impact
-def fall_at_speed(v, force=90.0):
+def fall_at_speed(v, force=120.0):   # 100 N standing doesn't knock it over (see `cruise_push`)
     def scenario(seed):
         c = Contacts()
         t_push = 4.0 if v else 2.0
@@ -601,7 +604,7 @@ def fall_at_speed(v, force=90.0):
     return scenario
 
 
-def fall_cutoff(v, force=30.0):
+def fall_cutoff(v, force):
     """A forward shove at v the wheels can't catch (at 2.5 m/s the motors have no speed left: see `cruise_push`), then
     someone stands the robot back on its wheels and lets go 1.2 s later. The fall cutoff must stop the wheels driving it along the floor on
     its head (without it: 4.4 m at 2.5 m/s), and re-arm the balance loop once it is upright, parked, not driving off."""
@@ -622,8 +625,8 @@ def fall_cutoff(v, force=30.0):
                 d.qpos[0:2], d.qpos[3:7], d.qvel[0:6] = state["xy"], state["q"], 0.0
         log, _, _ = T.run(drive(1.0, v), t_let_go + 4.0, pushes=[(t_push, force)], realism_seed=seed, hook=hook,
                           fallen=lambda m, d: (c(m, d) if d.time < t_up else None, False)[1])
-        if c.first is None:
-            return result(True, False, "stayed up")
+        if c.first is None:   # then the cutoff wasn't tested: the shove must be one the robot can't catch
+            return result(False, False, f"stayed up: a +{force:.0f} N shove at {v:.1f} m/s no longer knocks it over")
         t_hit = c.first[1]
         slide = T.window(log, t_up - 0.5, t_up)[-1, 1] - T.window(log, t_hit, t_up)[0, 1]
         still = np.abs(T.window(log, t_up - 0.5, t_up)[:, 4]).max()
@@ -872,6 +875,7 @@ SCENARIOS = (
     + [uneven(a) for a in (5, 10, 20)]
     + [turn_at_speed(v, d) for v in (0.6, 1.2, 1.5, 1.8, 2.2, 2.5) for d in (45, 90)]
     + [cruise_push(v, f) for v in (0.6, 1.05, 1.5, 1.8, 2.5) for f in (20, 30, -30)]
+    + [T.push(80), T.push(-80)]
     + [low_grip(mu, b) for mu in (0.3, 0.4, 0.5, 0.6) for b in (T.drive_turn_brake, T.push(30), T.jump)]
     + [battery(v, b) for v in (25.2, 22.2, 21.1) for b in (top_speed, T.push(40), T.jump)]
     + [low_battery(0.6), low_battery(1.5), low_battery(2.5)]
@@ -889,7 +893,7 @@ SCENARIOS = (
     + [imu_fault(f"IMU mounted {d:+d} deg off", imu_offset_deg=d) for d in (1, 2, 3, -3)]
     + [imu_fault("gyro bias drift 0.05 deg/s per s", gyro_drift=0.05),
        imu_fault("vibration noise @1.0 m/s", vib=(3.0, 0.5), speed=1.05)]
-    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8, 2.5)] + [fall_cutoff(1.8), fall_cutoff(2.5)] + [wall(0.6), wall(1.2)]
+    + [fall_at_speed(v) for v in (0.0, 0.6, 1.8, 2.5)] + [fall_cutoff(1.8, 60.0), fall_cutoff(2.5, 30.0)] + [wall(0.6), wall(1.2)]
     + [drop(h) for h in (3, 6, 10)] + [bad_landing("slope"), bad_landing("plate"), plate_edge]
     + [head_sweep, endurance(20)]
 )
