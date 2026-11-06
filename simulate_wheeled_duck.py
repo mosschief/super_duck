@@ -241,6 +241,15 @@ class ScaledWheeledDuckController:
     SUPPORTED_TIME = 0.02   # s
     DROP_LEGS_SETTLE = 0.5  # s after a leg move before free fall counts
     DROP_DELTA = 0.10      # Crouch held through a drop: of the poses tried (-0.15 to 0.20) this lands softest
+    # Bump detection (driving into a wall / furniture), see `_detect_bump`. Measured in test_robustness.py: the wall at
+    # 0.6 m/s reads 50 m/s^2 and 1.3 rad/s back, at 1.2 m/s 111 m/s^2 and 2.7 rad/s; the biggest spikes of everything
+    # else while cruising steadily are 30 (a 30 N shove from behind, trunk pitching forward) and 25 (from the front).
+    BUMP_ACCEL = 30.0      # m/s^2, IMU acceleration magnitude that arms the detector...
+    BUMP_SPEED_ERR = 0.3   # m/s, ...if the robot was cruising steadily (not landing from a hop over a threshold)
+    BUMP_PITCH_RATE = 0.8  # rad/s, then the trunk must rotate back, away from the direction of travel...
+    BUMP_CONFIRM = 0.012   # s, ...within this long
+    BUMP_MIN_SPEED = 0.25  # m/s, reference speed below which bumps aren't checked (no momentum to worry about)
+    BUMP_BACKOFF = 0.10    # m, hold point set this far back from where the bump happened
 
     def __init__(self, profile: RobotProfile = None, params: ScaledWheeledDuckParams = None):
         self.profile = profile or PROFILES[DEFAULT_ROBOT]
@@ -277,6 +286,8 @@ class ScaledWheeledDuckController:
         self.freefall_time = 0.0
         self.supported_time = 0.0
         self.landing_from_drop = False
+        self.bump_age = 10.0          # s since the last detected bump (`_detect_bump`)
+        self.bump_armed = 0.0         # s left to confirm an acceleration spike as a bump
         self.reset_requested = False
 
         # Jump state machine: "idle" -> "crouch" -> "thrust" -> "flight" -> "land" -> "idle"
@@ -304,6 +315,8 @@ class ScaledWheeledDuckController:
         self.yaw_ref = None
         self.freefall_time = 0.0
         self.supported_time = 0.0
+        self.bump_age = 10.0
+        self.bump_armed = 0.0
         self.low_battery = False
         self.jump_phase = "idle"
         self.jump_timer = 0.0
@@ -424,6 +437,7 @@ class ScaledWheeledDuckController:
             self.last_crouch = self.crouch_delta
         self.legs_moved_age += dt
         self._detect_drop(accel_mag, dt)
+        self._detect_bump(accel_mag, pitch_rate, x_pos, x_vel, dt)
         leg_delta, airborne = self._update_jump(x_pos, x_vel, accel_mag, dt)
 
         # Advance target_x reference when driving; clamp windup so braking is immediate
@@ -471,7 +485,9 @@ class ScaledWheeledDuckController:
         # Also held off just after the legs move (a crouch rolls the robot a few cm and back on its own) and at start-up
         # (it's still settling onto its wheels).
         self.run_time += dt
-        if parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF:
+        # And after a bump: the rebound off the obstacle is not a trim error.
+        if (parked and self.legs_moved_age > self.TRIM_HOLDOFF and self.run_time > self.TRIM_HOLDOFF
+                and self.bump_age > self.TRIM_HOLDOFF):
             trim_err = pos_err + self.TRIM_VEL_WEIGHT * (x_vel - self.target_vel)
             gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
             self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
@@ -691,6 +707,38 @@ class ScaledWheeledDuckController:
             self.jump_phase, self.jump_timer, self.freefall_time, self.supported_time = "drop", 0.0, 0.0, 0.0
             self.landing_from_drop = True
             print("[Drop] Free fall, bracing")
+
+    def _detect_bump(self, accel_mag: float, pitch_rate: float, x_pos: float, x_vel: float, dt: float) -> None:
+        """Driving into a wall: stop driving, hold a little way back from it.
+
+        The head sticks out ahead of the wheels, so on a wall it hits first and stops the top of the robot while the
+        wheels roll on: a sharp deceleration (the IMU reads several g) out of a steady cruise, then within a few ms
+        the trunk rotating back, away from the direction of travel. A wheel hitting a threshold or curb first pitches
+        the trunk forward over the stopped wheel; the back-pitching spikes there come when the robot lands after
+        hopping it, running well above the reference speed (hence the steady-cruise condition). A shove reads <= 30
+        m/s^2, and a hard brake, a turn or a slope doesn't come near. Only the IMU and wheel encoders are used.
+        A wall is caught from ~0.45 m/s; at 0.3 m/s it reads under the threshold and the robot still ends up leaning
+        on it (~10 deg, it stays up).
+        Without this the speed reference kept running ahead, the LQR drove the robot back into the wall, and the
+        cruise trim learner read the stall as "lean further": it ended up pinned to the wall at a 14-22 deg lean.
+        The stop clears the speed command (on a gamepad: until the stick is pushed again)."""
+        self.bump_age += dt
+        self.bump_armed = max(0.0, self.bump_armed - dt)
+        v = self.target_vel
+        if (accel_mag is None or self.jump_phase != "idle" or self.legs_moved_age < self.DROP_LEGS_SETTLE
+                or abs(v) < self.BUMP_MIN_SPEED):
+            self.bump_armed = 0.0
+            return
+        if accel_mag > self.BUMP_ACCEL and abs(x_vel - v) < self.BUMP_SPEED_ERR:
+            self.bump_armed = max(self.bump_armed, self.BUMP_CONFIRM)
+        if self.bump_armed <= 0.0 or math.copysign(1.0, v) * pitch_rate > -self.BUMP_PITCH_RATE:
+            return
+        self.bump_armed = 0.0
+        self.cmd_vel = self.target_vel = 0.0
+        self.braking = self.settling = False
+        self.target_x = x_pos - math.copysign(self.BUMP_BACKOFF, v)
+        self.bump_age = 0.0
+        print(f"[Bump] {accel_mag:.0f} m/s^2 at {v:+.2f} m/s: stopping, backing off {self.BUMP_BACKOFF:.2f} m")
 
     def _update_jump(self, x_pos: float, x_vel: float, accel_mag: float, dt: float) -> Tuple[float, bool]:
         """Advances the timed jump state machine. Returns (leg_delta, airborne)."""
