@@ -43,8 +43,9 @@ Frame everywhere: floor at z = 0, x forward, y left, z up, millimetres.
   plus strip and wrap. It now sits 2 mm below the trunk shell stand-in and 2 mm under the Pi: the trunk needs about
   5 mm more interior height, or the Pi has to move up.
 - **The Teensy carrier and IMU were outside the trunk** (x = -95 / -108 mm, the scaled Open Duck Mini IMU spot). Both
-  moved inside, onto the upper rear wall. The controller only uses IMU orientation and gyro, which don't depend on
-  where the IMU sits on the trunk.
+  moved inside, onto the upper rear wall. The IMU orientation and gyro don't depend on where the IMU sits on the
+  trunk; its acceleration magnitude (free-fall and bump detection) does a little, and those thresholds were set
+  with the IMU at this spot.
 - **The anti-spark switch overlapped the full-size battery** by 0.5 mm; moved 3 mm forward.
 - **The eye cameras' field of view was the wide lens's** (67° vertical). The standard Camera Module 3 is 41°.
 

@@ -83,8 +83,10 @@ class Contacts:
         return {k: v for k, v in self.peak.items() if "foot_bottom_tpu" not in k}
 
 
-def make_fallen(contacts=None):
-    """Fall test: a trunk / neck / head body on the ground, or the trunk tipped past 60 deg."""
+def make_fallen(contacts=None, obstacles=()):
+    """Fall test: a trunk / neck / head body on the ground, or the trunk tipped past 60 deg. `obstacles`: world geoms
+    (by name) that are not ground, such as a wall: touching one is a bump, not a fall (a fall onto the floor next
+    to it, or tipping over, still counts)."""
     state = {}
 
     def fallen(m, d):
@@ -94,6 +96,7 @@ def make_fallen(contacts=None):
                                                                  "right_roll_to_pitch_assembly",
                                                                  "knee_and_ankle_assembly",
                                                                  "knee_and_ankle_assembly_3"))
+            state["skip"] = {mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, n) for n in obstacles}
         if contacts is not None:
             contacts(m, d)
         up = d.xmat[1].reshape(3, 3)[:, 2]
@@ -101,6 +104,8 @@ def make_fallen(contacts=None):
             return True
         for i in range(d.ncon):
             c = d.contact[i]
+            if c.geom1 in state["skip"] or c.geom2 in state["skip"]:
+                continue
             b1, b2 = m.geom_bodyid[c.geom1], m.geom_bodyid[c.geom2]
             if (b1 == 0) != (b2 == 0) and (b2 if b1 == 0 else b1) not in state["ok"]:
                 return True
@@ -556,26 +561,44 @@ def fall_at_speed(v, force=90.0):
 
 
 def wall(v):
+    """Drives at v into a wall 1.45 m ahead. The head sticks out ahead of the wheels, so it is always what hits the
+    wall first, and nothing the controller senses (IMU, encoders, motor current) can see the wall coming: the hit
+    itself can't be avoided, so the wall counts as an obstacle, not as ground, for the fall test. To pass, the robot
+    must stay up (not touch the floor with anything but its legs, not tip past 60 deg), keep its pitch under 30 deg,
+    and be standing off the wall (no contact) for the last 1.5 s instead of leaning on it."""
     def spec_edit(spec):
         add_box(spec, "wall", (0.05, 1.0, 0.5), (1.5, 0, 0.5))
 
     def scenario(seed):
         c = Contacts()
+        touching = []
 
         def contacts(m, d):
+            on = False
             for i in range(d.ncon):
                 k = d.contact[i]
                 names = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) for g in (k.geom1, k.geom2)}
                 if "wall" in names:
+                    on = True
                     f = np.zeros(6)
                     mujoco.mj_contactForce(m, d, i, f)
                     other = (names - {"wall"}).pop()
                     c.peak[other] = max(c.peak.get(other, 0.0), float(f[0]))
-        fallen = make_fallen()
-        log, fell, _ = run(seed, events=drive(1.0, v), duration=1.0 + 1.5 / v + 3.0, spec_edit=spec_edit,
+            if on:
+                touching.append(float(d.time))
+        fallen = make_fallen(obstacles=("wall",))
+        duration = 1.0 + 1.5 / v + 3.0
+        log, fell, _ = run(seed, events=drive(1.0, v), duration=duration, spec_edit=spec_edit,
                            fallen=lambda m, d: (contacts(m, d), fallen(m, d))[1])
         hits = ", ".join(f"{k} {f:.0f} N" for k, f in sorted(c.peak.items(), key=lambda kv: -kv[1])[:3])
-        return (not fell), fell, f"{'fell' if fell else 'stayed up'}; wall contact: {hits or 'none'}"
+        if fell:
+            return False, True, f"fell at t={log[-1, 0]:.1f} s; wall contact: {hits or 'none'}"
+        pitch = np.abs(log[:, 5]).max()
+        off = not touching or touching[-1] < duration - 1.5
+        gap = 1.45 - log[-1, 1]
+        return result(off and pitch < 30, False,
+                      f"{'backed off' if off else 'still on the wall'}, base {gap:.2f} m from it, max |pitch| "
+                      f"{pitch:.0f} deg; wall contact: {hits or 'none'}")
     scenario.__name__ = f"wall @{v:.1f} m/s"
     return scenario
 
