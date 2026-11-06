@@ -137,10 +137,9 @@ PROFILES = {
 DEFAULT_ROBOT = "gim6010"
 
 
-def compute_wip_lqr_gains(params: ScaledWheeledDuckParams) -> np.ndarray:
+def wip_model(params: ScaledWheeledDuckParams) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Derives the linearized 4-state Wheeled Inverted Pendulum (WIP) model around upright equilibrium
-    and solves the Continuous Algebraic Riccati Equation (CARE) for optimal LQR state-feedback gains.
+    Linearized 4-state Wheeled Inverted Pendulum (WIP) model around upright equilibrium: x_dot = A x + B u.
 
     State vector: x_state = [x_pos, x_vel, pitch_angle, pitch_rate]^T
     Input: u = total_wheel_torque = tau_left + tau_right (N*m)
@@ -167,7 +166,12 @@ def compute_wip_lqr_gains(params: ScaledWheeledDuckParams) -> np.ndarray:
     B = np.zeros((4, 1), dtype=float)
     B[1, 0] = (I_eff / R + coupling) / denom
     B[3, 0] = -(M_eff + coupling / R) / denom
+    return A, B
 
+
+def compute_wip_lqr_gains(params: ScaledWheeledDuckParams) -> np.ndarray:
+    """Solves the Continuous Algebraic Riccati Equation (CARE) on `wip_model` for optimal LQR state-feedback gains."""
+    A, B = wip_model(params)
     Q = np.diag(LQR_Q)
     R_cost = np.array([[1.0]])
 
@@ -237,6 +241,14 @@ class ScaledWheeledDuckController:
     TRIM_VEL_WEIGHT = 1.0  # m of position-equivalent error per m/s
     TRIM_GAIN_CRUISE = 0.02  # (rad/s) per (m/s of speed error), while cruising
     TRIM_HOLDOFF = 1.0     # s after start-up and after a leg move
+    # Fast lean learner for the rest of the leg-move holdoff (see `_update_lean_estimate`): it starts once the legs have
+    # stopped and converges in ~0.5 s. A crouch changes the lean a trunk CoM offset needs (and the robot may not have
+    # learned it yet): a robot with its trunk CoM 8 mm off sat out the holdoff ~0.6 deg off its balance lean and rolled
+    # 10-12 cm (crouch_stand: 3/10 randomized robots passed). Not used at start-up: on a slope the robot is still far
+    # from its hold point then, and a trim corrected before it gets back made the position learner overshoot.
+    LEAN_GAIN = 2.0        # 1/s
+    LEAN_FILTER_S = 0.3    # s, low-pass on the pitch error and on the accelerations
+    LEAN_SETTLE = 0.3      # s after a leg move (the WIP model doesn't hold while the legs swing)
     GYRO_BIAS_TAU = 30.0   # s, drift-following low-pass
     GYRO_BIAS_PRIOR = 500  # samples: the running average starts as if the first second had read zero
     GYRO_STILL_RATE = 0.05  # rad/s (~3 deg/s), faster than this is real motion
@@ -264,6 +276,13 @@ class ScaledWheeledDuckController:
         self.profile = profile or PROFILES[DEFAULT_ROBOT]
         self.params = params or self.profile.params
         self.k_lqr = compute_wip_lqr_gains(self.params)
+        # Eliminating the wheel torque from the WIP model's x_accel and pitch_accel rows leaves
+        # pitch - balance_lean = c_x * x_accel + c_p * pitch_accel (see `_update_lean_estimate`).
+        A, B = wip_model(self.params)
+        det = B[3, 0] * A[1, 2] - B[1, 0] * A[3, 2]
+        self.lean_accel_coeffs = (B[3, 0] / det, -B[1, 0] / det)
+        self.lean_filter = None       # low-passed (pitch error, x_vel, pitch_rate)
+        self.lean_est = 0.0           # estimated balance lean - balance_pitch (rad)
         self.target_x = 0.0
         self.target_vel = 0.0
         self.cmd_vel = 0.0
@@ -320,6 +339,8 @@ class ScaledWheeledDuckController:
         self.head_pose = None
         self.antenna_cmd = 0.0
         self.pitch_trim = self.profile.initial_pitch_trim
+        self.lean_filter = None
+        self.lean_est = 0.0
         self.run_time = 0.0
         self.legs_moved_age = 10.0
         self.last_crouch = 0.0
@@ -474,6 +495,11 @@ class ScaledWheeledDuckController:
         # moves the trunk mass fore/aft, so the balance lean changes by ~+0.7 deg per 0.1 rad of crouch. Leaving
         # that to the slow trim learner made each 'Z'/'X' press roll the robot ~20 cm while it re-learned.
         balance_pitch = self.pitch_trim + self.posture_trim(fold)
+        self._update_lean_estimate(pitch - balance_pitch, x_vel, pitch_rate, dt)
+        # ...and while the legs move, the balance lean moves with them: the pitch-rate reference is its rate. With a
+        # zero rate reference the LQR fought the trunk's rotation to the new lean, paying for it with a velocity error
+        # (K_pitch_rate / K_vel ~ 0.9 m per rad): a crouch-then-stand rolled even the ideal robot 7 cm.
+        balance_rate = self.posture_trim_slope(fold) * leg_fold_rate if self.jump_phase == "idle" else 0.0
         pitch_err = pitch - balance_pitch
         self._update_fall(pitch_err, roll, pitch_rate, x_pos, yaw, dt)
         pos_err = float(np.clip(x_pos - self.target_x, -0.30, 0.30))
@@ -483,7 +509,7 @@ class ScaledWheeledDuckController:
             pos_weight * pos_err,
             x_vel - self.target_vel,
             pitch_err,
-            pitch_rate,
+            pitch_rate - balance_rate,
         ])
         total_balance_torque = float(np.dot(-self.k_lqr, state_err))
 
@@ -497,7 +523,8 @@ class ScaledWheeledDuckController:
         # then freezes the very estimator that would fix it (seen as a 0.18 m/s endless creep on a heavier robot).
         parked = abs(self.cmd_vel) < 1e-3 and abs(self.target_vel) < 0.05 and not self.settling
         # Also held off just after the legs move (a crouch rolls the robot a few cm and back on its own) and at start-up
-        # (it's still settling onto its wheels).
+        # (it's still settling onto its wheels). After a leg move the fast lean learner, which needs no position
+        # error, takes over once the legs have stopped.
         self.run_time += dt
         if self.fallen:
             pass   # lying on the floor says nothing about the balance lean
@@ -507,6 +534,9 @@ class ScaledWheeledDuckController:
             trim_err = pos_err + self.TRIM_VEL_WEIGHT * (x_vel - self.target_vel)
             gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
             self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
+                                            -self.TRIM_LIMIT, self.TRIM_LIMIT))
+        elif parked and self.jump_phase == "idle" and self.LEAN_SETTLE < self.legs_moved_age <= self.TRIM_HOLDOFF:
+            self.pitch_trim = float(np.clip(self.pitch_trim + self.LEAN_GAIN * self.lean_est * dt,
                                             -self.TRIM_LIMIT, self.TRIM_LIMIT))
         elif self.jump_phase == "idle" and abs(self.cmd_vel) > 1e-3 and abs(vel_diff) < 1e-3:
             # Cruising at a steady speed (no ramp, so no lean to accelerate): a speed error means the lean is wrong,
@@ -652,6 +682,11 @@ class ScaledWheeledDuckController:
         a, b = self.profile.posture_coeffs
         return a * fold + b * fold * fold
 
+    def posture_trim_slope(self, fold: float) -> float:
+        """d posture_trim / d fold (rad of lean per rad of fold)."""
+        a, b = self.profile.posture_coeffs
+        return a + 2.0 * b * fold
+
     # Leg servo damping (GIM4305 MIT-mode kd, N*m*s/rad). High damping stops the compliant kp=32 legs from
     # pogoing under hard wheel torque (which bounced the tires off the floor during push recovery), but it also
     # resists the fast leg extension of a jump, so it is dropped for the jump wind-up and thrust.
@@ -724,6 +759,29 @@ class ScaledWheeledDuckController:
             self.fallen = False
             self.run_time = 0.0   # trim learner holds off as at start-up: it's still settling onto its wheels
             print("[Fall] Upright again: balancing")
+
+    def _update_lean_estimate(self, pitch_err: float, x_vel: float, pitch_rate: float, dt: float) -> None:
+        """Balance lean error from accelerations, without waiting for a position error to build up.
+
+        A robot leaning off its balance point accelerates: by the WIP model, pitch - balance_lean = c_x * x_accel +
+        c_p * pitch_accel whatever the wheel torque. So balance_lean - balance_pitch = pitch_err - c_x * x_accel -
+        c_p * pitch_accel, all low-passed (the accelerations as the derivative of the low-passed rates). Trunk CoM
+        offset, payload and IMU mounting error all show up in it. It needs the legs still (the model has fixed legs).
+        """
+        f = self.lean_filter
+        if f is None:
+            # The estimate is f[0] - c_x * x_accel - c_p * pitch_accel, so starting f[0] at 0 (not at the pitch error)
+            # starts the estimate at 0: the present trim is the prior. Starting it at the start pose's pitch error
+            # (the robot isn't leaning in yet) left a bias of -0.6 deg 0.6 s later.
+            f = self.lean_filter = [0.0, x_vel, pitch_rate]
+        k = dt / self.LEAN_FILTER_S
+        x_accel = (x_vel - f[1]) / self.LEAN_FILTER_S
+        pitch_accel = (pitch_rate - f[2]) / self.LEAN_FILTER_S
+        f[0] += (pitch_err - f[0]) * k
+        f[1] += (x_vel - f[1]) * k
+        f[2] += (pitch_rate - f[2]) * k
+        c_x, c_p = self.lean_accel_coeffs
+        self.lean_est = f[0] - c_x * x_accel - c_p * pitch_accel
 
     def _update_gyro_bias(self, gyro_xyz, parked: bool, dt: float) -> None:
         """A parked robot's mean turn rate is zero, so the gyro's mean is its bias. A running average gets close within
