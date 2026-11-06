@@ -250,6 +250,7 @@ class ScaledWheeledDuckController:
     LEAN_GAIN = 2.0        # 1/s
     LEAN_FILTER_S = 0.3    # s, low-pass on the pitch error and on the accelerations
     LEAN_SETTLE = 0.3      # s after a leg move (the WIP model doesn't hold while the legs swing)
+    LEAN_WINDOW = 1.0      # s the fast learner also runs after the hold point is re-anchored on a newly learned slope
     # Slope observer (see `_update_slope`): momentum-observer bandwidth, the slower low-pass on what is fed forward
     # (a real slope lasts; a shove or a bump doesn't), and the steepest slope it will feed forward.
     SLOPE_OBS_TAU = 0.15   # s
@@ -293,6 +294,7 @@ class ScaledWheeledDuckController:
     BUMP_CONFIRM = 0.012   # s, ...within this long
     BUMP_MIN_SPEED = 0.25  # m/s, reference speed below which bumps aren't checked (no momentum to worry about)
     BUMP_BACKOFF = 0.10    # m, hold point set this far back from where the bump happened
+    BUMP_SLOPE_HOLD = 1.5  # s after a bump the slope observer is frozen (still pressed on / rebounding off the obstacle)
 
     def __init__(self, profile: RobotProfile = None, params: ScaledWheeledDuckParams = None):
         self.profile = profile or PROFILES[DEFAULT_ROBOT]
@@ -338,6 +340,8 @@ class ScaledWheeledDuckController:
         self.landing_from_drop = False
         self.bump_age = 10.0          # s since the last detected bump (`_detect_bump`)
         self.bump_armed = 0.0         # s left to confirm an acceleration spike as a bump
+        self.slope_at_arm = 0.0       # `slope_sin` when the bump detector armed
+        self.lean_window = 0.0        # s left of the fast lean learner's window after a slope re-anchor
         self.reset_requested = False
         self.fallen = False           # Fall cutoff latched: wheels off until stood up (see FALL_PITCH)
         self.upright_time = 0.0
@@ -377,6 +381,8 @@ class ScaledWheeledDuckController:
         self.supported_time = 0.0
         self.bump_age = 10.0
         self.bump_armed = 0.0
+        self.slope_at_arm = 0.0
+        self.lean_window = 0.0
         self.low_battery = False
         self.jump_phase = "idle"
         self.jump_timer = 0.0
@@ -509,7 +515,8 @@ class ScaledWheeledDuckController:
         leg_delta, airborne = self._update_jump(x_pos, x_vel, accel_mag, dt)
         self._update_slope(x_vel, pitch, pitch_rate, left_wheel_vel, right_wheel_vel,
                            frozen=(airborne or self.fallen or self.jump_phase != "idle"
-                                   or self.legs_moved_age < self.TRIM_HOLDOFF),
+                                   or self.legs_moved_age < self.TRIM_HOLDOFF
+                                   or self.bump_age < self.BUMP_SLOPE_HOLD),
                            dt=dt)
 
         # Advance target_x reference when driving; clamp windup so braking is immediate
@@ -587,9 +594,17 @@ class ScaledWheeledDuckController:
             if parked and abs(self.slope_sin - self.slope_before) > settled_sin:
                 self.target_x = x_pos
                 pos_err = 0.0
+                # That also leaves no position error for the trim learner to learn what the slope estimate left over
+                # (a trunk CoM offset, a weak motor misreading the slope): let the fast lean learner take it.
+                self.lean_window = self.LEAN_WINDOW
             self.slope_before = None
+        self.lean_window = max(0.0, self.lean_window - dt)
         if self.fallen:
             pass   # lying on the floor says nothing about the balance lean
+        elif self.lean_window > 0.0 and parked and slope_settled and self.jump_phase == "idle":
+            # Just re-anchored on a newly learned slope (see above): the fast learner takes what the slope estimate left
+            self.pitch_trim = float(np.clip(self.pitch_trim + self.LEAN_GAIN * self.lean_est * dt,
+                                            -self.TRIM_LIMIT, self.TRIM_LIMIT))
         # And after a bump: the rebound off the obstacle is not a trim error.
         elif (parked and slope_settled and self.legs_moved_age > self.TRIM_HOLDOFF
                 and self.run_time > self.TRIM_HOLDOFF and self.bump_age > self.TRIM_HOLDOFF):
@@ -597,8 +612,10 @@ class ScaledWheeledDuckController:
             gain = self.trim_adapt_gain + self.TRIM_GAIN_PER_M * abs(pos_err)
             self.pitch_trim = float(np.clip(self.pitch_trim - gain * trim_err * dt,
                                             -self.TRIM_LIMIT, self.TRIM_LIMIT))
-        elif (parked and slope_settled and self.jump_phase == "idle"
+        elif (parked and slope_settled and self.jump_phase == "idle" and self.run_time > self.TRIM_HOLDOFF
                 and self.LEAN_SETTLE < self.legs_moved_age <= self.TRIM_HOLDOFF):
+            # (Not at start-up, nor just after the fall cutoff re-arms, which restarts run_time: the fall's braced landing
+            # counts as a leg move, and a robot still being held by hand then read as a 3 deg lean error.)
             self.pitch_trim = float(np.clip(self.pitch_trim + self.LEAN_GAIN * self.lean_est * dt,
                                             -self.TRIM_LIMIT, self.TRIM_LIMIT))
         elif self.jump_phase == "idle" and abs(self.cmd_vel) > 1e-3 and abs(vel_diff) < 1e-3 and slope_settled:
@@ -703,7 +720,11 @@ class ScaledWheeledDuckController:
             self.antenna_cmd,
         ], dtype=float)
 
-        self.last_wheel_torque = float(tau_left + tau_right)
+        # What the motors deliver, not what was asked: at speed the speed-torque curve caps the motoring torque, and the
+        # slope observer read the shortfall as an uphill (a shove at 1.8 m/s read as a 7 deg slope). On hardware: the
+        # drivers' reported current.
+        self.last_wheel_torque = (self.deliverable_wheel_torque(tau_left, left_wheel_vel)
+                                  + self.deliverable_wheel_torque(tau_right, right_wheel_vel))
 
         telemetry = {
             "roll_deg": math.degrees(roll),
@@ -828,6 +849,29 @@ class ScaledWheeledDuckController:
         s = self.slope_sin + math.copysign(max(abs(s - self.slope_sin) - band, 0.0), s - self.slope_sin)
         self.slope_sin += (s - self.slope_sin) * dt / self.SLOPE_FF_TAU
 
+    def deliverable_wheel_torque(self, tau: float, omega: float) -> float:
+        """Wheel torque the motor can deliver at wheel speed `omega` (rad/s, relative to the foot) and the present pack
+        voltage: the speed-torque curve caps torque *with* the motion, the drivers' current limit any torque."""
+        curve = self.profile.wheel_torque_curve
+        if curve is None:
+            return float(tau)
+        stall, no_load_rpm, rpm_per_nm = curve
+        volts = 24.0 if self.filtered_voltage is None else self.filtered_voltage
+        rpm = abs(omega) * 60.0 / (2.0 * math.pi)
+        limit = float(np.clip((no_load_rpm * volts / 24.0 - rpm) / rpm_per_nm, 0.05, stall))
+        if tau * omega > 0.0:
+            return float(math.copysign(min(abs(tau), limit), tau))
+        return float(np.clip(tau, -stall, stall))
+
+    def _reset_slope(self, slope_sin: float = 0.0) -> None:
+        """Restarts the slope observer at `slope_sin` (see `_update_slope`)."""
+        P = self.params
+        self.slope_sin = slope_sin
+        self.slope_force = -slope_sin * (P.body_mass + 2.0 * P.wheel_mass) * P.gravity
+        self.slope_obs = None
+        self.slope_gap = 0.0
+        self.slope_before = None
+
     def _update_battery(self, dt: float) -> None:
         """Low battery: stop, crouch to shorten the eventual fall, refuse to drive or jump until the pack is charged."""
         if self.bus_voltage is None:
@@ -866,6 +910,9 @@ class ScaledWheeledDuckController:
         if self.upright_time >= self.UPRIGHT_TIME:
             self.fallen = False
             self.run_time = 0.0   # trim learner holds off as at start-up: it's still settling onto its wheels
+            # Picked up and set down somewhere else: start the slope observer afresh, as at start-up (what it held
+            # from the fall, the shove included, says nothing about the floor here).
+            self._reset_slope()
             print("[Fall] Upright again: balancing")
 
     def _update_lean_estimate(self, pitch_err: float, x_vel: float, pitch_rate: float, dt: float) -> None:
@@ -936,6 +983,8 @@ class ScaledWheeledDuckController:
             self.bump_armed = 0.0
             return
         if accel_mag > self.BUMP_ACCEL and abs(x_vel - v) < self.BUMP_SPEED_ERR:
+            if self.bump_armed <= 0.0:
+                self.slope_at_arm = self.slope_sin   # before the impact's force reaches the slope observer
             self.bump_armed = max(self.bump_armed, self.BUMP_CONFIRM)
         if self.bump_armed <= 0.0 or math.copysign(1.0, v) * pitch_rate > -self.BUMP_PITCH_RATE:
             return
@@ -944,6 +993,10 @@ class ScaledWheeledDuckController:
         self.braking = self.settling = False
         self.target_x = x_pos - math.copysign(self.BUMP_BACKOFF, v)
         self.bump_age = 0.0
+        # The obstacle's push is not a slope: the slope observer read a wall as a 3 deg upslope, fed that forward
+        # (leaning back into the wall) and, once it settled, re-anchored the hold point on the wall. Restore the
+        # estimate from before the impact; `_update_slope` stays frozen for BUMP_SLOPE_HOLD while it backs off.
+        self._reset_slope(self.slope_at_arm)
         print(f"[Bump] {accel_mag:.0f} m/s^2 at {v:+.2f} m/s: stopping, backing off {self.BUMP_BACKOFF:.2f} m")
 
     def _update_jump(self, x_pos: float, x_vel: float, accel_mag: float, dt: float) -> Tuple[float, bool]:
