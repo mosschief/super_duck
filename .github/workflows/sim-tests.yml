@@ -16,5 +16,10 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: pip install -r requirements.txt
-      # Ideal robot: every scenario must pass. Exits non-zero on any FAIL.
-      - run: python3 test_scenarios.py
+      # Ideal robot, every scenario must pass (non-zero exit on any FAIL). `compare` drives the sim with the Python
+      # controller and checks the C++ firmware controller against it on every tick (builds it with the runner's g++).
+      - run: python3 test_scenarios.py --controller compare
+      - name: Firmware config header is up to date
+        run: python3 tools/export_firmware_config.py --check
+      - name: Firmware config header compiles
+        run: echo '#include "config_gim6010.hpp"' | c++ -std=c++17 -fsyntax-only -Wall -Wextra -Werror -Ifirmware/controller -x c++ -

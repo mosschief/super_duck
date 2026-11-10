@@ -38,6 +38,7 @@ from duck.robot import (DEFAULT_ROBOT, LQR_Q, PROFILES, RobotProfile, ScaledWhee
                         compute_wip_lqr_gains, quat_to_euler_zyx, wip_model)
 from duck.controller import (KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_SPACE, KEY_UP,  # noqa: F401
                              ScaledWheeledDuckController)
+from duck.cpp_controller import CONTROLLERS, make_controller  # noqa: F401
 from duck.plant import (LEG_ACTUATORS, TIRE_GEOMS, WHEEL_ACTUATORS, RealismConfig, SimToReal,  # noqa: F401
                         apply_leg_servo_kd, apply_torque_curve, can_bus_load, profile_xml, read_sensors, step_robot)
 
@@ -63,7 +64,7 @@ def print_driving_instructions() -> None:
 
 def run_mujoco_simulation(xml_path: str = None, duration: float = 120.0, headless: bool = False,
                           realism_seed: int = None, robot: str = DEFAULT_ROBOT,
-                          realism_cfg: RealismConfig = RealismConfig()) -> None:
+                          realism_cfg: RealismConfig = RealismConfig(), controller_kind: str = None) -> None:
     """Runs the interactive or headless MuJoCo simulation with active LQR wheel balancing & keyboard driving.
 
     `robot` picks the `RobotProfile` (its MJCF is used unless `xml_path` overrides it). `realism_seed` (optional)
@@ -83,7 +84,7 @@ def run_mujoco_simulation(xml_path: str = None, duration: float = 120.0, headles
         mujoco.mj_resetDataKeyframe(model, data, key_id)
     mujoco.mj_forward(model, data)
 
-    controller = ScaledWheeledDuckController(profile)
+    controller = make_controller(profile, controller_kind)
     dt = float(model.opt.timestep)
 
     if headless:
@@ -138,10 +139,14 @@ if __name__ == "__main__":
     parser.add_argument("--imu", choices=("bno055", "fast"), default="fast",
                         help="With --realism: fast raw IMU filtered on the MCU (default) or BNO055 (100 Hz fused).")
     parser.add_argument("--leg-rate", type=float, default=100.0, help="With --realism: leg CAN update rate (Hz).")
+    parser.add_argument("--controller", choices=sorted(CONTROLLERS), default=None,
+                        help="py: the Python controller (default, or $DUCK_CONTROLLER); cpp: the C++ firmware controller; "
+                             "compare: both, checked against each other every tick.")
     args = parser.parse_args()
 
     print(f"Robot '{args.robot}': WIP LQR Feedback Gains K =",
           np.round(compute_wip_lqr_gains(PROFILES[args.robot].params), 3))
     run_mujoco_simulation(args.xml, duration=args.duration, headless=args.headless, realism_seed=args.realism,
                           robot=args.robot,
-                          realism_cfg=RealismConfig(arch=args.arch, imu=args.imu, leg_rate_hz=args.leg_rate))
+                          realism_cfg=RealismConfig(arch=args.arch, imu=args.imu, leg_rate_hz=args.leg_rate),
+                          controller_kind=args.controller)

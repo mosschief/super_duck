@@ -14,6 +14,7 @@ import argparse
 import contextlib
 import io
 import math
+import os
 import pathlib
 
 import mujoco
@@ -31,7 +32,8 @@ RATED_TORQUE = {3.47: 1.0, 11.0: 5.0}
 # Sim-to-real settings used for --realism runs (control architecture, IMU, leg CAN rate, noise...).
 REALISM_CFG = swd.RealismConfig()
 # Builds the controller for a model; swap it to test a variant with retuned parameters.
-make_controller = lambda model: swd.ScaledWheeledDuckController(PROFILE)
+# $DUCK_CONTROLLER (or --controller) picks the Python controller, the C++ one, or both compared every tick.
+make_controller = lambda model: swd.make_controller(PROFILE)
 
 
 # Shoves are applied to the trunk at this standing height (m above the floor), on its centreline, at a point fixed in
@@ -237,7 +239,10 @@ def main():
     ap.add_argument("--arch", choices=("mcu", "feather", "pi"), default="mcu", help="realism: Teensy 4.0 dual-CAN (mcu), Feather 1-CAN (feather), or Pi (pi)")
     ap.add_argument("--imu", choices=("bno055", "fast"), default="fast", help="realism: IMU model")
     ap.add_argument("--leg-rate", type=float, default=100.0, help="realism: leg CAN update rate (Hz)")
+    ap.add_argument("--controller", choices=sorted(swd.CONTROLLERS), help="py (default), cpp, or compare (both, checked every tick)")
     args = ap.parse_args()
+    if args.controller:
+        os.environ["DUCK_CONTROLLER"] = args.controller
     globals()["REALISM_CFG"] = swd.RealismConfig(arch=args.arch, imu=args.imu, leg_rate_hz=args.leg_rate)
     globals()["PROFILE"] = swd.PROFILES[args.robot]
     globals()["XML"] = args.xml or swd.profile_xml(PROFILE)

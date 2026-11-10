@@ -28,6 +28,7 @@ import dataclasses
 import io
 import json
 import math
+import os
 import pathlib
 
 import mujoco
@@ -918,7 +919,10 @@ def main():
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--report", action="store_true", help="also write reports/robustness.md")
     ap.add_argument("-j", type=int, default=0, help="parallel workers (default: all cores)")
+    ap.add_argument("--controller", choices=sorted(swd.CONTROLLERS), help="py (default), cpp, or compare (both, checked every tick)")
     args = ap.parse_args()
+    if args.controller:
+        os.environ["DUCK_CONTROLLER"] = args.controller   # before the worker processes start: they inherit it
     scenarios = [s for s in SCENARIOS if args.k in s.__name__]
     if args.list:
         print("\n".join(s.__name__ for s in scenarios))
