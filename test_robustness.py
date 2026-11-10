@@ -33,6 +33,7 @@ import pathlib
 import mujoco
 import numpy as np
 
+import duck.plant
 import simulate_wheeled_duck as swd
 import test_scenarios as T
 
@@ -432,7 +433,7 @@ def _apply_kd_limp(model, kd):
         model.actuator_biasprm[a, 1:3] = 0.0
 
 
-swd.apply_leg_servo_kd = _apply_kd_limp
+duck.plant.apply_leg_servo_kd = _apply_kd_limp   # step_robot (in duck.plant) looks it up there
 _t_run = T.run
 
 
