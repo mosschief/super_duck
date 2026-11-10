@@ -246,10 +246,12 @@ def main():
     scenarios = [s for s in SCENARIOS if args.k in s.__name__]
 
     if args.realism == 0:
+        failed = 0
         for sc in scenarios:
             ok, fell, msg = sc(None)
+            failed += not ok
             print(f"{'PASS' if ok else 'FAIL'}  {sc.__name__:18s} {'(FELL) ' if fell else ''}{msg}")
-        return
+        return 1 if failed else 0   # non-zero exit on any FAIL (CI)
 
     for sc in scenarios:
         results = [sc(seed) for seed in range(args.realism)]
@@ -263,4 +265,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
