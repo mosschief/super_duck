@@ -7,30 +7,30 @@
 namespace duck {
 
 constexpr Config kConfigGim6010 = {
-    6.529,                   // body_mass
+    6.565,                   // body_mass
     0.251,                   // wheel_mass
     0.075,                   // wheel_radius
-    0.2211,                  // com_height
+    0.2218,                  // com_height
     9.81,                    // gravity
     3.47,                    // max_wheel_torque
     0.00477,                 // wheel_inertia
     0.005,                   // wheel_viscous
     0.015,                   // wheel_coulomb
-    0.0758,                  // initial_pitch_trim
-    -0.1574,                 // posture_a
-    0.0358,                  // posture_b
+    0.0743,                  // initial_pitch_trim
+    -0.1545,                 // posture_a
+    0.0458,                  // posture_b
     0.05,                    // jump_thrust_time
     2.0,                     // thrust_wheel_mode
     1.0,                     // has_wheel_curve
     3.47,                    // wheel_curve_stall
     366.0,                   // wheel_curve_no_load_rpm
     68.93823811945526,       // wheel_curve_rpm_per_nm
-    -3.8729833462073366,     // k_lqr_0
-    -10.186214770982346,     // k_lqr_1
-    -42.548305011964935,     // k_lqr_2
-    -8.962438320095035,      // k_lqr_3
-    0.14815593498064883,     // lean_c_x
-    0.037598037643894834,    // lean_c_p
+    -3.8729833462073695,     // k_lqr_0
+    -10.185770434133245,     // k_lqr_1
+    -42.61890663706836,      // k_lqr_2
+    -8.976945111040711,      // k_lqr_3
+    0.1479464349789073,      // lean_c_x
+    0.037682469306396,       // lean_c_p
     0.24,                    // MAX_CROUCH
     8.0,                     // RAMP_JERK
     0.3,                     // REANCHOR_DIST

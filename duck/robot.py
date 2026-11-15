@@ -65,11 +65,11 @@ PROFILES = {
     "gim6010": RobotProfile(
         name="gim6010",
         xml="open_duck_wheeled_v2_gim6010.xml",
-        params=ScaledWheeledDuckParams(body_mass=6.529, wheel_mass=0.251, wheel_track=0.224, com_height=0.2211,
-                                       body_pitch_inertia=0.1050, wheel_inertia=0.00477,    # sim = CAD (2026-10-31)
+        params=ScaledWheeledDuckParams(body_mass=6.565, wheel_mass=0.251, wheel_track=0.224, com_height=0.2218,
+                                       body_pitch_inertia=0.1061, wheel_inertia=0.00477,    # sim = CAD (2026-11-14)
                                        wheel_viscous=0.005),   # = the MJCF's gim4305_wheel joint
-        initial_pitch_trim=0.0758,
-        posture_coeffs=(-0.1574, 0.0358),
+        initial_pitch_trim=0.0743,
+        posture_coeffs=(-0.1545, 0.0458),
         # CAD-ready zero-scrub geometry: 4x GIM6010-8 on hip-pitch + knee, 6x GIM4305-10 on hip-yaw + hip-roll + wheels
         # (saves 476 g; wheel aligned 4 mm from hip-roll axis -> 0.10 N*m standing roll torque), 6S2P battery shifted
         # to x = -26 mm. Trim/posture re-fit with tools/fit_balance_trim.py after the sim was exported from the CAD (standing lean +4.6 deg).

@@ -1,12 +1,12 @@
 # Super Duck (`mosschief/super_duck`)
 
-**Super Duck** is a `1.35x` scaled (`56.7 cm` tall, `7.03 kg` CAD-ready build configuration), wheeled bipedal robot based on the [Open Duck Mini v2](https://github.com/apirrone/Open_Duck_Mini) BDX architecture. It combines **4x SteadyWin GIM6010-8** high-torque QDD actuators (`hip_pitch`, `knee`) and **4x [SteadyWin GIM4305-10](https://rcdrone.top/products/steadywin-gim4305-planetary-reducer-servo-motor)** actuators (zero-scrub `hip_roll` and driven `75 mm`-radius wheels; the hips are fixed mounts, with no hip yaw: steering is by wheel torque difference) with a split-rate compute stack: a **[Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) + [Raspberry Pi AI HAT+ (26 TOPS)](https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html)** for vision/AI and a real-time **[PJRC Teensy 4.0](https://www.pjrc.com/store/teensy40.html)** running the deterministic `500 Hz` LQR balance loop over dual `1 Mbps` CAN buses. It carries the full Open Duck Mini expression package: moving antennas, LED eyes, head projector, speaker and microphone.
+**Super Duck** is a `1.35x` scaled (`56.7 cm` tall, `7.07 kg` CAD-ready build configuration), wheeled bipedal robot based on the [Open Duck Mini v2](https://github.com/apirrone/Open_Duck_Mini) BDX architecture. It combines **4x SteadyWin GIM6010-8** high-torque QDD actuators (`hip_pitch`, `knee`) and **4x [SteadyWin GIM4305-10](https://rcdrone.top/products/steadywin-gim4305-planetary-reducer-servo-motor)** actuators (zero-scrub `hip_roll` and driven `75 mm`-radius wheels; the hips are fixed mounts, with no hip yaw: steering is by wheel torque difference) with a split-rate compute stack: a **[Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) + [Raspberry Pi AI HAT+ (26 TOPS)](https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html)** for vision/AI and a real-time **[PJRC Teensy 4.0](https://www.pjrc.com/store/teensy40.html)** running the deterministic `500 Hz` LQR balance loop over dual `1 Mbps` CAN buses. It carries the full Open Duck Mini expression package: moving antennas, LED eyes, head projector, speaker and microphone.
 
 ## Repository Structure & Tooling
 
 | File / Script | Purpose |
 | :--- | :--- |
-| `open_duck_wheeled_v2_gim6010.xml` | **Default CAD-ready build model (`--robot gim6010`, `7.03 kg`, exported from the FreeCAD assembly: every part's mesh, mass and inertia, collision hulls, neck, cameras, IMU; `cad/freecad/export_sim.py`)**: 4x GIM6010-8 (`hip_pitch`, `knee`), 4x GIM4305-10 (inline zero-scrub `hip_roll`, `left/right_wheel`), fixed hip mounts (no hip yaw), 4x STS3215 (`neck/head`), 2x 9 g antenna servos, `6S2P` 21700 battery pack with BMS / fuse / anti-spark switch / e-stop, AI HAT+, Teensy 4.0 dual-CAN module, and the expression package |
+| `open_duck_wheeled_v2_gim6010.xml` | **Default CAD-ready build model (`--robot gim6010`, `7.07 kg`, exported from the FreeCAD assembly: every part's mesh, mass and inertia, collision hulls, neck, cameras, IMU; `cad/freecad/export_sim.py`)**: 4x GIM6010-8 (`hip_pitch`, `knee`), 4x GIM4305-10 (inline zero-scrub `hip_roll`, `left/right_wheel`), fixed hip mounts (no hip yaw), 4x STS3215 (`neck/head`), 2x 9 g antenna servos, `6S2P` 21700 battery pack with BMS / fuse / anti-spark switch / e-stop, AI HAT+, Teensy 4.0 dual-CAN module, and the expression package |
 | `open_duck_wheeled_v2.xml` | **Baseline model (`--robot gim4305`, `3.87 kg`)**: Original all-GIM4305-10 leg/wheel configuration with a `6S1P` battery pack (also with fixed hip mounts) |
 | `simulate_wheeled_duck.py` | Interactive viewer / CLI entry point (`--robot`, `--realism`, `--headless`); re-exports the `duck/` package for the tests and tools |
 | `duck/robot.py` | Physical parameters, `RobotProfile`s (`gim6010`, `gim4305`), wheeled-inverted-pendulum model and LQR gain synthesis |
@@ -154,7 +154,7 @@ and they keep showing status (low battery, fallen, Pi not connected) even when t
 - **Teensy 4.0 <-> 8x GIM6010-8 / GIM4305-10 Motors (`500 Hz` Dual 1 Mbps Classic CAN)**:
   - **`CAN1` (`CRX1` Pin 23, `CTX1` Pin 22 -> Transceiver #1)**: Left Leg (`left_hip_roll`, `left_hip_pitch`, `left_knee`) + `left_wheel` (CAN IDs `1-4`, `120 Ω` termination at both ends: the transceiver board at the Teensy and `left_wheel`).
   - **`CAN2` (`CRX2` Pin 0, `CTX2` Pin 1 -> Transceiver #2)**: Right Leg (`right_hip_roll`, `right_hip_pitch`, `right_knee`) + `right_wheel` (CAN IDs `5-8`, `120 Ω` termination at both ends: the Teensy and `right_wheel`).
-  - Mid-bus motors unterminated: turn the GIM6010 driver's `120 R` switch **off** on both hip-pitch and knee motors. The GIM4305s at the bus ends may need an inline `120 Ω` across `CAN_H / CAN_L` if their drivers have none: check on arrival.
+  - Mid-bus motors unterminated. The GIM6010-8 driver has no termination switch: its `120 Ω` is switched in software (manual rev1.2 pp. 32-33: `can.config.r120_gpio_num = 5`, `enable_r120`), so leave it **disabled** on both hip-pitch and knee motors. Its CAN rate defaults to `500 kbps`: set every driver to `1 Mbps` before connecting it to the bus. The GIM4305s at the bus ends need termination enabled, or an inline `120 Ω` across `CAN_H / CAN_L` if their drivers have none: check on arrival.
 - **Teensy 4.0 <-> ICM-42688-P Raw IMU (`500 Hz - 1 kHz` SPI Attitude Loop)**:
   - **`SPI0`**: `CS` Pin 10, `MOSI` Pin 11, `MISO` Pin 12, `SCK` Pin 13 + data-ready interrupt (`INT1` on Pin 9). *(If using a BNO055 instead, wire to `I2C0` on `SDA0` Pin 18 / `SCL0` Pin 19).*
 - **Teensy 4.0 <-> 4x Neck/Head STS3215 Servos (`100 Hz` Camera Horizon Gimbal)**:
@@ -180,7 +180,7 @@ and they keep showing status (low battery, fallen, Pi not connected) even when t
 # 1. Install dependencies
 pip install -r requirements.txt            # pinned mujoco / numpy / scipy (FEA: requirements-fea.txt)
 
-# 2. Launch interactive 3D simulation (default `gim6010` 7.03 kg build configuration)
+# 2. Launch interactive 3D simulation (default `gim6010` 7.07 kg build configuration)
 python3 simulate_wheeled_duck.py
 
 # 3. Launch with SimToReal domain randomization (Teensy 4.0 dual-CAN + fast SPI IMU)

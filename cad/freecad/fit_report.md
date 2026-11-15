@@ -13,7 +13,7 @@ Press fits / pockets in the ODM design, or STL-to-solid conversion artefacts; no
 | Part A | Part B | Overlap (mm³) |
 | :--- | :--- | ---: |
 | `head_bot_sheet` | `head_shell` | 412 |
-| `head_roll_mount` | `sts3215_head_roll` | 11 |
+| `head_roll_mount` | `sts3215_head_roll` | 10 |
 | `head_yaw_to_roll` | `sts3215_head_yaw` | 10 |
 
 ## Printed parts
@@ -22,11 +22,12 @@ Exported to `printed/<name>.step` in the part's body frame. Mass at 100% infill,
 
 | Part | Body | Volume (cm³) | Mass @100% (g) |
 | :--- | :--- | ---: | ---: |
-| `trunk_tub` | `trunk_assembly` | 429.8 | 546 |
-| `trunk_cover` | `trunk_assembly` | 149.8 | 190 |
-| `trunk_lid` | `trunk_assembly` | 52.7 | 67 |
-| `pi_deck_frame` | `trunk_assembly` | 7.8 | 10 |
-| `electronics_shelf` | `trunk_assembly` | 11.4 | 14 |
+| `trunk_tub` | `trunk_assembly` | 435.1 | 553 |
+| `trunk_cover` | `trunk_assembly` | 154.3 | 196 |
+| `speaker_retainer` | `trunk_assembly` | 2.3 | 3 |
+| `trunk_lid` | `trunk_assembly` | 55.3 | 70 |
+| `pi_deck_frame` | `trunk_assembly` | 7.6 | 10 |
+| `electronics_shelf` | `trunk_assembly` | 12.7 | 16 |
 | `L_hip_mount` | `hip_roll_assembly` | 140.0 | 178 |
 | `L_hip_roll_end_cap` | `hip_roll_assembly` | 5.0 | 6 |
 | `L_hip_roll_yoke` | `left_roll_to_pitch_assembly` | 99.8 | 127 |
@@ -43,7 +44,7 @@ Exported to `printed/<name>.step` in the part's body frame. Mass at 100% infill,
 | `R_shin` | `knee_and_ankle_assembly_4` | 141.5 | 180 |
 | `R_wheel_end_cap` | `knee_and_ankle_assembly_4` | 3.1 | 4 |
 | `R_wheel_hub` | `foot_assembly_2` | 122.1 | 155 |
-| `neck_servo_pocket` | `trunk_assembly` | 22.1 | 28 |
+| `neck_servo_pocket` | `trunk_assembly` | 36.1 | 46 |
 | `neck_left_sheet` | `neck_pitch_assembly` | 8.1 | 10 |
 | `neck_right_sheet` | `neck_pitch_assembly` | 6.2 | 8 |
 | `head_pitch_to_yaw` | `head_pitch_to_yaw` | 13.5 | 17 |
@@ -54,7 +55,7 @@ Exported to `printed/<name>.step` in the part's body frame. Mass at 100% infill,
 | `left_antenna_holder` | `left_antenna` | 2.9 | 4 |
 | `right_antenna_holder` | `right_antenna` | 2.9 | 4 |
 | `R_antenna` | `right_antenna` | 0.4 | 1 |
-| `head_shell` | `head_assembly` | 228.3 | 290 |
+| `head_shell` | `head_assembly` | 236.4 | 300 |
 | `projector_pod` | `head_assembly` | 12.5 | 16 |
 | `projector_reflector` | `head_assembly` | 2.2 | 3 |
 | `L_eye_diffuser` | `head_assembly` | 1.6 | 2 |

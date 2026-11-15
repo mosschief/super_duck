@@ -21,6 +21,17 @@
   ],
   "transparency": 65
  },
+ "speaker_retainer": {
+  "body": "trunk_assembly",
+  "part": "Trunk",
+  "tag": "printed",
+  "rgb": [
+   0.96,
+   0.62,
+   0.16
+  ],
+  "transparency": 0
+ },
  "trunk_lid": {
   "body": "trunk_assembly",
   "part": "Trunk",

@@ -291,9 +291,12 @@ for s_ in (1, -1):
         v_ = vent_slot(4, 22, 46)
         v_.translate(V(x, s_ * 63.25, 0))
         VENTS.append(v_)
-for y in (-9.75, -3.25, 3.25, 9.75):                             # low inlet: floor slots between the hip-mount
-    VENTS.append(fuse([box(22, 66, y - 2, y + 2, -100, FLOOR_TOP + 1)] +    # shelves, under the servo buck
-                      [cyl(4, 100 + FLOOR_TOP + 1, (x, y, -100)) for x in (22, 66)]))
+# low inlet: floor slots between the hip-mount shelves, under the servo buck. The outer two are broken round
+# the buck's standoffs (its holes at x 26.8 / 47.2, y ±10.2, see BUCK7_PL).
+for y, runs in ((-9.75, ((33, 41), (53.4, 66))), (-3.25, ((22, 66),)), (3.25, ((22, 66),)), (9.75, ((33, 66),))):
+    for x0, x1 in runs:
+        VENTS.append(fuse([box(x0, x1, y - 2, y + 2, -100, FLOOR_TOP + 1)] +
+                          [cyl(4, 100 + FLOOR_TOP + 1, (x, y, -100)) for x in (x0, x1)]))
 _tt = V(-46, -45.9, 0).normalize()                               # along the left tail side, toward the end
 for u in range(14, 47, 6):                                       # fan exhaust in the tail sides
     v_ = vent_slot(4, -22, 6)
@@ -340,15 +343,38 @@ adds += [cyl(8, 8, (x, y, WALL_TOP - 8)) for x, y in LID_SCREWS]
 adds += [box(-65.5, -63.5, -30, 30, FLOOR_TOP, FLOOR_TOP + 8), box(11.5, 13.5, -30, 30, FLOOR_TOP, FLOOR_TOP + 8)]
 adds += [box(-55, 3, s * 45.5, s * 47.5, FLOOR_TOP, FLOOR_TOP + 8) if s > 0 else
          box(-55, 3, -47.5, -45.5, FLOOR_TOP, FLOOR_TOP + 8) for s in (1, -1)]
-# ledges and posts carrying the Pi deck frame (rests on the pack through 0.5 mm foam)
-adds += [box(-49, -41, 55, 61, BATT_Z + 30.5, BATT_Z + 34.5), box(-49, -41, -61, -55, BATT_Z + 30.5, BATT_Z + 34.5)]
-adds += [cyl(8, BATT_Z + 34.5 - FLOOR_TOP, (13, y, FLOOR_TOP)) for y in (-50, 50)]
-# servo-buck standoffs, Pi-buck and bus-adapter bulkhead bosses
-adds += [tube(6, 2.5, 5, (37 + dx, dy, FLOOR_TOP)) for dx in (-13, 13) for dy in (-26, 26)]
-adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (20, 52) for z in (-36, -17)]   # clear of the nav-cam window
-adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (-13, 13) for z in (8.5, 43.5)]
-# tail shelf for the fuse, anti-spark switch and peripheral buck (on the sloping underside)
+# ledges and posts carrying the Pi deck frame (rests on the pack through 0.5 mm foam); M3 heat inserts in their tops
+DECK_SEAT = BATT_Z + 34.5
+DECK_SCREWS = [(-45, -57.5), (-45, 57.5), (13, -50), (13, 50)]
+adds += [box(-50, -40, 54, 61, DECK_SEAT - 8, DECK_SEAT), box(-50, -40, -61, -54, DECK_SEAT - 8, DECK_SEAT)]
+adds += [cyl(9, DECK_SEAT - FLOOR_TOP, (13, y, FLOOR_TOP)) for y in (-50, 50)]
+# boards on standoffs / bosses at their own mounting holes (Pololu D36V50F: 3x M2 in three corners)
 TAIL_SHELF_Z = -60.0
+POLOLU_HOLES = ((-10.2, 10.2), (-10.2, -10.2), (10.2, -10.2))
+BUCK7_PL = pl(37, 0, FLOOR_TOP + 5)                       # servo buck on 5 mm standoffs over the floor inlet
+BUCK5_PL = pl(69, 36, -26.5, (0, 1, 0), -90)              # Pi buck on the front bulkhead, 2 mm bosses
+BUCKP_PL = pl(-90, -40.5, TAIL_SHELF_Z + 3)               # peripheral buck on 3 mm standoffs on the tail shelf
+
+
+def board_pts(plc, pts):
+    return [plc.multVec(V(x, y, 0)) for x, y in pts]
+
+
+adds += [tube(6, 2.5, 5, (p.x, p.y, FLOOR_TOP)) for p in board_pts(BUCK7_PL, POLOLU_HOLES)]
+adds += [tube(6, 1.8, 2, (69, p.y, p.z), (1, 0, 0)) for p in board_pts(BUCK5_PL, POLOLU_HOLES)]
+adds += [tube(6, 1.8, 3, (p.x, p.y, TAIL_SHELF_Z)) for p in board_pts(BUCKP_PL, POLOLU_HOLES)]
+adds += [tube(6, 2.5, 2, (69, y, z), (1, 0, 0)) for y in (-13, 13) for z in (8.5, 43.5)]   # bus adapter
+# BMS on edge across the bay: a slotted cradle block each side, on the floor (the Pi deck bar holds its top edge)
+BMS_X = 17.5                                    # its back 3 mm ahead of the pack, room for the cradle wall
+adds += [box(BMS_X - 6.5, BMS_X + 7, y0, y0 + 7, FLOOR_TOP, -57).cut(box(BMS_X - 4.2, BMS_X + 4.2, -100, 100, -65.2, 0))
+         for y0 in (22, -29)]
+# I2S amp on the rear bulkhead (the breakout has no mounting holes): slides down into a rail along its outer edge
+# and a ledge under its bottom edge, 2 mm off the bulkhead (the terminal block is on its inner edge)
+adds += [box(-71, -66.4, 49.5, 52.5, -10, 9), box(-67.4, -66.4, 48.5, 52.5, -10, 9),     # outer rail + lip
+         box(-71, -66.4, 36.5, 52.5, -11, -9), box(-67.4, -66.4, 36.5, 52.5, -11, -8),   # bottom ledge + lip
+         box(-71, -69, 33, 36.5, -9, 9), box(-71, -69, 46, 49.5, -9, 9)]                  # standoff pads behind it
+SHELF_SCREWS_Y, SHELF_SCREW_Z = (-45, 10), 30.0    # electronics shelf flange -> rear bulkhead (above the fan)
+# tail shelf for the fuse, anti-spark switch and peripheral buck (on the sloping underside)
 adds += [fill_in.common(box(-125, -72.5, -100, 100, TAIL_SHELF_Z - 4, TAIL_SHELF_Z))] + \
         [fill_in.common(box(-125, -72.5, y - 1.5, y + 1.5, -200, TAIL_SHELF_Z)) for y in (-40, -20, 0, 20, 40)]
 # + 5 ribs: the pockets under the shelf are closed, so it is printed without support there; the ribs keep its
@@ -363,9 +389,15 @@ for x in HM_BOLTS_X:                          # hip-mount shelf: M4 heat inserts
         cuts.append(cyl(5.6, 6.5, (x, s * 30, BODY_BOT - 0.1)))
 for x, y in LID_SCREWS:                       # lid screws into the bulkhead bosses
     cuts.append(cyl(2.8, 9, (x, y, WALL_TOP - 8.5)))
-for y in (-26, 26):                           # servo-buck standoff holes through the floor
-    for dx in (-13, 13):
-        cuts.append(cyl(2.5, 30, (37 + dx, y, -100)))
+for p in board_pts(BUCK7_PL, POLOLU_HOLES):   # servo-buck standoff holes through the floor (M2 from below)
+    cuts.append(cyl(2.5, 30, (p.x, p.y, -100)))
+for x, y in DECK_SCREWS:                      # Pi deck: M3 heat inserts in the ledges and posts
+    cuts.append(cyl(4.2, 6, (x, y, DECK_SEAT - 6)))
+for y in SHELF_SCREWS_Y:                      # electronics shelf: M3 through its flange and the rear bulkhead, nut behind
+    cuts.append(cyl(3.4, 12, (-80, y, SHELF_SCREW_Z), (1, 0, 0)))
+# zip-tie grooves (5 x 2 mm) across the tail shelf, under the fuse holder and the anti-spark switch
+cuts += [box(-92.5, -87.5, 26, 42, TAIL_SHELF_Z - 2, TAIL_SHELF_Z + 1)]
+cuts += [box(x - 2.5, x + 2.5, -24, 24, TAIL_SHELF_Z - 2, TAIL_SHELF_Z + 1) for x in (-101, -81)]
 cuts += [dp.teardrop(GROM_D, 12, (GROM_X, y_, GROM_Z), (0, 1, 0)) for y_ in (57, -69)]  # leg harness grommets
 cuts += [dp.teardrop(38, 10, (-78, FAN_Y, FAN_Z), (1, 0, 0))]                            # fan bore
 cuts += [cyl(3.4, 10, (-78, FAN_Y + dy, FAN_Z + dz), (1, 0, 0)) for dy in (-16, 16) for dz in (-16, 16)]
@@ -401,7 +433,23 @@ B.add(T, "trunk_tub", tub, C_SHELL, "printed", transparency=65)
 
 # top cover: the ODM shell above the split, screwed down through four posts into the lid
 cover = shell.cut(below)
-cover = fuse([cover] + [cyl(8, 30, (x, y, WALL_TOP + 4)).common(fill_in) for x, y in LID_SCREWS])
+cover = fuse([cover] + [cyl(11, 30, (x, y, WALL_TOP + 4)).common(fill_in) for x, y in LID_SCREWS])
+
+
+def spk(shape):
+    """Shape built in the speaker's frame (cone along +x, rim front at x 0) -> trunk frame."""
+    s_ = shape.copy()
+    s_.transformShape(SPK_PL.toMatrix())
+    return s_
+
+
+# speaker mount: a gasket ring it seats on, a surround round its rim and 3 bosses; a printed retainer ring
+# (screwed to the bosses, M2 self-tapping) presses on its basket from behind
+SPK_BOSSES = [(24.5 * math.cos(math.radians(a)), 24.5 * math.sin(math.radians(a))) for a in (90, 210, 330)]
+cover = fuse([cover] + [spk(s_).common(body_out) for s_ in
+                        [tube(40, 34, 4, (0, 0, 0), (1, 0, 0)), tube(46, 40.6, 7.3, (-3.3, 0, 0), (1, 0, 0))] +
+                        [cyl(6, 7.3, (-3.3, y, z), (1, 0, 0)) for y, z in SPK_BOSSES]])
+cover = cover.cut([spk(cyl(1.8, 4.3, (-3.4, y, z), (1, 0, 0))) for y, z in SPK_BOSSES])
 grille = []
 for gy in range(-4, 5):                       # speaker grille on the tail's top face, hex pattern inside r15
     for gz in range(-4, 5):
@@ -409,12 +457,31 @@ for gy in range(-4, 5):                       # speaker grille on the tail's top
         if math.hypot(y, w) < 15:
             grille.append(Part.makeCylinder(1.3, 12, SPK_PL.multVec(V(-4, y, w)), _tn))
 cover = cover.cut(grille + VENTS + [cyl(3.4, 40, (x, y, WALL_TOP)) for x, y in LID_SCREWS])
+
+
+def seat_z(x, y, r=3.6):
+    """Lowest point of the cover's outer surface within r of (x, y): the flat for a screw head there."""
+    zs = []
+    for k in range(12):
+        a = math.radians(30 * k)
+        probe = Part.makeCylinder(0.05, 300, V(x + r * math.cos(a), y + r * math.sin(a), -150))
+        zs.append(body_out.common(probe).BoundBox.ZMax)
+    return min(zs)
+
+
+# spot-faces: the screw seats are on the 45 deg top chamfers, so give each head a flat (Ø6.5 for an M3 head)
+cover = cover.cut([cyl(6.5, 40, (x, y, seat_z(x, y) - 0.3)) for x, y in LID_SCREWS])
 B.add(T, "trunk_cover", cover, C_SHELL, "printed", transparency=65)
+retainer = tube(54, 37.8, 2, (-5.3, 0, 0), (1, 0, 0)).cut([cyl(2.4, 4, (-6, y, z), (1, 0, 0)) for y, z in SPK_BOSSES])
+B.add(T, "speaker_retainer", spk(retainer).common(body_in), C_PRINT, "printed")
 
 lid = body_in.common(box(-74, 74, -100, 100, WALL_TOP, WALL_TOP + 4))
-lid = lid.cut([box(4, 68, -26, 26, WALL_TOP - 1, WALL_TOP + 20)] +   # ODM neck-pitch servo + swept neck sheets
-              [cyl(3.4, 10, (x, y, WALL_TOP - 1)) for x, y in LID_SCREWS] +
-              [cyl(3.4, 10, (x, -24, WALL_TOP - 1)) for x in (4, 44)])
+# opening for the ODM neck-pitch servo and the swept neck sheets (|y| 16..23), leaving a tongue front and back
+# between the sheets: the neck servo pocket's webs screw up into them (POCKET_SCREWS)
+POCKET_SCREWS = [(x, y) for x in (10, 62) for y in (-7, 7)]
+opening = box(4, 68, -26, 26, WALL_TOP - 1, WALL_TOP + 20).cut([box(3, 16, -14, 14, WALL_TOP - 2, WALL_TOP + 21),
+                                                                 box(56, 69, -14, 14, WALL_TOP - 2, WALL_TOP + 21)])
+lid = lid.cut([opening] + [cyl(3.4, 10, (x, y, WALL_TOP - 1)) for x, y in list(LID_SCREWS) + POCKET_SCREWS])
 B.add(T, "trunk_lid", lid, C_SHELL, "printed", transparency=65)
 
 # Pi deck frame: clamps the battery (0.5 mm foam) and carries the Pi directly (it sits 4.5 mm lower than
@@ -424,16 +491,27 @@ PI_Z = DECK_Z[1] + 2.0                            # 2 mm standoffs: the Pi has p
 deck = [box(-49, -41, -60, 60, *DECK_Z), box(9, 17, -60, 60, *DECK_Z),
         box(-49, 17, 33, 39, *DECK_Z), box(-49, 17, -39, -33, *DECK_Z)]
 deck += [cyl(6, 2, (x - 6, y, DECK_Z[1])) for x in (-39, 19) for y in (-24.5, 24.5)]
-deck = fuse(deck).cut([cyl(2.5, 12, (x - 6, y, 0)) for x in (-39, 19) for y in (-24.5, 24.5)] +
-                      [cyl(3.4, 12, (x, y, 0)) for x in (-45,) for y in (-57.5, 57.5)] +
-                      [cyl(3.4, 12, (13, y, 0)) for y in (-50, 50)])
+deck = fuse(deck).cut([cyl(2.5, 12, (x - 6, y, DECK_Z[0] - 1)) for x in (-39, 19) for y in (-24.5, 24.5)] +
+                      [cyl(3.4, 12, (x, y, DECK_Z[0] - 1)) for x, y in DECK_SCREWS])
 deck = deck.common(body_in)
 B.add(T, "pi_deck_frame", deck, C_PRINT, "printed")
 
 # Teensy / IMU shelf, cantilevered off the rear bulkhead
-shelf = fuse([box(-71, -38, -57, 20, 34, 37), box(-71, -66, -57, 20, 24, 34)])
-shelf = shelf.cut([cyl(2.5, 6, (x, y, 33)) for x, y in ((-67, -44), (-43, -44), (-67, -8), (-43, -8),
-                                                        (-64.5, 8), (-51.5, 8))])
+# Teensy / IMU shelf off the rear bulkhead: 2 M3 through its flange and the bulkhead (nuts on the tail side),
+# 2 gussets under it, 2 mm standoffs at the boards' holes
+SHELF_HOLES = ((-67, -44), (-43, -44), (-67, -8), (-43, -8), (-64.5, 8), (-51.5, 8))
+
+
+def gusset(y, t=3.0):
+    tri = Part.Face(Part.makePolygon([V(-66.5, y - t / 2, 34.5), V(-52, y - t / 2, 34.5), V(-66.5, y - t / 2, 22),
+                                      V(-66.5, y - t / 2, 34.5)]))
+    return tri.extrude(V(0, t, 0))
+
+
+shelf = fuse([box(-71, -38, -57, 20, 34, 37), box(-71, -66, -57, 20, 22, 34), gusset(-40), gusset(3)] +
+             [cyl(5, 2, (x, y, 37)) for x, y in SHELF_HOLES])
+shelf = shelf.cut([cyl(2.5, 8, (x, y, 33)) for x, y in SHELF_HOLES] +
+                  [cyl(3.4, 12, (-75, y, SHELF_SCREW_Z), (1, 0, 0)) for y in SHELF_SCREWS_Y])
 B.add(T, "electronics_shelf", shelf, C_PRINT, "printed")
 
 tick("trunk electronics")
@@ -441,13 +519,13 @@ tick("trunk electronics")
 cells, wrap = dp.battery_6s2p()
 B.add(T, "battery_6s2p_cells", cells, C_CELL, "power", pl(-26, 0, BATT_Z))
 B.add(T, "battery_6s2p_wrap", wrap, (0.15, 0.15, 0.6), "power", pl(-26, 0, BATT_Z), transparency=70)
-B.add(T, "bms_6s_100a", dp.bms_6s(), C_POWER, "power", pl(16, 0, -37.5, (0, 0, 1), 90))   # on edge across the bay, ahead of the pack
+B.add(T, "bms_6s_100a", dp.bms_6s(), C_POWER, "power", pl(BMS_X, 0, -37.5, (0, 0, 1), 90))   # on edge across the bay, ahead of the pack
 # fuse, anti-spark switch and peripheral buck on the shelf in the tail
 B.add(T, "main_fuse_40a", dp.blade_fuse_holder(), C_POWER, "power", pl(-90, 34, TAIL_SHELF_Z + 8))
 B.add(T, "antispark_switch_120a", dp.antispark_switch(), C_POWER, "power", pl(-91, 0, TAIL_SHELF_Z + 8, (0, 0, 1), 90))
-B.add(T, "buck_7v4_10a_servos", dp.pololu_d36v50(), C_POWER, "power", pl(37, 0, FLOOR_TOP + 5))
-B.add(T, "buck_5v1_5a_pi", dp.pololu_d36v50(), C_POWER, "power", pl(69, 36, -26.5, (0, 1, 0), -90))
-B.add(T, "buck_5v_5a_peripherals", dp.pololu_d36v50(), C_POWER, "power", pl(-90, -40.5, TAIL_SHELF_Z))
+B.add(T, "buck_7v4_10a_servos", dp.pololu_d36v50(), C_POWER, "power", BUCK7_PL)
+B.add(T, "buck_5v1_5a_pi", dp.pololu_d36v50(), C_POWER, "power", BUCK5_PL)
+B.add(T, "buck_5v_5a_peripherals", dp.pololu_d36v50(), C_POWER, "power", BUCKP_PL)
 B.add(T, "estop_22mm", dp.estop_22mm(), C_POWER, "power", ESTOP_PL)
 B.add(T, "charge_port_gx16", dp.gx16_charge_port(), C_METAL, "power", CHARGE_PL)
 B.add(T, "fan_40x10_5v", dp.fan_40x10(), C_CHIP, "electronics", FAN_PL)
@@ -746,6 +824,12 @@ else:
             crop.Placement = plc
             crop = crop.common(box(-15.4, 19, -25, 25, 40, 90))  # ODM trunk frame
             crop.translate(ODM_T)
+            # webs from the pocket's back and front walls up to the lid's tongues, between the neck sheets
+            # (|y| < 12; the sheets are at |y| 16..23), clear of the servo (x 23.6..48.4, z > 24.9) and the bus adapter
+            webs = [box(-2, 20.6, -12, 12, 42, WALL_TOP),                                    # back
+                    box(49.4, 56.5, -12, 12, 14.8, WALL_TOP), box(49.4, 68, -12, 12, 47.6, WALL_TOP),  # front:
+                    box(44, 56.5, -12, 12, 14.8, 24.5)]   # the pocket is open at the front above its floor: lap that
+            crop = fuse([crop] + webs).cut([cyl(4.2, 5, (x, y, WALL_TOP - 5)) for x, y in POCKET_SCREWS])
             B.add(T, "neck_servo_pocket", crop, C_PRINT, "printed")
         elif mesh == "sg90":
             B.add(body, ("L" if plc.Base.y > 0 else "R") + "_antenna_sg90", odm_mod.mesh_solid(mesh), C_SERVO, "servo", lp)
@@ -797,6 +881,18 @@ else:
 
     def cheek(x, z):
         return V(x, _a[0] + (_b[0] - _a[0]) * (z - _a[1]) / (_b[1] - _a[1]), z)
+
+    # brow lip: a rim round the face's top and cheek edges, standing LIP_D proud of the face and LIP_O past the
+    # top / cheek surfaces, LIP_T wide on the face (the wall's thickness); the bottom edge is left plain
+    LIP_D, LIP_O, LIP_T = 4.0, 1.5, 3.0
+    def _face(yz, x):
+        return Part.Face(Part.makePolygon([V(x, y, z) for y, z in yz] + [V(x, *yz[0])]))
+    _dy = (_b[0] - _a[0]) / (_b[1] - _a[1]) * 20                      # cheek lines carried 20 mm below the face
+    _low = [(-99.0 - _dy, 89.7), (99.0 + _dy, 89.7), ODM_FRONT_YZ[2], ODM_FRONT_YZ[3]]
+    lip = (_face(ODM_FRONT_YZ, FACE_X - 1).makeOffset2D(LIP_O, 2)
+           .cut(_face(_low, FACE_X - 1).makeOffset2D(-LIP_T, 2))
+           .extrude(V(LIP_D + 1, 0, 0)).cut(box(0, 200, -150, 150, 0, ODM_FRONT_YZ[0][1])))
+    shell = fuse([shell, lip])
 
     old = [(cheek(100, 135), 5.4)] + [(cheek(x, z), 2.6) for x in (90, 110) for z in (125.7, 144.5)]
     shell = fuse([shell] + [Part.makeCylinder(d / 2, 1.5, p - POD_N * 1.5, POD_N) for p, d in old])  # plug ODM holes
@@ -888,7 +984,7 @@ for label, body, tag, plc, shape in B.items:
 # parts that legitimately overlap at home (mating connectors, mounted-through-the-panel parts)
 EXPECTED = {frozenset(p) for p in [("raspberry_pi_5", "ai_hat_plus_26tops"),
                                    ("raspberry_pi_5", "pi_active_cooler"),
-                                   ("battery_6s2p_cells", "battery_6s2p_wrap"), ("trunk_lid", "neck_servo_pocket"),
+                                   ("battery_6s2p_cells", "battery_6s2p_wrap"),
                                    ("L_antenna", "L_antenna_servo_mg90s"), ("R_antenna", "R_antenna_servo_mg90s")]}
 clashes = []
 for i in range(len(world)):

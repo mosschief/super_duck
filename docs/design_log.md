@@ -1,7 +1,7 @@
 # Design Log
 
 Dated engineering notes moved here from the old `GEMINI.md` ("Next Engineering Milestones"). Entries record what was
-true **on their date**; some numbers have since changed (e.g. the build is now 7.03 kg from the CAD export, hip roll is
+true **on their date**; some numbers have since changed (e.g. the build is now 7.07 kg from the CAD export, hip roll is
 GIM4305-10 again on the zero-scrub geometry, and the balance loop runs on a Teensy 4.0). The README and `reports/` hold
 the current figures.
 
